@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
 	"tracking/internal/config"
 	"tracking/internal/database"
 	"tracking/internal/modules/health"
@@ -16,25 +17,45 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setupVisualizer(router *gin.Engine, host string, port string) {
-	fmt.Printf(
-		"Starting debugging tools server: http://%s:%s/debug/statsviz/\n",
-		host,
-		port,
-	)
-
-	mux := http.NewServeMux()
-
-	statsviz.Register(mux)
-
-	router.Any("/debug/statsviz/*filepath", gin.WrapH(mux))
+type application struct {
+	cfg config.Config
+	db  *database.Database
 }
 
-func setupServer(
-	cfg config.Config,
-	databaseConnection *database.Database,
-) {
-	if cfg.App.IsDev {
+func main() {
+	if err := run(); err != nil {
+		log.Fatalf("App failed to start: %v", err)
+	}
+}
+
+func run() error {
+	cfg, err := config.Load(config.LoadOptions{
+		RequireDotEnv: false,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	db, err := initDatabase(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize database: %w", err)
+	}
+
+	app := &application{
+		cfg: cfg,
+		db:  db,
+	}
+
+	router := app.setupRouter()
+
+	fmt.Printf("starting server on %s:%d (tls=%v) \n", cfg.App.Host, cfg.App.Port, cfg.TLS.Enabled)
+	fmt.Printf("Check Server Health On http://%s:%d/health \n", cfg.App.Host, cfg.App.Port)
+
+	return server.Run(context.Background(), router, app.serverSettings())
+}
+
+func (app *application) setupRouter() *gin.Engine {
+	if app.cfg.App.IsDev {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
@@ -42,65 +63,72 @@ func setupServer(
 
 	router := gin.New()
 
+	// Global Middlewares
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{
-			"/health",
-		},
+		SkipPaths: []string{"/health"},
 	}))
-
 	router.Use(gin.Recovery())
 
-	setupRoutes(router, databaseConnection)
+	// Register Routes
+	app.registerRoutes(router)
 
-	if cfg.App.IsDev {
-		setupVisualizer(router, cfg.App.Host, strconv.Itoa(cfg.App.Port))
+	// Setup Visualizer in development mode
+	if app.cfg.App.IsDev {
+		app.setupVisualizer(router)
 	}
-	s := server.Settings{
-		Host:              cfg.App.Host,
-		Port:              cfg.App.Port,
+
+	return router
+}
+
+func (app *application) registerRoutes(router *gin.Engine) {
+	router.GET("/health", func(c *gin.Context) {
+		applicationHealth := health.GetApplicationHealth(app.db.SQL)
+		c.JSON(http.StatusOK, applicationHealth)
+	})
+}
+
+func (app *application) setupVisualizer(router *gin.Engine) {
+	host := app.cfg.App.Host
+	port := strconv.Itoa(app.cfg.App.Port)
+
+	fmt.Printf("Starting debugging tools server: http://%s:%s/debug/statsviz/\n", host, port)
+
+	mux := http.NewServeMux()
+	statsviz.Register(mux)
+
+	router.Any("/debug/statsviz/*filepath", gin.WrapH(mux))
+}
+
+func (app *application) serverSettings() server.Settings {
+	return server.Settings{
+		Host:              app.cfg.App.Host,
+		Port:              app.cfg.App.Port,
 		ReadTimeout:       15 * time.Second,
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       2 * time.Minute,
 		ShutdownTimeout:   10 * time.Second,
-
 		TLS: server.TLSSettings{
-			Enabled:  cfg.TLS.Enabled,
-			CertFile: cfg.TLS.CertFile,
-			KeyFile:  cfg.TLS.KeyFile,
+			Enabled:  app.cfg.TLS.Enabled,
+			CertFile: app.cfg.TLS.CertFile,
+			KeyFile:  app.cfg.TLS.KeyFile,
 		},
 	}
-
-	if err := server.Run(
-		context.Background(),
-		router,
-		s,
-	); err != nil {
-		log.Fatal(err)
-	}
 }
 
-func setupRoutes(
-	router *gin.Engine,
-	databaseConnection *database.Database,
-) {
-	router.GET("/health", func(c *gin.Context) {
-		applicationHealth := health.GetApplicationHealth(
-			databaseConnection.SQL,
-		)
+func initDatabase(cfg config.Config) (*database.Database, error) {
+	const (
+		MaxOpenConnections = 10
+		MaxIdleConns       = 5
+		SSLMode            = "disable"
+		ConnMaxLifetime    = 30 * time.Minute
+		ConnMaxIdleTime    = 10 * time.Minute
+	)
 
-		c.JSON(http.StatusOK, applicationHealth)
-	})
-}
+	enableDebug := cfg.App.RunMode == config.Development
 
-func setupDatabaseConnection(cfg config.Config) (*database.Database, error) {
-	const MaxOpenConnections = 10
-	const SSLMode = "disable"
-	const MaxIdleConns = 5
-	const ConnMaxLifetime = 30 * time.Minute
-	const ConnMaxIdleTime = 10 * time.Minute
-	var EnableDebug = cfg.App.RunMode == config.Development
-	fmt.Printf("connecting to Database on %s:%d \n", cfg.DB.Host, cfg.DB.Port)
+	fmt.Printf("connecting to Database on %s:%d\n", cfg.DB.Host, cfg.DB.Port)
+
 	db, err := database.Connect(database.Config{
 		Host:            cfg.DB.Host,
 		Port:            cfg.DB.Port,
@@ -112,29 +140,15 @@ func setupDatabaseConnection(cfg config.Config) (*database.Database, error) {
 		MaxIdleConns:    MaxIdleConns,
 		ConnMaxLifetime: ConnMaxLifetime,
 		ConnMaxIdleTime: ConnMaxIdleTime,
-		EnableDebug:     EnableDebug,
+		EnableDebug:     enableDebug,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, err
 	}
-	if err := database.Migrate(db.Gorm); err != nil {
-		return nil, fmt.Errorf("failed to migrate database: %w", err)
-	}
-	return db, nil
-}
-func main() {
-	loadOptions := config.LoadOptions{
-		RequireDotEnv: false,
-	}
-	envirmentConfig, err := config.Load(loadOptions)
-	if err != nil {
-		panic(`App Failed to load config ` + err.Error())
-	}
-	fmt.Printf(" starting server on %s:%d (tls=%v) \n", envirmentConfig.App.Host, envirmentConfig.App.Port, envirmentConfig.TLS.Enabled)
 
-	databaseConnection, err := setupDatabaseConnection(envirmentConfig)
-	if err != nil {
-		panic(`App Failed to load database ` + err.Error())
+	if err := database.Migrate(db.Gorm); err != nil {
+		return nil, fmt.Errorf("migration failed: %w", err)
 	}
-	setupServer(envirmentConfig, databaseConnection)
+
+	return db, nil
 }
