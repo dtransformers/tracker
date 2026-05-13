@@ -37,10 +37,8 @@ func Run(ctx context.Context, handler http.Handler, s Settings) error {
 		return errors.New("handler is nil")
 	}
 
-	addr := net.JoinHostPort(s.Host, fmt.Sprintf("%d", s.Port))
-
-	srv := &http.Server{
-		Addr:              addr,
+	server := &http.Server{
+		Addr:              net.JoinHostPort(s.Host, fmt.Sprintf("%d", s.Port)),
 		Handler:           handler,
 		ReadTimeout:       defaultIfZero(s.ReadTimeout, 15*time.Second),
 		ReadHeaderTimeout: defaultIfZero(s.ReadHeaderTimeout, 10*time.Second),
@@ -51,28 +49,23 @@ func Run(ctx context.Context, handler http.Handler, s Settings) error {
 		},
 	}
 
-	// TLS -> HTTP/2 is enabled by default in Go.
-	// We set a minimal TLS config; Go will add "h2" automatically when appropriate.
 	if s.TLS.Enabled {
 		if s.TLS.CertFile == "" || s.TLS.KeyFile == "" {
 			return errors.New("TLS enabled but cert/key file not provided")
 		}
-		srv.TLSConfig = &tls.Config{
+		server.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 		}
 	}
-
-	// Graceful shutdown on SIGINT/SIGTERM
 	errCh := make(chan error, 1)
 	go func() {
 		if s.TLS.Enabled {
-			errCh <- srv.ListenAndServeTLS(s.TLS.CertFile, s.TLS.KeyFile)
+			errCh <- server.ListenAndServeTLS(s.TLS.CertFile, s.TLS.KeyFile)
 			return
 		}
-		errCh <- srv.ListenAndServe()
+		errCh <- server.ListenAndServe()
 	}()
 
-	// Wait for stop signal or server error
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
@@ -92,7 +85,7 @@ func Run(ctx context.Context, handler http.Handler, s Settings) error {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), defaultIfZero(s.ShutdownTimeout, 10*time.Second))
 	defer cancel()
 
-	if err := srv.Shutdown(shutdownCtx); err != nil {
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("shutdown: %w", err)
 	}
 
