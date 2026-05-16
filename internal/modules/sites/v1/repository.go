@@ -7,29 +7,33 @@ import (
 	"tracking/internal/ent/site"
 )
 
-// Repository defines the interface for site data access.
 type Repository interface {
-	// Create persists a new site record.
 	Create(ctx context.Context, input CreateSiteInput) (*ent.Site, error)
-	// GetByID retrieves a site by its internal ID.
-	GetByID(ctx context.Context, id int) (*ent.Site, error)
-	// GetByUUID retrieves a site by its public UUID.
+
 	GetByUUID(ctx context.Context, uuid string) (*ent.Site, error)
-	// List returns all non-deleted sites.
+
+	GetByDomain(ctx context.Context, domain string) (*ent.Site, error)
 	List(ctx context.Context) ([]*ent.Site, error)
-	// Update modifies an existing site.
+
 	Update(ctx context.Context, uuid string, input UpdateSiteInput) (*ent.Site, error)
-	// Delete performs a soft delete on a site.
+
 	Delete(ctx context.Context, uuid string) error
+
+	RegenerateKeys(ctx context.Context, uuid, publicKey, secretKey string) (*ent.Site, error)
+
+	ListActive(ctx context.Context) ([]*ent.Site, error)
+	Count(ctx context.Context) (int, error)
 }
 
-type siteRepository struct {
+type entRepository struct {
 	client *ent.Client
 }
 
-// NewRepository creates a new site repository using the ent client.
 func NewRepository(client *ent.Client) Repository {
-	return &siteRepository{client: client}
+	if client == nil {
+		panic("ent client cannot be nil")
+	}
+	return &entRepository{client: client}
 }
 
 type CreateSiteInput struct {
@@ -46,76 +50,180 @@ type UpdateSiteInput struct {
 	IsActive *bool
 }
 
-func (r *siteRepository) Create(ctx context.Context, input CreateSiteInput) (*ent.Site, error) {
-	return r.client.Site.Create().
+func (r *entRepository) Create(ctx context.Context, input CreateSiteInput) (*ent.Site, error) {
+	site, err := r.client.Site.
+		Create().
 		SetUUID(input.UUID).
 		SetName(input.Name).
 		SetDomain(input.Domain).
 		SetPublicKey(input.PublicKey).
 		SetSecretKey(input.SecretKey).
+		SetIsActive(true). // Default to active
 		Save(ctx)
-}
 
-func (r *siteRepository) GetByID(ctx context.Context, id int) (*ent.Site, error) {
-	s, err := r.client.Site.Get(ctx, id)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, fmt.Errorf("site not found: %w", err)
-		}
-		return nil, err
+		return nil, fmt.Errorf("failed to create site: %w", err)
 	}
-	return s, nil
+
+	return site, nil
 }
 
-func (r *siteRepository) GetByUUID(ctx context.Context, uuidStr string) (*ent.Site, error) {
-	s, err := r.client.Site.Query().
-		Where(site.UUIDEQ(uuidStr)).
+func (r *entRepository) GetByUUID(ctx context.Context, uuid string) (*ent.Site, error) {
+	site, err := r.client.Site.
+		Query().
+		Where(site.UUID(uuid)).
 		Only(ctx)
+
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return nil, fmt.Errorf("site not found: %w", err)
+			return nil, err
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get site by uuid: %w", err)
 	}
-	return s, nil
+
+	return site, nil
 }
 
-func (r *siteRepository) List(ctx context.Context) ([]*ent.Site, error) {
-	return r.client.Site.Query().
-		Where(site.IsDeletedEQ(false)).
-		All(ctx)
-}
+// GetByDomain retrieves a site by its domain.
+func (r *entRepository) GetByDomain(ctx context.Context, domain string) (*ent.Site, error) {
+	site, err := r.client.Site.
+		Query().
+		Where(site.Domain(domain)).
+		Only(ctx)
 
-func (r *siteRepository) Update(ctx context.Context, uuidStr string, input UpdateSiteInput) (*ent.Site, error) {
-	updater := r.client.Site.Update().
-		Where(site.UUIDEQ(uuidStr))
-
-	if input.Name != nil {
-		updater.SetName(*input.Name)
-	}
-	if input.Domain != nil {
-		updater.SetDomain(*input.Domain)
-	}
-	if input.IsActive != nil {
-		updater.SetIsActive(*input.IsActive)
-	}
-
-	n, err := updater.Save(ctx)
 	if err != nil {
-		return nil, err
-	}
-	if n == 0 {
-		return nil, fmt.Errorf("site not found")
+		if ent.IsNotFound(err) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to get site by domain: %w", err)
 	}
 
-	return r.GetByUUID(ctx, uuidStr)
+	return site, nil
 }
 
-func (r *siteRepository) Delete(ctx context.Context, uuidStr string) error {
-	// Soft delete
-	err := r.client.Site.Update().
-		Where(site.UUIDEQ(uuidStr)).
-		SetIsDeleted(true).
+// List retrieves all sites ordered by creation date.
+func (r *entRepository) List(ctx context.Context) ([]*ent.Site, error) {
+	sites, err := r.client.Site.
+		Query().
+		Order(ent.Desc(site.FieldCreatedAt)).
+		All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list sites: %w", err)
+	}
+
+	return sites, nil
+}
+
+// ListActive retrieves all active sites.
+func (r *entRepository) ListActive(ctx context.Context) ([]*ent.Site, error) {
+	sites, err := r.client.Site.
+		Query().
+		Where(site.IsActive(true)).
+		Order(ent.Desc(site.FieldCreatedAt)).
+		All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list active sites: %w", err)
+	}
+
+	return sites, nil
+}
+
+// Update updates a site with the provided fields.
+func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateSiteInput) (*ent.Site, error) {
+	// Start building the update query
+	updateQuery := r.client.Site.
+		Update().
+		Where(site.UUID(uuid))
+
+	// Apply updates only for non-nil fields
+	if input.Name != nil {
+		updateQuery = updateQuery.SetName(*input.Name)
+	}
+
+	if input.Domain != nil {
+		updateQuery = updateQuery.SetDomain(*input.Domain)
+	}
+
+	if input.IsActive != nil {
+		updateQuery = updateQuery.SetIsActive(*input.IsActive)
+	}
+
+	// Execute the update
+	affected, err := updateQuery.Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update site: %w", err)
+	}
+
+	if affected == 0 {
+		return nil, &ent.NotFoundError{}
+	}
+
+	// Retrieve and return the updated site
+	return r.GetByUUID(ctx, uuid)
+}
+
+// Delete deletes a site by its UUID.
+func (r *entRepository) Delete(ctx context.Context, uuid string) error {
+	affected, err := r.client.Site.
+		Delete().
+		Where(site.UUID(uuid)).
 		Exec(ctx)
-	return err
+
+	if err != nil {
+		return fmt.Errorf("failed to delete site: %w", err)
+	}
+
+	if affected == 0 {
+		return &ent.NotFoundError{}
+	}
+
+	return nil
+}
+
+// RegenerateKeys updates the security keys for a site.
+func (r *entRepository) RegenerateKeys(ctx context.Context, uuid, publicKey, secretKey string) (*ent.Site, error) {
+	affected, err := r.client.Site.
+		Update().
+		Where(site.UUID(uuid)).
+		SetPublicKey(publicKey).
+		SetSecretKey(secretKey).
+		Save(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to regenerate keys: %w", err)
+	}
+
+	if affected == 0 {
+		return nil, &ent.NotFoundError{}
+	}
+
+	// Retrieve and return the updated site
+	return r.GetByUUID(ctx, uuid)
+}
+
+// Count returns the total number of sites.
+func (r *entRepository) Count(ctx context.Context) (int, error) {
+	count, err := r.client.Site.
+		Query().
+		Count(ctx)
+
+	if err != nil {
+		return 0, fmt.Errorf("failed to count sites: %w", err)
+	}
+
+	return count, nil
+}
+
+// Transaction support methods (optional but useful)
+
+// WithTx returns a new repository that uses the given transaction.
+func (r *entRepository) WithTx(tx *ent.Tx) Repository {
+	return &entRepository{client: tx.Client()}
+}
+
+// BeginTx starts a new transaction.
+func (r *entRepository) BeginTx(ctx context.Context) (*ent.Tx, error) {
+	return r.client.Tx(ctx)
 }

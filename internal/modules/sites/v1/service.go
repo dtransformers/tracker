@@ -4,77 +4,507 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/url"
+	"strings"
+	"time"
 	"tracking/internal/ent"
 
 	"github.com/google/uuid"
 )
 
+// Configuration constants for key generation
+const (
+	PublicKeyBytes  = 16 // Generates 32 hex characters
+	SecretKeyBytes  = 32 // Generates 64 hex characters
+	DefaultTimeout  = 5 * time.Second
+	MaxNameLength   = 255
+	MinNameLength   = 1
+	MaxDomainLength = 253 // RFC 1035
+)
+
+// Custom errors for better error handling
+var (
+	ErrInvalidDomain = errors.New("invalid domain format")
+	ErrInvalidName   = errors.New("name must be between 1 and 255 characters")
+	ErrEmptyUpdate   = errors.New("at least one field must be updated")
+	ErrDomainExists  = errors.New("domain already exists")
+	ErrKeyGeneration = errors.New("failed to generate security key")
+	ErrSiteNotFound  = errors.New("site not found")
+)
+
 // Service handles the business logic for sites.
 type Service struct {
-	repo Repository
+	repo         Repository
+	logger       *slog.Logger
+	pubKeyLength int
+	secKeyLength int
+	timeout      time.Duration
 }
 
-// NewService creates a new Site service with the given repository.
-func NewService(repo Repository) *Service {
-	return &Service{repo: repo}
+// ServiceConfig holds configuration options for the Service.
+type ServiceConfig struct {
+	PublicKeyLength int
+	SecretKeyLength int
+	Timeout         time.Duration
+}
+
+// NewService creates a new Site service with the given repository and logger.
+func NewService(repo Repository, logger *slog.Logger) *Service {
+	return NewServiceWithConfig(repo, logger, ServiceConfig{
+		PublicKeyLength: PublicKeyBytes,
+		SecretKeyLength: SecretKeyBytes,
+		Timeout:         DefaultTimeout,
+	})
+}
+
+// NewServiceWithConfig creates a new Site service with custom configuration.
+func NewServiceWithConfig(repo Repository, logger *slog.Logger, cfg ServiceConfig) *Service {
+	if logger == nil {
+		logger = slog.Default()
+	}
+
+	return &Service{
+		repo:         repo,
+		logger:       logger,
+		pubKeyLength: cfg.PublicKeyLength,
+		secKeyLength: cfg.SecretKeyLength,
+		timeout:      cfg.Timeout,
+	}
 }
 
 // CreateRequest defines the payload for creating a new site.
 type CreateRequest struct {
-	// Name of the site
-	Name   string `json:"name" binding:"required"`
-	// Domain of the site (must be unique)
+	// Name of the site (required, 1-255 characters)
+	Name string `json:"name" binding:"required"`
+	// Domain of the site (required, must be unique and valid)
 	Domain string `json:"domain" binding:"required"`
 }
 
 // UpdateRequest defines the payload for updating an existing site.
 type UpdateRequest struct {
 	// Optional new name for the site
-	Name     *string `json:"name"`
+	Name *string `json:"name"`
 	// Optional new domain for the site
-	Domain   *string `json:"domain"`
+	Domain *string `json:"domain"`
 	// Optional active status
-	IsActive *bool   `json:"is_active"`
+	IsActive *bool `json:"is_active"`
 }
 
-func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*ent.Site, error) {
-	u := uuid.New().String()
-	pubKey := generateRandomKey(16)
-	secKey := generateRandomKey(32)
+// Response represents a site in API responses.
+// Note: SecretKey is intentionally excluded for security.
+type Response struct {
+	UUID      string    `json:"uuid"`
+	Name      string    `json:"name"`
+	Domain    string    `json:"domain"`
+	PublicKey string    `json:"public_key"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
 
-	return s.repo.Create(ctx, CreateSiteInput{
-		UUID:      u,
-		Name:      req.Name,
-		Domain:    req.Domain,
+// ListResponse represents a list of sites.
+type ListResponse struct {
+	Sites []*Response `json:"sites"`
+	Total int         `json:"total"`
+}
+
+// CreateSite creates a new site with generated security keys.
+func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	s.logger.InfoContext(ctx, "creating site",
+		"name", req.Name,
+		"domain", req.Domain,
+	)
+
+	// Validate input
+	if err := s.validateCreateRequest(req); err != nil {
+		s.logger.WarnContext(ctx, "validation failed",
+			"error", err,
+			"domain", req.Domain,
+		)
+		return nil, err
+	}
+
+	// Check for duplicate domain
+	if err := s.checkDomainUniqueness(ctx, req.Domain, ""); err != nil {
+		return nil, err
+	}
+
+	// Generate security keys
+	pubKey, err := generateRandomKey(s.pubKeyLength)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
+		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
+	}
+
+	secKey, err := generateRandomKey(s.secKeyLength)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
+		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
+	}
+
+	// Create site
+	site, err := s.repo.Create(ctx, CreateSiteInput{
+		UUID:      uuid.New().String(),
+		Name:      strings.TrimSpace(req.Name),
+		Domain:    normalizeDomain(req.Domain),
 		PublicKey: pubKey,
 		SecretKey: secKey,
 	})
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to create site",
+			"error", err,
+			"domain", req.Domain,
+		)
+		return nil, fmt.Errorf("failed to create site: %w", err)
+	}
+
+	s.logger.InfoContext(ctx, "site created successfully",
+		"uuid", site.UUID,
+		"domain", site.Domain,
+	)
+
+	return toResponse(site), nil
 }
 
-func (s *Service) GetSite(ctx context.Context, uuid string) (*ent.Site, error) {
-	return s.repo.GetByUUID(ctx, uuid)
+// GetSite retrieves a site by its UUID.
+func (s *Service) GetSite(ctx context.Context, siteUUID string) (*Response, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	// Validate UUID format
+	if _, err := uuid.Parse(siteUUID); err != nil {
+		return nil, fmt.Errorf("invalid UUID format: %w", err)
+	}
+
+	site, err := s.repo.GetByUUID(ctx, siteUUID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrSiteNotFound
+		}
+		s.logger.ErrorContext(ctx, "failed to get site",
+			"error", err,
+			"uuid", siteUUID,
+		)
+		return nil, fmt.Errorf("failed to get site: %w", err)
+	}
+
+	return toResponse(site), nil
 }
 
-func (s *Service) ListSites(ctx context.Context) ([]*ent.Site, error) {
-	return s.repo.List(ctx)
+// ListSites retrieves all sites.
+func (s *Service) ListSites(ctx context.Context) (*ListResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sites, err := s.repo.List(ctx)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to list sites", "error", err)
+		return nil, fmt.Errorf("failed to list sites: %w", err)
+	}
+
+	responses := make([]*Response, len(sites))
+	for i, site := range sites {
+		responses[i] = toResponse(site)
+	}
+
+	return &ListResponse{
+		Sites: responses,
+		Total: len(responses),
+	}, nil
 }
 
-func (s *Service) UpdateSite(ctx context.Context, uuid string, req UpdateRequest) (*ent.Site, error) {
-	return s.repo.Update(ctx, uuid, UpdateSiteInput{
+// UpdateSite updates an existing site.
+func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateRequest) (*Response, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	s.logger.InfoContext(ctx, "updating site", "uuid", siteUUID)
+
+	// Validate UUID format
+	if _, err := uuid.Parse(siteUUID); err != nil {
+		return nil, fmt.Errorf("invalid UUID format: %w", err)
+	}
+
+	// Validate update request
+	if err := s.validateUpdateRequest(req); err != nil {
+		s.logger.WarnContext(ctx, "validation failed",
+			"error", err,
+			"uuid", siteUUID,
+		)
+		return nil, err
+	}
+
+	// Check domain uniqueness if domain is being updated
+	if req.Domain != nil {
+		if err := s.checkDomainUniqueness(ctx, *req.Domain, siteUUID); err != nil {
+			return nil, err
+		}
+	}
+
+	// Normalize domain if provided
+	input := UpdateSiteInput{
 		Name:     req.Name,
-		Domain:   req.Domain,
 		IsActive: req.IsActive,
-	})
+	}
+	if req.Domain != nil {
+		normalized := normalizeDomain(*req.Domain)
+		input.Domain = &normalized
+	}
+
+	site, err := s.repo.Update(ctx, siteUUID, input)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrSiteNotFound
+		}
+		s.logger.ErrorContext(ctx, "failed to update site",
+			"error", err,
+			"uuid", siteUUID,
+		)
+		return nil, fmt.Errorf("failed to update site: %w", err)
+	}
+
+	s.logger.InfoContext(ctx, "site updated successfully",
+		"uuid", site.UUID,
+		"domain", site.Domain,
+	)
+
+	return toResponse(site), nil
 }
 
-func (s *Service) DeleteSite(ctx context.Context, uuid string) error {
-	return s.repo.Delete(ctx, uuid)
+// DeleteSite deletes a site by its UUID.
+func (s *Service) DeleteSite(ctx context.Context, siteUUID string) error {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	s.logger.InfoContext(ctx, "deleting site", "uuid", siteUUID)
+
+	// Validate UUID format
+	if _, err := uuid.Parse(siteUUID); err != nil {
+		return fmt.Errorf("invalid UUID format: %w", err)
+	}
+
+	err := s.repo.Delete(ctx, siteUUID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return ErrSiteNotFound
+		}
+		s.logger.ErrorContext(ctx, "failed to delete site",
+			"error", err,
+			"uuid", siteUUID,
+		)
+		return fmt.Errorf("failed to delete site: %w", err)
+	}
+
+	s.logger.InfoContext(ctx, "site deleted successfully", "uuid", siteUUID)
+
+	return nil
 }
 
-func generateRandomKey(length int) string {
+// RegenerateKeys regenerates the security keys for a site.
+func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Response, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	s.logger.InfoContext(ctx, "regenerating keys", "uuid", siteUUID)
+
+	// Validate UUID format
+	if _, err := uuid.Parse(siteUUID); err != nil {
+		return nil, fmt.Errorf("invalid UUID format: %w", err)
+	}
+
+	// Generate new keys
+	pubKey, err := generateRandomKey(s.pubKeyLength)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
+		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
+	}
+
+	secKey, err := generateRandomKey(s.secKeyLength)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
+		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
+	}
+
+	// Update with new keys
+	site, err := s.repo.RegenerateKeys(ctx, siteUUID, pubKey, secKey)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrSiteNotFound
+		}
+		s.logger.ErrorContext(ctx, "failed to regenerate keys",
+			"error", err,
+			"uuid", siteUUID,
+		)
+		return nil, fmt.Errorf("failed to regenerate keys: %w", err)
+	}
+
+	s.logger.InfoContext(ctx, "keys regenerated successfully", "uuid", siteUUID)
+
+	return toResponse(site), nil
+}
+
+// validateCreateRequest validates the create site request.
+func (s *Service) validateCreateRequest(req CreateRequest) error {
+	if err := validateName(req.Name); err != nil {
+		return err
+	}
+
+	if err := validateDomain(req.Domain); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateUpdateRequest validates the update site request.
+func (s *Service) validateUpdateRequest(req UpdateRequest) error {
+	// Check that at least one field is being updated
+	if req.Name == nil && req.Domain == nil && req.IsActive == nil {
+		return ErrEmptyUpdate
+	}
+
+	// Validate name if provided
+	if req.Name != nil {
+		if err := validateName(*req.Name); err != nil {
+			return err
+		}
+	}
+
+	// Validate domain if provided
+	if req.Domain != nil {
+		if err := validateDomain(*req.Domain); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// checkDomainUniqueness checks if a domain is already in use by another site.
+func (s *Service) checkDomainUniqueness(ctx context.Context, domain, excludeUUID string) error {
+	normalized := normalizeDomain(domain)
+
+	existing, err := s.repo.GetByDomain(ctx, normalized)
+	if err != nil && !ent.IsNotFound(err) {
+		s.logger.ErrorContext(ctx, "failed to check domain uniqueness",
+			"error", err,
+			"domain", normalized,
+		)
+		return fmt.Errorf("failed to check domain uniqueness: %w", err)
+	}
+
+	if existing != nil && existing.UUID != excludeUUID {
+		s.logger.WarnContext(ctx, "domain already exists",
+			"domain", normalized,
+			"existing_uuid", existing.UUID,
+		)
+		return ErrDomainExists
+	}
+
+	return nil
+}
+
+// validateName validates a site name.
+func validateName(name string) error {
+	trimmed := strings.TrimSpace(name)
+	if len(trimmed) < MinNameLength || len(trimmed) > MaxNameLength {
+		return fmt.Errorf("%w: must be between %d and %d characters",
+			ErrInvalidName, MinNameLength, MaxNameLength)
+	}
+	return nil
+}
+
+// validateDomain validates a domain name.
+func validateDomain(domain string) error {
+	trimmed := strings.TrimSpace(domain)
+	if len(trimmed) == 0 {
+		return fmt.Errorf("%w: cannot be empty", ErrInvalidDomain)
+	}
+
+	if len(trimmed) > MaxDomainLength {
+		return fmt.Errorf("%w: exceeds maximum length of %d characters",
+			ErrInvalidDomain, MaxDomainLength)
+	}
+
+	// Normalize and validate format
+	normalized := normalizeDomain(trimmed)
+
+	// Try to parse as URL to validate format
+	testURL := "http://" + normalized
+	u, err := url.Parse(testURL)
+	if err != nil || u.Host != normalized {
+		return fmt.Errorf("%w: invalid format", ErrInvalidDomain)
+	}
+
+	// Additional checks
+	if strings.Contains(normalized, " ") {
+		return fmt.Errorf("%w: cannot contain spaces", ErrInvalidDomain)
+	}
+
+	if strings.HasPrefix(normalized, ".") || strings.HasSuffix(normalized, ".") {
+		return fmt.Errorf("%w: cannot start or end with a dot", ErrInvalidDomain)
+	}
+
+	return nil
+}
+
+// normalizeDomain normalizes a domain name.
+func normalizeDomain(domain string) string {
+	normalized := strings.TrimSpace(domain)
+	normalized = strings.ToLower(normalized)
+	// Remove protocol if present
+	normalized = strings.TrimPrefix(normalized, "http://")
+	normalized = strings.TrimPrefix(normalized, "https://")
+	// Remove trailing slash
+	normalized = strings.TrimSuffix(normalized, "/")
+	return normalized
+}
+
+// generateRandomKey generates a cryptographically secure random key.
+func generateRandomKey(length int) (string, error) {
+	if length <= 0 {
+		return "", fmt.Errorf("invalid key length: %d", length)
+	}
+
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
-		return ""
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
 	}
-	return hex.EncodeToString(b)
+
+	return hex.EncodeToString(b), nil
+}
+
+// toResponse converts an ent.Site to a Response DTO.
+func toResponse(site *ent.Site) *Response {
+	if site == nil {
+		return nil
+	}
+
+	return &Response{
+		UUID:      site.UUID,
+		Name:      site.Name,
+		Domain:    site.Domain,
+		PublicKey: site.PublicKey,
+		IsActive:  site.IsActive,
+		CreatedAt: site.CreatedAt,
+		UpdatedAt: site.UpdatedAt,
+	}
+}
+func (c ServiceConfig) Validate() error {
+	if c.PublicKeyLength <= 0 {
+		return fmt.Errorf("public key length must be positive")
+	}
+	if c.SecretKeyLength <= 0 {
+		return fmt.Errorf("secret key length must be positive")
+	}
+	if c.Timeout <= 0 {
+		return fmt.Errorf("timeout must be positive")
+	}
+	return nil
 }

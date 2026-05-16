@@ -13,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"tracking/pkg/constants"
 
 	"github.com/joho/godotenv"
@@ -59,11 +60,16 @@ type AppConfig struct {
 }
 
 type DBConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Database string
+	Host            string
+	Port            int
+	Username        string
+	Password        string
+	Database        string
+	MaxOpenConns    int           "default: 10"
+	MaxIdleConns    int           "default: 5"
+	ConnMaxLifetime time.Duration "default: 30m"
+	ConnMaxIdleTime time.Duration "default: 10m"
+	SSLMode         string
 }
 
 type RedisConfig struct {

@@ -1,0 +1,13 @@
+# Top-level defaults for v3
+all: false
+force-file-write: true
+log-level: info
+recursive: false
+
+packages:
+  tracking/internal/modules/sites/v1:
+    config:
+      all: true
+      dir: "internal/modules/sites/v1/mocks"
+      filename: "mock_{{.InterfaceName}}.go"
+      pkgname: "mocks"

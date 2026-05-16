@@ -88,7 +88,7 @@ func printColumns(
 		}
 
 		fmt.Printf(
-			"    - %s (%s) nullable=%s\n",
+			"    - %s%s%s%s (%s%s%s%s) nullable=%s%s%s%s\n",
 			tools.Bold, tools.Yellow, name, tools.Reset,
 			tools.Bold, tools.Cyan, dataType, tools.Reset,
 			tools.Bold, tools.Green, nullable, tools.Reset,
@@ -133,12 +133,12 @@ func printIndexes(
 		}
 
 		fmt.Printf(
-			"    - %s\n",
+			"    - %s%s%s%s\n",
 			tools.Bold, tools.Yellow, name, tools.Reset,
 		)
 
 		fmt.Printf(
-			"      %s\n",
+			"      %s%s%s%s\n",
 			tools.Bold, tools.White, definition, tools.Reset,
 		)
 	}
