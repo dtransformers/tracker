@@ -1,3 +1,17 @@
+// @title Tracking API
+// @version 1.0
+// @description This is a tracking service API.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (
@@ -11,10 +25,15 @@ import (
 	"tracking/internal/config"
 	"tracking/internal/database"
 	"tracking/internal/modules/health"
+	"tracking/internal/modules/sites"
 	"tracking/internal/server"
 
 	"github.com/arl/statsviz"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "tracking/docs"
 )
 
 type application struct {
@@ -85,6 +104,11 @@ func (app *application) registerRoutes(router *gin.Engine) {
 		applicationHealth := health.GetApplicationHealth(app.db.SQL)
 		c.JSON(http.StatusOK, applicationHealth)
 	})
+
+	sites.RegisterV1(router, app.db.Client)
+
+	// Swagger documentation
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func (app *application) setupVisualizer(router *gin.Engine) {

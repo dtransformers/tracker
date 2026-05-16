@@ -1,0 +1,206 @@
+basePath: /
+definitions:
+  ent.Site:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      deleted_at:
+        description: DeletedAt holds the value of the "deleted_at" field.
+        type: string
+      domain:
+        description: Domain holds the value of the "domain" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      is_active:
+        description: IsActive holds the value of the "is_active" field.
+        type: boolean
+      is_deleted:
+        description: IsDeleted holds the value of the "is_deleted" field.
+        type: boolean
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      public_key:
+        description: PublicKey holds the value of the "public_key" field.
+        type: string
+      updated_at:
+        description: UpdatedAt holds the value of the "updated_at" field.
+        type: string
+      uuid:
+        description: UUID holds the value of the "uuid" field.
+        type: string
+    type: object
+  v1.CreateRequest:
+    properties:
+      domain:
+        type: string
+      name:
+        type: string
+    required:
+    - domain
+    - name
+    type: object
+  v1.UpdateRequest:
+    properties:
+      domain:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a tracking service API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Tracking API
+  version: "1.0"
+paths:
+  /api/v1/sites:
+    get:
+      description: Get a list of all active sites
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ent.Site'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all sites
+      tags:
+      - sites
+    post:
+      consumes:
+      - application/json
+      description: Create a new site with name and domain
+      parameters:
+      - description: Site creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Site'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new site
+      tags:
+      - sites
+  /api/v1/sites/{uuid}:
+    delete:
+      description: Soft-delete a site by its UUID
+      parameters:
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a site
+      tags:
+      - sites
+    get:
+      description: Get a site by its UUID
+      parameters:
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Site'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a site
+      tags:
+      - sites
+    patch:
+      consumes:
+      - application/json
+      description: Update site name, domain, or status
+      parameters:
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Site update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Site'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a site
+      tags:
+      - sites
+swagger: "2.0"
