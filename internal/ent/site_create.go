@@ -38,6 +38,20 @@ func (_c *SiteCreate) SetDomain(v string) *SiteCreate {
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *SiteCreate) SetTenantID(v int64) *SiteCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *SiteCreate) SetNillableTenantID(v *int64) *SiteCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetPublicKey sets the "public_key" field.
 func (_c *SiteCreate) SetPublicKey(v string) *SiteCreate {
 	_c.mutation.SetPublicKey(v)
@@ -155,6 +169,10 @@ func (_c *SiteCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SiteCreate) defaults() {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := site.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
 	if _, ok := _c.mutation.IsActive(); !ok {
 		v := site.DefaultIsActive
 		_c.mutation.SetIsActive(v)
@@ -197,6 +215,14 @@ func (_c *SiteCreate) check() error {
 	if v, ok := _c.mutation.Domain(); ok {
 		if err := site.DomainValidator(v); err != nil {
 			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Site.domain": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`ent: missing required field "Site.tenant_id"`)}
+	}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := site.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`ent: validator failed for field "Site.tenant_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.PublicKey(); !ok {
@@ -264,6 +290,10 @@ func (_c *SiteCreate) createSpec() (*Site, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Domain(); ok {
 		_spec.SetField(site.FieldDomain, field.TypeString, value)
 		_node.Domain = value
+	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(site.FieldTenantID, field.TypeInt64, value)
+		_node.TenantID = value
 	}
 	if value, ok := _c.mutation.PublicKey(); ok {
 		_spec.SetField(site.FieldPublicKey, field.TypeString, value)

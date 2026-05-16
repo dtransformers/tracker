@@ -69,6 +69,11 @@ func Domain(v string) predicate.Site {
 	return predicate.Site(sql.FieldEQ(FieldDomain, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v int64) predicate.Site {
+	return predicate.Site(sql.FieldEQ(FieldTenantID, v))
+}
+
 // PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
 func PublicKey(v string) predicate.Site {
 	return predicate.Site(sql.FieldEQ(FieldPublicKey, v))
@@ -297,6 +302,46 @@ func DomainEqualFold(v string) predicate.Site {
 // DomainContainsFold applies the ContainsFold predicate on the "domain" field.
 func DomainContainsFold(v string) predicate.Site {
 	return predicate.Site(sql.FieldContainsFold(FieldDomain, v))
+}
+
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v int64) predicate.Site {
+	return predicate.Site(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v int64) predicate.Site {
+	return predicate.Site(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...int64) predicate.Site {
+	return predicate.Site(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...int64) predicate.Site {
+	return predicate.Site(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v int64) predicate.Site {
+	return predicate.Site(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v int64) predicate.Site {
+	return predicate.Site(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v int64) predicate.Site {
+	return predicate.Site(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v int64) predicate.Site {
+	return predicate.Site(sql.FieldLTE(FieldTenantID, v))
 }
 
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.

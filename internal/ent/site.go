@@ -23,6 +23,8 @@ type Site struct {
 	Name string `json:"name,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
+	// TenantID holds the value of the "tenant_id" field.
+	TenantID int64 `json:"tenant_id,omitempty"`
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey string `json:"public_key,omitempty"`
 	// SecretKey holds the value of the "secret_key" field.
@@ -47,7 +49,7 @@ func (*Site) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case site.FieldIsActive, site.FieldIsDeleted:
 			values[i] = new(sql.NullBool)
-		case site.FieldID:
+		case site.FieldID, site.FieldTenantID:
 			values[i] = new(sql.NullInt64)
 		case site.FieldUUID, site.FieldName, site.FieldDomain, site.FieldPublicKey, site.FieldSecretKey:
 			values[i] = new(sql.NullString)
@@ -91,6 +93,12 @@ func (_m *Site) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field domain", values[i])
 			} else if value.Valid {
 				_m.Domain = value.String
+			}
+		case site.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = value.Int64
 			}
 		case site.FieldPublicKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -179,6 +187,9 @@ func (_m *Site) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("domain=")
 	builder.WriteString(_m.Domain)
+	builder.WriteString(", ")
+	builder.WriteString("tenant_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
 	builder.WriteString(", ")
 	builder.WriteString("public_key=")
 	builder.WriteString(_m.PublicKey)

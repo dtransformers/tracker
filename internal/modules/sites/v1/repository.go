@@ -22,6 +22,7 @@ type Repository interface {
 	RegenerateKeys(ctx context.Context, uuid, publicKey, secretKey string) (*ent.Site, error)
 
 	ListActive(ctx context.Context) ([]*ent.Site, error)
+	ListByTenant(ctx context.Context, tenantID int64) ([]*ent.Site, error)
 	Count(ctx context.Context) (int, error)
 }
 
@@ -40,6 +41,7 @@ type CreateSiteInput struct {
 	UUID      string
 	Name      string
 	Domain    string
+	TenantID  int64
 	PublicKey string
 	SecretKey string
 }
@@ -47,6 +49,7 @@ type CreateSiteInput struct {
 type UpdateSiteInput struct {
 	Name     *string
 	Domain   *string
+	TenantID *int64
 	IsActive *bool
 }
 
@@ -56,6 +59,7 @@ func (r *entRepository) Create(ctx context.Context, input CreateSiteInput) (*ent
 		SetUUID(input.UUID).
 		SetName(input.Name).
 		SetDomain(input.Domain).
+		SetTenantID(input.TenantID).
 		SetPublicKey(input.PublicKey).
 		SetSecretKey(input.SecretKey).
 		SetIsActive(true). // Default to active
@@ -130,6 +134,21 @@ func (r *entRepository) ListActive(ctx context.Context) ([]*ent.Site, error) {
 	return sites, nil
 }
 
+// ListByTenant retrieves all sites for a specific tenant.
+func (r *entRepository) ListByTenant(ctx context.Context, tenantID int64) ([]*ent.Site, error) {
+	sites, err := r.client.Site.
+		Query().
+		Where(site.TenantID(tenantID)).
+		Order(ent.Desc(site.FieldCreatedAt)).
+		All(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list sites by tenant: %w", err)
+	}
+
+	return sites, nil
+}
+
 // Update updates a site with the provided fields.
 func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateSiteInput) (*ent.Site, error) {
 	// Start building the update query
@@ -144,6 +163,10 @@ func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateSit
 
 	if input.Domain != nil {
 		updateQuery = updateQuery.SetDomain(*input.Domain)
+	}
+
+	if input.TenantID != nil {
+		updateQuery = updateQuery.SetTenantID(*input.TenantID)
 	}
 
 	if input.IsActive != nil {

@@ -81,6 +81,8 @@ type CreateRequest struct {
 	Name string `json:"name" binding:"required"`
 	// Domain of the site (required, must be unique and valid)
 	Domain string `json:"domain" binding:"required"`
+	// Tenant ID of the site
+	TenantID int64 `json:"tenant_id" binding:"required"`
 }
 
 // UpdateRequest defines the payload for updating an existing site.
@@ -89,6 +91,8 @@ type UpdateRequest struct {
 	Name *string `json:"name"`
 	// Optional new domain for the site
 	Domain *string `json:"domain"`
+	// Optional new tenant ID
+	TenantID *int64 `json:"tenant_id"`
 	// Optional active status
 	IsActive *bool `json:"is_active"`
 }
@@ -99,6 +103,7 @@ type Response struct {
 	UUID      string    `json:"uuid"`
 	Name      string    `json:"name"`
 	Domain    string    `json:"domain"`
+	TenantID  int64     `json:"tenant_id"`
 	PublicKey string    `json:"public_key"`
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
@@ -119,6 +124,7 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 	s.logger.InfoContext(ctx, "creating site",
 		"name", req.Name,
 		"domain", req.Domain,
+		"tenant_id", req.TenantID,
 	)
 
 	if err := s.validateCreateRequest(req); err != nil {
@@ -149,6 +155,7 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 		UUID:      uuid.New().String(),
 		Name:      strings.TrimSpace(req.Name),
 		Domain:    normalizeDomain(req.Domain),
+		TenantID:  req.TenantID,
 		PublicKey: pubKey,
 		SecretKey: secKey,
 	})
@@ -193,12 +200,22 @@ func (s *Service) GetSite(ctx context.Context, siteUUID string) (*Response, erro
 	return toResponse(site), nil
 }
 
-// ListSites retrieves all sites.
-func (s *Service) ListSites(ctx context.Context) (*ListResponse, error) {
+// ListSites retrieves sites, optionally filtered by tenant ID.
+func (s *Service) ListSites(ctx context.Context, tenantID *int64) (*ListResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	sites, err := s.repo.List(ctx)
+	var sites []*ent.Site
+	var err error
+
+	if tenantID != nil {
+		s.logger.InfoContext(ctx, "listing sites for tenant", "tenant_id", *tenantID)
+		sites, err = s.repo.ListByTenant(ctx, *tenantID)
+	} else {
+		s.logger.InfoContext(ctx, "listing all sites")
+		sites, err = s.repo.List(ctx)
+	}
+
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to list sites", "error", err)
 		return nil, fmt.Errorf("failed to list sites: %w", err)
@@ -246,6 +263,7 @@ func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateReq
 	// Normalize domain if provided
 	input := UpdateSiteInput{
 		Name:     req.Name,
+		TenantID: req.TenantID,
 		IsActive: req.IsActive,
 	}
 	if req.Domain != nil {
@@ -361,7 +379,7 @@ func (s *Service) validateCreateRequest(req CreateRequest) error {
 // validateUpdateRequest validates the update site request.
 func (s *Service) validateUpdateRequest(req UpdateRequest) error {
 	// Check that at least one field is being updated
-	if req.Name == nil && req.Domain == nil && req.IsActive == nil {
+	if req.Name == nil && req.Domain == nil && req.TenantID == nil && req.IsActive == nil {
 		return ErrEmptyUpdate
 	}
 
@@ -490,6 +508,7 @@ func toResponse(site *ent.Site) *Response {
 		UUID:      site.UUID,
 		Name:      site.Name,
 		Domain:    site.Domain,
+		TenantID:  site.TenantID,
 		PublicKey: site.PublicKey,
 		IsActive:  site.IsActive,
 		CreatedAt: site.CreatedAt,

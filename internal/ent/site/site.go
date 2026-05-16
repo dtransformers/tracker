@@ -19,6 +19,8 @@ const (
 	FieldName = "name"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
 	// FieldSecretKey holds the string denoting the secret_key field in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldUUID,
 	FieldName,
 	FieldDomain,
+	FieldTenantID,
 	FieldPublicKey,
 	FieldSecretKey,
 	FieldIsActive,
@@ -69,6 +72,10 @@ var (
 	NameValidator func(string) error
 	// DomainValidator is a validator for the "domain" field. It is called by the builders before save.
 	DomainValidator func(string) error
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID int64
+	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	TenantIDValidator func(int64) error
 	// PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
 	PublicKeyValidator func(string) error
 	// SecretKeyValidator is a validator for the "secret_key" field. It is called by the builders before save.
@@ -106,6 +113,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByDomain orders the results by the domain field.
 func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByPublicKey orders the results by the public_key field.

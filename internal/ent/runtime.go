@@ -26,28 +26,34 @@ func init() {
 	siteDescDomain := siteFields[2].Descriptor()
 	// site.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
 	site.DomainValidator = siteDescDomain.Validators[0].(func(string) error)
+	// siteDescTenantID is the schema descriptor for tenant_id field.
+	siteDescTenantID := siteFields[3].Descriptor()
+	// site.DefaultTenantID holds the default value on creation for the tenant_id field.
+	site.DefaultTenantID = siteDescTenantID.Default.(int64)
+	// site.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	site.TenantIDValidator = siteDescTenantID.Validators[0].(func(int64) error)
 	// siteDescPublicKey is the schema descriptor for public_key field.
-	siteDescPublicKey := siteFields[3].Descriptor()
+	siteDescPublicKey := siteFields[4].Descriptor()
 	// site.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
 	site.PublicKeyValidator = siteDescPublicKey.Validators[0].(func(string) error)
 	// siteDescSecretKey is the schema descriptor for secret_key field.
-	siteDescSecretKey := siteFields[4].Descriptor()
+	siteDescSecretKey := siteFields[5].Descriptor()
 	// site.SecretKeyValidator is a validator for the "secret_key" field. It is called by the builders before save.
 	site.SecretKeyValidator = siteDescSecretKey.Validators[0].(func(string) error)
 	// siteDescIsActive is the schema descriptor for is_active field.
-	siteDescIsActive := siteFields[5].Descriptor()
+	siteDescIsActive := siteFields[6].Descriptor()
 	// site.DefaultIsActive holds the default value on creation for the is_active field.
 	site.DefaultIsActive = siteDescIsActive.Default.(bool)
 	// siteDescIsDeleted is the schema descriptor for is_deleted field.
-	siteDescIsDeleted := siteFields[6].Descriptor()
+	siteDescIsDeleted := siteFields[7].Descriptor()
 	// site.DefaultIsDeleted holds the default value on creation for the is_deleted field.
 	site.DefaultIsDeleted = siteDescIsDeleted.Default.(bool)
 	// siteDescCreatedAt is the schema descriptor for created_at field.
-	siteDescCreatedAt := siteFields[7].Descriptor()
+	siteDescCreatedAt := siteFields[8].Descriptor()
 	// site.DefaultCreatedAt holds the default value on creation for the created_at field.
 	site.DefaultCreatedAt = siteDescCreatedAt.Default.(func() time.Time)
 	// siteDescUpdatedAt is the schema descriptor for updated_at field.
-	siteDescUpdatedAt := siteFields[8].Descriptor()
+	siteDescUpdatedAt := siteFields[9].Descriptor()
 	// site.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	site.DefaultUpdatedAt = siteDescUpdatedAt.Default.(func() time.Time)
 	// site.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -14,6 +14,7 @@ var (
 		{Name: "uuid", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "domain", Type: field.TypeString, Unique: true},
+		{Name: "tenant_id", Type: field.TypeInt64, Default: 1},
 		{Name: "public_key", Type: field.TypeString, Unique: true},
 		{Name: "secret_key", Type: field.TypeString},
 		{Name: "is_active", Type: field.TypeBool, Default: true},

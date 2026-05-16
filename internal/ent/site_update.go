@@ -70,6 +70,27 @@ func (_u *SiteUpdate) SetNillableDomain(v *string) *SiteUpdate {
 	return _u
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_u *SiteUpdate) SetTenantID(v int64) *SiteUpdate {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *SiteUpdate) SetNillableTenantID(v *int64) *SiteUpdate {
+	if v != nil {
+		_u.SetTenantID(*v)
+	}
+	return _u
+}
+
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *SiteUpdate) AddTenantID(v int64) *SiteUpdate {
+	_u.mutation.AddTenantID(v)
+	return _u
+}
+
 // SetPublicKey sets the "public_key" field.
 func (_u *SiteUpdate) SetPublicKey(v string) *SiteUpdate {
 	_u.mutation.SetPublicKey(v)
@@ -224,6 +245,11 @@ func (_u *SiteUpdate) check() error {
 			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Site.domain": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := site.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`ent: validator failed for field "Site.tenant_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PublicKey(); ok {
 		if err := site.PublicKeyValidator(v); err != nil {
 			return &ValidationError{Name: "public_key", err: fmt.Errorf(`ent: validator failed for field "Site.public_key": %w`, err)}
@@ -257,6 +283,12 @@ func (_u *SiteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Domain(); ok {
 		_spec.SetField(site.FieldDomain, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(site.FieldTenantID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(site.FieldTenantID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.PublicKey(); ok {
 		_spec.SetField(site.FieldPublicKey, field.TypeString, value)
@@ -341,6 +373,27 @@ func (_u *SiteUpdateOne) SetNillableDomain(v *string) *SiteUpdateOne {
 	if v != nil {
 		_u.SetDomain(*v)
 	}
+	return _u
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_u *SiteUpdateOne) SetTenantID(v int64) *SiteUpdateOne {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *SiteUpdateOne) SetNillableTenantID(v *int64) *SiteUpdateOne {
+	if v != nil {
+		_u.SetTenantID(*v)
+	}
+	return _u
+}
+
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *SiteUpdateOne) AddTenantID(v int64) *SiteUpdateOne {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -511,6 +564,11 @@ func (_u *SiteUpdateOne) check() error {
 			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Site.domain": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := site.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`ent: validator failed for field "Site.tenant_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.PublicKey(); ok {
 		if err := site.PublicKeyValidator(v); err != nil {
 			return &ValidationError{Name: "public_key", err: fmt.Errorf(`ent: validator failed for field "Site.public_key": %w`, err)}
@@ -561,6 +619,12 @@ func (_u *SiteUpdateOne) sqlSave(ctx context.Context) (_node *Site, err error) {
 	}
 	if value, ok := _u.mutation.Domain(); ok {
 		_spec.SetField(site.FieldDomain, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(site.FieldTenantID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(site.FieldTenantID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.PublicKey(); ok {
 		_spec.SetField(site.FieldPublicKey, field.TypeString, value)

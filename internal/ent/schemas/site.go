@@ -25,6 +25,10 @@ func (Site) Fields() []ent.Field {
 			Unique().
 			NotEmpty(),
 
+		field.Int64("tenant_id").
+			Positive().
+			Default(1),
+
 		field.String("public_key").
 			Unique().
 			NotEmpty(),

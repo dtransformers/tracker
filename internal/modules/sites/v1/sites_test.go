@@ -26,16 +26,18 @@ func TestService_CreateSite(t *testing.T) {
 		{
 			name: "valid site creation",
 			request: v1.CreateRequest{
-				Name:   "Test Site",
-				Domain: "example.com",
+				Name:     "Test Site",
+				Domain:   "example.com",
+				TenantID: 1,
 			},
 			wantErr: false,
 		},
 		{
 			name: "invalid domain",
 			request: v1.CreateRequest{
-				Name:   "Test Site",
-				Domain: "invalid domain with spaces",
+				Name:     "Test Site",
+				Domain:   "invalid domain with spaces",
+				TenantID: 1,
 			},
 			wantErr:     true,
 			expectedErr: v1.ErrInvalidDomain,
@@ -43,8 +45,9 @@ func TestService_CreateSite(t *testing.T) {
 		{
 			name: "empty name",
 			request: v1.CreateRequest{
-				Name:   "",
-				Domain: "example.com",
+				Name:     "",
+				Domain:   "example.com",
+				TenantID: 1,
 			},
 			wantErr:     true,
 			expectedErr: v1.ErrInvalidName,
@@ -52,8 +55,9 @@ func TestService_CreateSite(t *testing.T) {
 		{
 			name: "name too long",
 			request: v1.CreateRequest{
-				Name:   string(make([]byte, 256)),
-				Domain: "example.com",
+				Name:     string(make([]byte, 256)),
+				Domain:   "example.com",
+				TenantID: 1,
 			},
 			wantErr:     true,
 			expectedErr: v1.ErrInvalidName,

@@ -36,6 +36,8 @@ type SiteMutation struct {
 	uuid          *string
 	name          *string
 	domain        *string
+	tenant_id     *int64
+	addtenant_id  *int64
 	public_key    *string
 	secret_key    *string
 	is_active     *bool
@@ -253,6 +255,62 @@ func (m *SiteMutation) OldDomain(ctx context.Context) (v string, err error) {
 // ResetDomain resets all changes to the "domain" field.
 func (m *SiteMutation) ResetDomain() {
 	m.domain = nil
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *SiteMutation) SetTenantID(i int64) {
+	m.tenant_id = &i
+	m.addtenant_id = nil
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *SiteMutation) TenantID() (r int64, exists bool) {
+	v := m.tenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the Site entity.
+// If the Site object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteMutation) OldTenantID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// AddTenantID adds i to the "tenant_id" field.
+func (m *SiteMutation) AddTenantID(i int64) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += i
+	} else {
+		m.addtenant_id = &i
+	}
+}
+
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *SiteMutation) AddedTenantID() (r int64, exists bool) {
+	v := m.addtenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *SiteMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetPublicKey sets the "public_key" field.
@@ -554,7 +612,7 @@ func (m *SiteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SiteMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.uuid != nil {
 		fields = append(fields, site.FieldUUID)
 	}
@@ -563,6 +621,9 @@ func (m *SiteMutation) Fields() []string {
 	}
 	if m.domain != nil {
 		fields = append(fields, site.FieldDomain)
+	}
+	if m.tenant_id != nil {
+		fields = append(fields, site.FieldTenantID)
 	}
 	if m.public_key != nil {
 		fields = append(fields, site.FieldPublicKey)
@@ -599,6 +660,8 @@ func (m *SiteMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case site.FieldDomain:
 		return m.Domain()
+	case site.FieldTenantID:
+		return m.TenantID()
 	case site.FieldPublicKey:
 		return m.PublicKey()
 	case site.FieldSecretKey:
@@ -628,6 +691,8 @@ func (m *SiteMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case site.FieldDomain:
 		return m.OldDomain(ctx)
+	case site.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case site.FieldPublicKey:
 		return m.OldPublicKey(ctx)
 	case site.FieldSecretKey:
@@ -671,6 +736,13 @@ func (m *SiteMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomain(v)
+		return nil
+	case site.FieldTenantID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
 		return nil
 	case site.FieldPublicKey:
 		v, ok := value.(string)
@@ -728,13 +800,21 @@ func (m *SiteMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SiteMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addtenant_id != nil {
+		fields = append(fields, site.FieldTenantID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SiteMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case site.FieldTenantID:
+		return m.AddedTenantID()
+	}
 	return nil, false
 }
 
@@ -743,6 +823,13 @@ func (m *SiteMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *SiteMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case site.FieldTenantID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTenantID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Site numeric field %s", name)
 }
@@ -787,6 +874,9 @@ func (m *SiteMutation) ResetField(name string) error {
 		return nil
 	case site.FieldDomain:
 		m.ResetDomain()
+		return nil
+	case site.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case site.FieldPublicKey:
 		m.ResetPublicKey()

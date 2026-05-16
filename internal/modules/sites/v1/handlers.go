@@ -3,6 +3,7 @@ package v1
 import (
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 
 // Create godoc
 // @Summary Create a new site
-// @Description Create a new site with auto-generated security keys
+// @Description Create a new site with auto-generated security keys and assigned tenant ID
 // @Tags sites
 // @Accept json
 // @Produce json
@@ -64,12 +65,26 @@ func (h *Handler) Create(c *gin.Context) {
 // @Description Get a list of all sites
 // @Tags sites
 // @Produce json
+// @Param tenant_id query int64 false "Filter by Tenant ID"
 // @Security BasicAuth
 // @Success 200 {object} ListResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/sites [get]
 func (h *Handler) List(c *gin.Context) {
-	sites, err := h.service.ListSites(c.Request.Context())
+	var tenantID *int64
+	if tidStr := c.Query("tenant_id"); tidStr != "" {
+		tid, err := strconv.ParseInt(tidStr, 10, 64)
+		if err != nil {
+			h.logger.Warn("invalid tenant_id", "error", err)
+			c.JSON(http.StatusBadRequest, ErrorResponse{
+				Error: "Invalid tenant_id format",
+			})
+			return
+		}
+		tenantID = &tid
+	}
+
+	sites, err := h.service.ListSites(c.Request.Context(), tenantID)
 	if err != nil {
 		h.handleError(c, err)
 		return
