@@ -316,13 +316,13 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 	}
 
 	// Generate new keys
-	pubKey, err := generateKeyFromBaseString(siteUUID, s.pubKeyLength)
+	pubKey, err := generateKeyFromBaseString(siteUUID, "public", s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateKeyFromBaseString(siteUUID, s.secKeyLength)
+	secKey, err := generateKeyFromBaseString(siteUUID, "secret", s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
@@ -463,7 +463,7 @@ func normalizeDomain(domain string) string {
 	return normalized
 }
 
-func generateKeyFromBaseString(baseString string, maxLength int) (string, error) {
+func generateKeyFromBaseString(baseString string, salt string, maxLength int) (string, error) {
 	if baseString == "" {
 		return "", fmt.Errorf("baseString cannot be empty")
 	}
@@ -472,7 +472,7 @@ func generateKeyFromBaseString(baseString string, maxLength int) (string, error)
 		return "", fmt.Errorf("maxLength must be greater than 0")
 	}
 
-	sum := sha256.Sum256([]byte(baseString))
+	sum := sha256.Sum256([]byte(baseString + salt))
 	hexStr := hex.EncodeToString(sum[:])
 
 	if len(hexStr) > maxLength {
