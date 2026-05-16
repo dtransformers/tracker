@@ -12,7 +12,6 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-// Module encapsulates all v1 site dependencies and configuration.
 type Module struct {
 	handler *Handler
 	service *Service
@@ -21,7 +20,6 @@ type Module struct {
 	config  RouterConfig
 }
 
-// NewModule creates a new v1 sites module with all dependencies.
 func NewModule(client *ent.Client, logger *slog.Logger, cfg RouterConfig) *Module {
 	repo := NewRepository(client)
 	svc := NewServiceWithConfig(repo, logger, cfg.ServiceConfig)
@@ -36,41 +34,29 @@ func NewModule(client *ent.Client, logger *slog.Logger, cfg RouterConfig) *Modul
 	}
 }
 
-// Register registers the module routes.
 func (m *Module) Register(router *gin.RouterGroup) {
 	sites := router.Group("/sites")
 
-	// Apply middlewares
 	m.applyMiddlewares(sites)
 
-	// Register routes
 	m.registerRoutes(sites)
 }
 
-// applyMiddlewares applies all necessary middlewares to the router group.
 func (m *Module) applyMiddlewares(group *gin.RouterGroup) {
-	// Metrics middleware
+
 	group.Use(m.metricsMiddleware())
 
-	// CORS middleware (if needed)
-	// group.Use(corsMiddleware())
-
-	// Rate limiting
 	if m.config.EnableRateLimit {
 		group.Use(m.rateLimitMiddleware())
 	}
 
-	// Request validation
 	group.Use(validationMiddleware())
 }
 
-// registerRoutes registers all site endpoints.
 func (m *Module) registerRoutes(group *gin.RouterGroup) {
-	// Collection endpoints
 	group.POST("", m.handler.Create)
 	group.GET("", m.handler.List)
 
-	// Resource endpoints
 	group.GET("/:uuid", m.handler.Get)
 	group.PATCH("/:uuid", m.handler.Update)
 	group.DELETE("/:uuid", m.handler.Delete)

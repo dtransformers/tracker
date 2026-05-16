@@ -13,10 +13,6 @@ type Site struct {
 
 func (Site) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
-			Nillable().
-			Immutable().
-			Default(0),
 
 		field.String("uuid").
 			Unique().

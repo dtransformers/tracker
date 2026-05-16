@@ -2,7 +2,7 @@ package v1
 
 import (
 	"context"
-	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -121,7 +121,6 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 		"domain", req.Domain,
 	)
 
-	// Validate input
 	if err := s.validateCreateRequest(req); err != nil {
 		s.logger.WarnContext(ctx, "validation failed",
 			"error", err,
@@ -130,19 +129,17 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 		return nil, err
 	}
 
-	// Check for duplicate domain
 	if err := s.checkDomainUniqueness(ctx, req.Domain, ""); err != nil {
 		return nil, err
 	}
 
-	// Generate security keys
-	pubKey, err := generateRandomKey(s.pubKeyLength)
+	pubKey, err := generateKeyFromBaseString(req.Domain, s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateRandomKey(s.secKeyLength)
+	secKey, err := generateKeyFromBaseString(req.Domain, s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
@@ -319,13 +316,13 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 	}
 
 	// Generate new keys
-	pubKey, err := generateRandomKey(s.pubKeyLength)
+	pubKey, err := generateKeyFromBaseString(siteUUID, s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateRandomKey(s.secKeyLength)
+	secKey, err := generateKeyFromBaseString(siteUUID, s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
@@ -466,21 +463,25 @@ func normalizeDomain(domain string) string {
 	return normalized
 }
 
-// generateRandomKey generates a cryptographically secure random key.
-func generateRandomKey(length int) (string, error) {
-	if length <= 0 {
-		return "", fmt.Errorf("invalid key length: %d", length)
+func generateKeyFromBaseString(baseString string, maxLength int) (string, error) {
+	if baseString == "" {
+		return "", fmt.Errorf("baseString cannot be empty")
 	}
 
-	b := make([]byte, length)
-	if _, err := rand.Read(b); err != nil {
-		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+	if maxLength <= 0 {
+		return "", fmt.Errorf("maxLength must be greater than 0")
 	}
 
-	return hex.EncodeToString(b), nil
+	sum := sha256.Sum256([]byte(baseString))
+	hexStr := hex.EncodeToString(sum[:])
+
+	if len(hexStr) > maxLength {
+		hexStr = hexStr[:maxLength]
+	}
+
+	return hexStr, nil
 }
 
-// toResponse converts an ent.Site to a Response DTO.
 func toResponse(site *ent.Site) *Response {
 	if site == nil {
 		return nil
