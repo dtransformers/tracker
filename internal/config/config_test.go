@@ -17,7 +17,7 @@ func (m MapEnv) LookupEnv(key string) (string, bool) {
 func baseValidEnv() MapEnv {
 	return MapEnv{
 		"APP_HOST":    "0.0.0.0",
-		"APP_PORT":    "8080",
+		"APP_PORT":    "3000",
 		"RUN_MODE":    "development",
 		"DB_HOST":     "localhost",
 		"DB_PORT":     "5432",
@@ -45,8 +45,8 @@ func TestLoadFrom_OK(t *testing.T) {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
-	if cfg.App.Port != 8080 {
-		t.Fatalf("expected app port 8080, got %d", cfg.App.Port)
+	if cfg.App.Port != 3000 {
+		t.Fatalf("expected app port 3000, got %d", cfg.App.Port)
 	}
 	if cfg.DB.Host != "localhost" {
 		t.Fatalf("expected db host localhost, got %q", cfg.DB.Host)
@@ -165,12 +165,12 @@ func FuzzLoadFromEnv(f *testing.F) {
 	)
 
 	f.Add("0.0.0.0", "not-a-number", "invalid", "localhost", "5432", "app", "secret", "appdb",
-		"localhost", "6379", "0", "localhost", "5672", "guest", "guest", "maybe")
-	f.Add("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-	f.Add("   ", " 8080 ", "development", " \t", "65536", "a", "b", "c",
-		"127.0.0.1", "-1", "-99", "host", "0", "u", "p", "true")
+		"localhost", "6379", "0", "false")
+	f.Add("", "", "", "", "", "", "", "", "", "", "", "")
+	f.Add("   ", " 3000 ", "development", " \t", "65536", "a", "b", "c",
+		"127.0.0.1", "-1", "-99", "true")
 	f.Add("\x00\xff", "2147483648", "prod", "db", "999999999", "user", "pass", "db",
-		"redis", "999999999", "999999999", "999999999", "u", "p", "on")
+		"redis", "999999999", "999999999", "on")
 
 	f.Fuzz(func(t *testing.T,
 		appHost, appPort, runMode,

@@ -286,9 +286,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "domain": {
+                    "description": "Domain of the site (must be unique)",
                     "type": "string"
                 },
                 "name": {
+                    "description": "Name of the site",
                     "type": "string"
                 }
             }
@@ -297,12 +299,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "domain": {
+                    "description": "Optional new domain for the site",
                     "type": "string"
                 },
                 "is_active": {
+                    "description": "Optional active status",
                     "type": "boolean"
                 },
                 "name": {
+                    "description": "Optional new name for the site",
                     "type": "string"
                 }
             }
@@ -313,7 +318,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:3000",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Tracking API",

@@ -10,7 +10,7 @@
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
+// @host localhost:3000
 // @BasePath /
 package main
 
@@ -33,7 +33,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "tracking/docs"
+	"tracking/docs"
 )
 
 type application struct {
@@ -108,7 +108,11 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	sites.RegisterV1(router, app.db.Client)
 
 	// Swagger documentation
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", app.cfg.App.Host, app.cfg.App.Port)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 }
 
 func (app *application) setupVisualizer(router *gin.Engine) {

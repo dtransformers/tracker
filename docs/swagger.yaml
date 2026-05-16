@@ -36,23 +36,28 @@ definitions:
   v1.CreateRequest:
     properties:
       domain:
+        description: Domain of the site (must be unique)
         type: string
       name:
+        description: Name of the site
         type: string
     required:
-    - domain
-    - name
+      - domain
+      - name
     type: object
   v1.UpdateRequest:
     properties:
       domain:
+        description: Optional new domain for the site
         type: string
       is_active:
+        description: Optional active status
         type: boolean
       name:
+        description: Optional new name for the site
         type: string
     type: object
-host: localhost:8080
+host: localhost:3000
 info:
   contact:
     email: support@swagger.io
@@ -70,13 +75,13 @@ paths:
     get:
       description: Get a list of all active sites
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ent.Site'
+              $ref: "#/definitions/ent.Site"
             type: array
         "500":
           description: Internal Server Error
@@ -86,25 +91,25 @@ paths:
             type: object
       summary: List all sites
       tags:
-      - sites
+        - sites
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create a new site with name and domain
       parameters:
-      - description: Site creation request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1.CreateRequest'
+        - description: Site creation request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/v1.CreateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/ent.Site'
+            $ref: "#/definitions/ent.Site"
         "400":
           description: Bad Request
           schema:
@@ -119,16 +124,16 @@ paths:
             type: object
       summary: Create a new site
       tags:
-      - sites
+        - sites
   /api/v1/sites/{uuid}:
     delete:
       description: Soft-delete a site by its UUID
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
       responses:
         "204":
           description: No Content
@@ -140,22 +145,22 @@ paths:
             type: object
       summary: Delete a site
       tags:
-      - sites
+        - sites
     get:
       description: Get a site by its UUID
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ent.Site'
+            $ref: "#/definitions/ent.Site"
         "404":
           description: Not Found
           schema:
@@ -164,30 +169,30 @@ paths:
             type: object
       summary: Get a site
       tags:
-      - sites
+        - sites
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update site name, domain, or status
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
-      - description: Site update request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1.UpdateRequest'
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
+        - description: Site update request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/v1.UpdateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ent.Site'
+            $ref: "#/definitions/ent.Site"
         "400":
           description: Bad Request
           schema:
@@ -202,5 +207,5 @@ paths:
             type: object
       summary: Update a site
       tags:
-      - sites
+        - sites
 swagger: "2.0"
