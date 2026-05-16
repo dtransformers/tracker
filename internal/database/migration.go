@@ -1,20 +1,37 @@
 package database
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"tracking/internal/ent"
 
-	"gorm.io/gorm"
+	"entgo.io/ent/dialect/sql/schema"
 )
 
-func Migrate(db *gorm.DB) error {
+func RunMigrations(
+	ctx context.Context,
+	client *ent.Client,
+) error {
 
-	// get all files in ./models folder
+	log.Println("Starting database migrations...")
 
-	err := db.AutoMigrate()
+	err := client.Schema.Create(
+		ctx,
+
+		schema.WithForeignKeys(true),
+
+		schema.WithGlobalUniqueID(false),
+	)
 
 	if err != nil {
-		return fmt.Errorf("migrate database: %w", err)
+		return fmt.Errorf(
+			"failed to create schema: %w",
+			err,
+		)
 	}
+
+	log.Println("Database migrations completed")
 
 	return nil
 }

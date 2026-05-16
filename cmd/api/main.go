@@ -146,9 +146,5 @@ func initDatabase(cfg config.Config) (*database.Database, error) {
 		return nil, err
 	}
 
-	if err := database.Migrate(db.Gorm); err != nil {
-		return nil, fmt.Errorf("migration failed: %w", err)
-	}
-
 	return db, nil
 }
