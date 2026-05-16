@@ -50,6 +50,7 @@ func (m *Module) applyMiddlewares(group *gin.RouterGroup) {
 		group.Use(m.rateLimitMiddleware())
 	}
 
+	group.Use(m.authMiddleware())
 	group.Use(validationMiddleware())
 }
 
@@ -108,6 +109,13 @@ func (m *Module) metricsMiddleware() gin.HandlerFunc {
 		// You can also emit metrics to your monitoring system here
 		// metrics.RecordRequest(path, c.Request.Method, status, duration)
 	}
+}
+
+// authMiddleware provides basic authentication using configured root credentials.
+func (m *Module) authMiddleware() gin.HandlerFunc {
+	return gin.BasicAuth(gin.Accounts{
+		m.config.RootUsername: m.config.RootPassword,
+	})
 }
 
 // validationMiddleware validates common request parameters.
@@ -169,5 +177,19 @@ func Register(router *gin.RouterGroup, client *ent.Client) {
 // RegisterWithLogger is a convenience function to register the sites module with a logger and default config.
 func RegisterWithLogger(router *gin.RouterGroup, client *ent.Client, logger *slog.Logger) {
 	module := NewModule(client, logger, DefaultRouterConfig())
+	module.Register(router)
+}
+
+// RegisterWithCredentials is a convenience function to register the sites module with credentials.
+func RegisterWithCredentials(router *gin.RouterGroup, client *ent.Client, rootUser, rootPass string) {
+	RegisterWithLoggerAndCredentials(router, client, slog.Default(), rootUser, rootPass)
+}
+
+// RegisterWithLoggerAndCredentials is a convenience function to register the sites module with a logger and credentials.
+func RegisterWithLoggerAndCredentials(router *gin.RouterGroup, client *ent.Client, logger *slog.Logger, rootUser, rootPass string) {
+	cfg := DefaultRouterConfig()
+	cfg.RootUsername = rootUser
+	cfg.RootPassword = rootPass
+	module := NewModule(client, logger, cfg)
 	module.Register(router)
 }

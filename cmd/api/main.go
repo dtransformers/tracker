@@ -12,6 +12,7 @@
 
 // @host localhost:3000
 // @BasePath /
+// @securityDefinitions.basic BasicAuth
 package main
 
 import (
@@ -115,7 +116,7 @@ func (app *application) applyMiddlewares(router *gin.Engine) {
 func (app *application) registerRoutes(router *gin.Engine) {
 	app.registerHealthRoutes(router)
 
-	sites.RegisterV1(router, app.db.Client)
+	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
 	app.registerSwaggerRoutes(router)
 }
 

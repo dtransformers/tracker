@@ -12,6 +12,8 @@ type RouterConfig struct {
 	EnableMetrics     bool
 	EnableCORS        bool
 	AllowedOrigins    []string
+	RootUsername      string
+	RootPassword      string
 	ServiceConfig     ServiceConfig
 }
 

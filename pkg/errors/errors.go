@@ -13,6 +13,7 @@ type HTTPError interface {
 }
 
 type BaseError struct {
+	Version string
 	Code    int
 	Message string
 	Cause   error

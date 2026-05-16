@@ -30,6 +30,8 @@ func baseValidEnv() MapEnv {
 		"REDIS_DATABASE": "0",
 
 		"TLS_ENABLED": "false",
+		"ROOT_USERNAME": "admin",
+		"ROOT_PASSWORD": "password123",
 	}
 }
 
@@ -162,21 +164,23 @@ func FuzzLoadFromEnv(f *testing.F) {
 		seed["REDIS_PORT"],
 		seed["REDIS_DATABASE"],
 		seed["TLS_ENABLED"],
+		seed["ROOT_USERNAME"],
+		seed["ROOT_PASSWORD"],
 	)
 
 	f.Add("0.0.0.0", "not-a-number", "invalid", "localhost", "5432", "app", "secret", "appdb",
-		"localhost", "6379", "0", "false")
-	f.Add("", "", "", "", "", "", "", "", "", "", "", "")
+		"localhost", "6379", "0", "false", "admin", "pass")
+	f.Add("", "", "", "", "", "", "", "", "", "", "", "", "", "")
 	f.Add("   ", " 3000 ", "development", " \t", "65536", "a", "b", "c",
-		"127.0.0.1", "-1", "-99", "true")
+		"127.0.0.1", "-1", "-99", "true", "u", "p")
 	f.Add("\x00\xff", "2147483648", "prod", "db", "999999999", "user", "pass", "db",
-		"redis", "999999999", "999999999", "on")
+		"redis", "999999999", "999999999", "on", "root", "toor")
 
 	f.Fuzz(func(t *testing.T,
 		appHost, appPort, runMode,
 		dbHost, dbPort, dbUser, dbPass, dbName,
 		redisHost, redisPort, redisDB,
-		tlsEnabled string,
+		tlsEnabled, rootUser, rootPass string,
 	) {
 		// Keep fuzz inputs bounded (prevents huge allocations / slowdowns)
 		appHost = clamp(appHost, 200)
@@ -208,6 +212,8 @@ func FuzzLoadFromEnv(f *testing.F) {
 		env["REDIS_DATABASE"] = redisDB
 
 		env["TLS_ENABLED"] = tlsEnabled
+		env["ROOT_USERNAME"] = clamp(rootUser, 200)
+		env["ROOT_PASSWORD"] = clamp(rootPass, 200)
 
 		cfg, err := LoadFrom(env, LoadOptions{
 			DotEnvPath:         "",

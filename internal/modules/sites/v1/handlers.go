@@ -32,6 +32,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Accept json
 // @Produce json
 // @Param site body CreateRequest true "Site creation request"
+// @Security BasicAuth
 // @Success 201 {object} Response
 // @Failure 400 {object} ErrorResponse
 // @Failure 409 {object} ErrorResponse "Domain already exists"
@@ -63,6 +64,7 @@ func (h *Handler) Create(c *gin.Context) {
 // @Description Get a list of all sites
 // @Tags sites
 // @Produce json
+// @Security BasicAuth
 // @Success 200 {object} ListResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/sites [get]
@@ -82,6 +84,7 @@ func (h *Handler) List(c *gin.Context) {
 // @Tags sites
 // @Produce json
 // @Param uuid path string true "Site UUID"
+// @Security BasicAuth
 // @Success 200 {object} Response
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
@@ -107,6 +110,7 @@ func (h *Handler) Get(c *gin.Context) {
 // @Produce json
 // @Param uuid path string true "Site UUID"
 // @Param site body UpdateRequest true "Site update request"
+// @Security BasicAuth
 // @Success 200 {object} Response
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
@@ -140,6 +144,7 @@ func (h *Handler) Update(c *gin.Context) {
 // @Description Permanently delete a site
 // @Tags sites
 // @Param uuid path string true "Site UUID"
+// @Security BasicAuth
 // @Success 204 "No Content"
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
@@ -162,6 +167,7 @@ func (h *Handler) Delete(c *gin.Context) {
 // @Tags sites
 // @Produce json
 // @Param uuid path string true "Site UUID"
+// @Security BasicAuth
 // @Success 200 {object} Response
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse

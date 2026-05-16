@@ -10,16 +10,15 @@ import (
 )
 
 // RegisterV1 registers v1 site routes.
-// This is the simple version for backward compatibility.
-func RegisterV1(router *gin.Engine, client *ent.Client) {
+func RegisterV1(router *gin.Engine, client *ent.Client, rootUser, rootPass string) {
 	v1Group := router.Group("/api/v1")
-	v1.Register(v1Group, client)
+	v1.RegisterWithCredentials(v1Group, client, rootUser, rootPass)
 }
 
-// RegisterV1WithLogger registers v1 site routes with a custom logger.
-func RegisterV1WithLogger(router *gin.Engine, client *ent.Client, logger *slog.Logger) {
+// RegisterV1WithLogger registers v1 site routes with a custom logger and credentials.
+func RegisterV1WithLogger(router *gin.Engine, client *ent.Client, logger *slog.Logger, rootUser, rootPass string) {
 	v1Group := router.Group("/api/v1")
-	v1.RegisterWithLogger(v1Group, client, logger)
+	v1.RegisterWithLoggerAndCredentials(v1Group, client, logger, rootUser, rootPass)
 }
 
 func RegisterV1WithConfig(

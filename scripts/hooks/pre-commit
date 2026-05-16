@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+echo "[PRE-COMMIT] Running backend enforcement rules..."
+
+./scripts/hooks/validate_scope.sh
+./scripts/hooks/validate_structure.sh
+./scripts/hooks/validate_history.sh
+./scripts/hooks/validate_docs.sh
+./scripts/hooks/validate_tests.sh
+
+echo "[PRE-COMMIT] All checks passed."

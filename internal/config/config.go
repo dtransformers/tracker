@@ -38,6 +38,7 @@ type Config struct {
 	DB    DBConfig
 	Redis RedisConfig
 	TLS   TLSConfig
+	Auth  AuthConfig
 }
 type RunMode string
 
@@ -80,6 +81,11 @@ type RedisConfig struct {
 	Database int
 }
 
+type AuthConfig struct {
+	RootUsername string
+	RootPassword string
+}
+
 func Load(opts LoadOptions) (Config, error) {
 	return LoadFrom(OSEnv{}, opts)
 }
@@ -93,6 +99,7 @@ func LoadFrom(env EnvProvider, opts LoadOptions) (Config, error) {
 		DB:    loadDB(env, opts),
 		Redis: loadRedis(env, opts),
 		TLS:   loadTLS(env, opts),
+		Auth:  loadAuth(env, opts),
 	}
 
 	if err := Validate(cfg); err != nil {
@@ -135,6 +142,13 @@ func Validate(cfg Config) error {
 	}
 	if cfg.Redis.Database < 0 {
 		errs = append(errs, fmt.Errorf("REDIS_DATABASE must be >= 0, got: %d", cfg.Redis.Database))
+	}
+
+	if strings.TrimSpace(cfg.Auth.RootUsername) == "" {
+		errs = append(errs, errors.New("ROOT_USERNAME is required"))
+	}
+	if strings.TrimSpace(cfg.Auth.RootPassword) == "" {
+		errs = append(errs, errors.New("ROOT_PASSWORD is required"))
 	}
 
 	return joinErrors(errs)
@@ -183,6 +197,13 @@ func loadTLS(env EnvProvider, opts LoadOptions) TLSConfig {
 		Enabled:  boolOrDefault(env, "TLS_ENABLED", false),
 		CertFile: stringOrDefault(env, "TLS_CERT_FILE", "", opts.AllowEmptyOptional),
 		KeyFile:  stringOrDefault(env, "TLS_KEY_FILE", "", opts.AllowEmptyOptional),
+	}
+}
+
+func loadAuth(env EnvProvider, opts LoadOptions) AuthConfig {
+	return AuthConfig{
+		RootUsername: mustString(env, "ROOT_USERNAME"),
+		RootPassword: mustString(env, "ROOT_PASSWORD"),
 	}
 }
 

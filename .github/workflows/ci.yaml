@@ -1,0 +1,59 @@
+name: Backend Enforcement CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  enforce-backend-rules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go (or Node/Python depending on stack)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      # -------------------------
+      # STRUCTURE VALIDATION
+      # -------------------------
+      - name: Validate structure
+        run: ./scripts/hooks/validate_structure.sh
+
+      # -------------------------
+      # SCOPE VALIDATION
+      # -------------------------
+      - name: Validate scope (README alignment)
+        run: ./scripts/hooks/validate_scope.sh
+
+      # -------------------------
+      # HISTORY TRACKING
+      # -------------------------
+      - name: Validate HISTORY.md updates
+        run: ./scripts/hooks/validate_history.sh
+
+      # -------------------------
+      # DOCUMENTATION SYNC
+      # -------------------------
+      - name: Validate documentation
+        run: ./scripts/hooks/validate_docs.sh
+
+      # -------------------------
+      # TEST SUITE
+      # -------------------------
+      - name: Run tests
+        run: go test ./...
+
+      # -------------------------
+      # OPTIONAL: LINT
+      # -------------------------
+      - name: Lint
+        run: go vet ./...

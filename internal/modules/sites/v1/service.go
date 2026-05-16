@@ -17,8 +17,8 @@ import (
 
 // Configuration constants for key generation
 const (
-	PublicKeyBytes  = 16 // Generates 32 hex characters
-	SecretKeyBytes  = 32 // Generates 64 hex characters
+	PublicKeyBytes  = 32 // Generates 64 hex characters
+	SecretKeyBytes  = 64 // Generates 128 hex characters
 	DefaultTimeout  = 5 * time.Second
 	MaxNameLength   = 255
 	MinNameLength   = 1
@@ -133,19 +133,18 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 		return nil, err
 	}
 
-	pubKey, err := generateKeyFromBaseString(req.Domain, s.pubKeyLength)
+	pubKey, err := generateKeyFromBaseString(req.Domain, "public", s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateKeyFromBaseString(req.Domain, s.secKeyLength)
+	secKey, err := generateKeyFromBaseString(req.Domain, "secret", s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
 	}
 
-	// Create site
 	site, err := s.repo.Create(ctx, CreateSiteInput{
 		UUID:      uuid.New().String(),
 		Name:      strings.TrimSpace(req.Name),
