@@ -316,7 +316,7 @@ paths:
       summary: Regenerate site security keys
       tags:
       - sites
-  /api/v1/visitors/track:
+  /api/v1/visitors:
     post:
       consumes:
       - application/json

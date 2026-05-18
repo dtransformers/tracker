@@ -12,9 +12,12 @@ import (
 	"tracking/internal/ent/migrate"
 
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
+	"tracking/internal/ent/visitorconsent"
+	"tracking/internal/ent/visitorevent"
 	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
@@ -29,12 +32,18 @@ type Client struct {
 	Schema *migrate.Schema
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// PageView is the client for interacting with the PageView builders.
+	PageView *PageViewClient
 	// Site is the client for interacting with the Site builders.
 	Site *SiteClient
 	// SiteVisitor is the client for interacting with the SiteVisitor builders.
 	SiteVisitor *SiteVisitorClient
 	// Visitor is the client for interacting with the Visitor builders.
 	Visitor *VisitorClient
+	// VisitorConsent is the client for interacting with the VisitorConsent builders.
+	VisitorConsent *VisitorConsentClient
+	// VisitorEvent is the client for interacting with the VisitorEvent builders.
+	VisitorEvent *VisitorEventClient
 	// VisitorSession is the client for interacting with the VisitorSession builders.
 	VisitorSession *VisitorSessionClient
 }
@@ -49,9 +58,12 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Device = NewDeviceClient(c.config)
+	c.PageView = NewPageViewClient(c.config)
 	c.Site = NewSiteClient(c.config)
 	c.SiteVisitor = NewSiteVisitorClient(c.config)
 	c.Visitor = NewVisitorClient(c.config)
+	c.VisitorConsent = NewVisitorConsentClient(c.config)
+	c.VisitorEvent = NewVisitorEventClient(c.config)
 	c.VisitorSession = NewVisitorSessionClient(c.config)
 }
 
@@ -146,9 +158,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:            ctx,
 		config:         cfg,
 		Device:         NewDeviceClient(cfg),
+		PageView:       NewPageViewClient(cfg),
 		Site:           NewSiteClient(cfg),
 		SiteVisitor:    NewSiteVisitorClient(cfg),
 		Visitor:        NewVisitorClient(cfg),
+		VisitorConsent: NewVisitorConsentClient(cfg),
+		VisitorEvent:   NewVisitorEventClient(cfg),
 		VisitorSession: NewVisitorSessionClient(cfg),
 	}, nil
 }
@@ -170,9 +185,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:            ctx,
 		config:         cfg,
 		Device:         NewDeviceClient(cfg),
+		PageView:       NewPageViewClient(cfg),
 		Site:           NewSiteClient(cfg),
 		SiteVisitor:    NewSiteVisitorClient(cfg),
 		Visitor:        NewVisitorClient(cfg),
+		VisitorConsent: NewVisitorConsentClient(cfg),
+		VisitorEvent:   NewVisitorEventClient(cfg),
 		VisitorSession: NewVisitorSessionClient(cfg),
 	}, nil
 }
@@ -202,21 +220,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Device.Use(hooks...)
-	c.Site.Use(hooks...)
-	c.SiteVisitor.Use(hooks...)
-	c.Visitor.Use(hooks...)
-	c.VisitorSession.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Device, c.PageView, c.Site, c.SiteVisitor, c.Visitor, c.VisitorConsent,
+		c.VisitorEvent, c.VisitorSession,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Device.Intercept(interceptors...)
-	c.Site.Intercept(interceptors...)
-	c.SiteVisitor.Intercept(interceptors...)
-	c.Visitor.Intercept(interceptors...)
-	c.VisitorSession.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Device, c.PageView, c.Site, c.SiteVisitor, c.Visitor, c.VisitorConsent,
+		c.VisitorEvent, c.VisitorSession,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -224,12 +244,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *DeviceMutation:
 		return c.Device.mutate(ctx, m)
+	case *PageViewMutation:
+		return c.PageView.mutate(ctx, m)
 	case *SiteMutation:
 		return c.Site.mutate(ctx, m)
 	case *SiteVisitorMutation:
 		return c.SiteVisitor.mutate(ctx, m)
 	case *VisitorMutation:
 		return c.Visitor.mutate(ctx, m)
+	case *VisitorConsentMutation:
+		return c.VisitorConsent.mutate(ctx, m)
+	case *VisitorEventMutation:
+		return c.VisitorEvent.mutate(ctx, m)
 	case *VisitorSessionMutation:
 		return c.VisitorSession.mutate(ctx, m)
 	default:
@@ -367,6 +393,139 @@ func (c *DeviceClient) mutate(ctx context.Context, m *DeviceMutation) (Value, er
 		return (&DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Device mutation op: %q", m.Op())
+	}
+}
+
+// PageViewClient is a client for the PageView schema.
+type PageViewClient struct {
+	config
+}
+
+// NewPageViewClient returns a client for the PageView from the given config.
+func NewPageViewClient(c config) *PageViewClient {
+	return &PageViewClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pageview.Hooks(f(g(h())))`.
+func (c *PageViewClient) Use(hooks ...Hook) {
+	c.hooks.PageView = append(c.hooks.PageView, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pageview.Intercept(f(g(h())))`.
+func (c *PageViewClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PageView = append(c.inters.PageView, interceptors...)
+}
+
+// Create returns a builder for creating a PageView entity.
+func (c *PageViewClient) Create() *PageViewCreate {
+	mutation := newPageViewMutation(c.config, OpCreate)
+	return &PageViewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PageView entities.
+func (c *PageViewClient) CreateBulk(builders ...*PageViewCreate) *PageViewCreateBulk {
+	return &PageViewCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PageViewClient) MapCreateBulk(slice any, setFunc func(*PageViewCreate, int)) *PageViewCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PageViewCreateBulk{err: fmt.Errorf("calling to PageViewClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PageViewCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PageViewCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PageView.
+func (c *PageViewClient) Update() *PageViewUpdate {
+	mutation := newPageViewMutation(c.config, OpUpdate)
+	return &PageViewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PageViewClient) UpdateOne(_m *PageView) *PageViewUpdateOne {
+	mutation := newPageViewMutation(c.config, OpUpdateOne, withPageView(_m))
+	return &PageViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PageViewClient) UpdateOneID(id int64) *PageViewUpdateOne {
+	mutation := newPageViewMutation(c.config, OpUpdateOne, withPageViewID(id))
+	return &PageViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PageView.
+func (c *PageViewClient) Delete() *PageViewDelete {
+	mutation := newPageViewMutation(c.config, OpDelete)
+	return &PageViewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PageViewClient) DeleteOne(_m *PageView) *PageViewDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PageViewClient) DeleteOneID(id int64) *PageViewDeleteOne {
+	builder := c.Delete().Where(pageview.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PageViewDeleteOne{builder}
+}
+
+// Query returns a query builder for PageView.
+func (c *PageViewClient) Query() *PageViewQuery {
+	return &PageViewQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePageView},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PageView entity by its id.
+func (c *PageViewClient) Get(ctx context.Context, id int64) (*PageView, error) {
+	return c.Query().Where(pageview.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PageViewClient) GetX(ctx context.Context, id int64) *PageView {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PageViewClient) Hooks() []Hook {
+	return c.hooks.PageView
+}
+
+// Interceptors returns the client interceptors.
+func (c *PageViewClient) Interceptors() []Interceptor {
+	return c.inters.PageView
+}
+
+func (c *PageViewClient) mutate(ctx context.Context, m *PageViewMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PageViewCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PageViewUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PageViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PageViewDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PageView mutation op: %q", m.Op())
 	}
 }
 
@@ -769,6 +928,272 @@ func (c *VisitorClient) mutate(ctx context.Context, m *VisitorMutation) (Value, 
 	}
 }
 
+// VisitorConsentClient is a client for the VisitorConsent schema.
+type VisitorConsentClient struct {
+	config
+}
+
+// NewVisitorConsentClient returns a client for the VisitorConsent from the given config.
+func NewVisitorConsentClient(c config) *VisitorConsentClient {
+	return &VisitorConsentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `visitorconsent.Hooks(f(g(h())))`.
+func (c *VisitorConsentClient) Use(hooks ...Hook) {
+	c.hooks.VisitorConsent = append(c.hooks.VisitorConsent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `visitorconsent.Intercept(f(g(h())))`.
+func (c *VisitorConsentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VisitorConsent = append(c.inters.VisitorConsent, interceptors...)
+}
+
+// Create returns a builder for creating a VisitorConsent entity.
+func (c *VisitorConsentClient) Create() *VisitorConsentCreate {
+	mutation := newVisitorConsentMutation(c.config, OpCreate)
+	return &VisitorConsentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VisitorConsent entities.
+func (c *VisitorConsentClient) CreateBulk(builders ...*VisitorConsentCreate) *VisitorConsentCreateBulk {
+	return &VisitorConsentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VisitorConsentClient) MapCreateBulk(slice any, setFunc func(*VisitorConsentCreate, int)) *VisitorConsentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VisitorConsentCreateBulk{err: fmt.Errorf("calling to VisitorConsentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VisitorConsentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VisitorConsentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VisitorConsent.
+func (c *VisitorConsentClient) Update() *VisitorConsentUpdate {
+	mutation := newVisitorConsentMutation(c.config, OpUpdate)
+	return &VisitorConsentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VisitorConsentClient) UpdateOne(_m *VisitorConsent) *VisitorConsentUpdateOne {
+	mutation := newVisitorConsentMutation(c.config, OpUpdateOne, withVisitorConsent(_m))
+	return &VisitorConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VisitorConsentClient) UpdateOneID(id int64) *VisitorConsentUpdateOne {
+	mutation := newVisitorConsentMutation(c.config, OpUpdateOne, withVisitorConsentID(id))
+	return &VisitorConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VisitorConsent.
+func (c *VisitorConsentClient) Delete() *VisitorConsentDelete {
+	mutation := newVisitorConsentMutation(c.config, OpDelete)
+	return &VisitorConsentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VisitorConsentClient) DeleteOne(_m *VisitorConsent) *VisitorConsentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VisitorConsentClient) DeleteOneID(id int64) *VisitorConsentDeleteOne {
+	builder := c.Delete().Where(visitorconsent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VisitorConsentDeleteOne{builder}
+}
+
+// Query returns a query builder for VisitorConsent.
+func (c *VisitorConsentClient) Query() *VisitorConsentQuery {
+	return &VisitorConsentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVisitorConsent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VisitorConsent entity by its id.
+func (c *VisitorConsentClient) Get(ctx context.Context, id int64) (*VisitorConsent, error) {
+	return c.Query().Where(visitorconsent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VisitorConsentClient) GetX(ctx context.Context, id int64) *VisitorConsent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VisitorConsentClient) Hooks() []Hook {
+	return c.hooks.VisitorConsent
+}
+
+// Interceptors returns the client interceptors.
+func (c *VisitorConsentClient) Interceptors() []Interceptor {
+	return c.inters.VisitorConsent
+}
+
+func (c *VisitorConsentClient) mutate(ctx context.Context, m *VisitorConsentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VisitorConsentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VisitorConsentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VisitorConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VisitorConsentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VisitorConsent mutation op: %q", m.Op())
+	}
+}
+
+// VisitorEventClient is a client for the VisitorEvent schema.
+type VisitorEventClient struct {
+	config
+}
+
+// NewVisitorEventClient returns a client for the VisitorEvent from the given config.
+func NewVisitorEventClient(c config) *VisitorEventClient {
+	return &VisitorEventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `visitorevent.Hooks(f(g(h())))`.
+func (c *VisitorEventClient) Use(hooks ...Hook) {
+	c.hooks.VisitorEvent = append(c.hooks.VisitorEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `visitorevent.Intercept(f(g(h())))`.
+func (c *VisitorEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VisitorEvent = append(c.inters.VisitorEvent, interceptors...)
+}
+
+// Create returns a builder for creating a VisitorEvent entity.
+func (c *VisitorEventClient) Create() *VisitorEventCreate {
+	mutation := newVisitorEventMutation(c.config, OpCreate)
+	return &VisitorEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VisitorEvent entities.
+func (c *VisitorEventClient) CreateBulk(builders ...*VisitorEventCreate) *VisitorEventCreateBulk {
+	return &VisitorEventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VisitorEventClient) MapCreateBulk(slice any, setFunc func(*VisitorEventCreate, int)) *VisitorEventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VisitorEventCreateBulk{err: fmt.Errorf("calling to VisitorEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VisitorEventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VisitorEventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VisitorEvent.
+func (c *VisitorEventClient) Update() *VisitorEventUpdate {
+	mutation := newVisitorEventMutation(c.config, OpUpdate)
+	return &VisitorEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VisitorEventClient) UpdateOne(_m *VisitorEvent) *VisitorEventUpdateOne {
+	mutation := newVisitorEventMutation(c.config, OpUpdateOne, withVisitorEvent(_m))
+	return &VisitorEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VisitorEventClient) UpdateOneID(id int64) *VisitorEventUpdateOne {
+	mutation := newVisitorEventMutation(c.config, OpUpdateOne, withVisitorEventID(id))
+	return &VisitorEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VisitorEvent.
+func (c *VisitorEventClient) Delete() *VisitorEventDelete {
+	mutation := newVisitorEventMutation(c.config, OpDelete)
+	return &VisitorEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VisitorEventClient) DeleteOne(_m *VisitorEvent) *VisitorEventDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VisitorEventClient) DeleteOneID(id int64) *VisitorEventDeleteOne {
+	builder := c.Delete().Where(visitorevent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VisitorEventDeleteOne{builder}
+}
+
+// Query returns a query builder for VisitorEvent.
+func (c *VisitorEventClient) Query() *VisitorEventQuery {
+	return &VisitorEventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVisitorEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VisitorEvent entity by its id.
+func (c *VisitorEventClient) Get(ctx context.Context, id int64) (*VisitorEvent, error) {
+	return c.Query().Where(visitorevent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VisitorEventClient) GetX(ctx context.Context, id int64) *VisitorEvent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VisitorEventClient) Hooks() []Hook {
+	return c.hooks.VisitorEvent
+}
+
+// Interceptors returns the client interceptors.
+func (c *VisitorEventClient) Interceptors() []Interceptor {
+	return c.inters.VisitorEvent
+}
+
+func (c *VisitorEventClient) mutate(ctx context.Context, m *VisitorEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VisitorEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VisitorEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VisitorEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VisitorEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VisitorEvent mutation op: %q", m.Op())
+	}
+}
+
 // VisitorSessionClient is a client for the VisitorSession schema.
 type VisitorSessionClient struct {
 	config
@@ -905,9 +1330,11 @@ func (c *VisitorSessionClient) mutate(ctx context.Context, m *VisitorSessionMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Device, Site, SiteVisitor, Visitor, VisitorSession []ent.Hook
+		Device, PageView, Site, SiteVisitor, Visitor, VisitorConsent, VisitorEvent,
+		VisitorSession []ent.Hook
 	}
 	inters struct {
-		Device, Site, SiteVisitor, Visitor, VisitorSession []ent.Interceptor
+		Device, PageView, Site, SiteVisitor, Visitor, VisitorConsent, VisitorEvent,
+		VisitorSession []ent.Interceptor
 	}
 )

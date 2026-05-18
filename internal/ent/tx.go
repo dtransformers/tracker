@@ -14,12 +14,18 @@ type Tx struct {
 	config
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// PageView is the client for interacting with the PageView builders.
+	PageView *PageViewClient
 	// Site is the client for interacting with the Site builders.
 	Site *SiteClient
 	// SiteVisitor is the client for interacting with the SiteVisitor builders.
 	SiteVisitor *SiteVisitorClient
 	// Visitor is the client for interacting with the Visitor builders.
 	Visitor *VisitorClient
+	// VisitorConsent is the client for interacting with the VisitorConsent builders.
+	VisitorConsent *VisitorConsentClient
+	// VisitorEvent is the client for interacting with the VisitorEvent builders.
+	VisitorEvent *VisitorEventClient
 	// VisitorSession is the client for interacting with the VisitorSession builders.
 	VisitorSession *VisitorSessionClient
 
@@ -154,9 +160,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Device = NewDeviceClient(tx.config)
+	tx.PageView = NewPageViewClient(tx.config)
 	tx.Site = NewSiteClient(tx.config)
 	tx.SiteVisitor = NewSiteVisitorClient(tx.config)
 	tx.Visitor = NewVisitorClient(tx.config)
+	tx.VisitorConsent = NewVisitorConsentClient(tx.config)
+	tx.VisitorEvent = NewVisitorEventClient(tx.config)
 	tx.VisitorSession = NewVisitorSessionClient(tx.config)
 }
 

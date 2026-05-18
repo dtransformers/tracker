@@ -32,6 +32,24 @@ var (
 		Columns:    DevicesColumns,
 		PrimaryKey: []*schema.Column{DevicesColumns[0]},
 	}
+	// PageViewsColumns holds the columns for the "page_views" table.
+	PageViewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "session_id", Type: field.TypeInt64},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "device_id", Type: field.TypeInt64},
+		{Name: "url", Type: field.TypeString, Nullable: true},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "referrer", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// PageViewsTable holds the schema information for the "page_views" table.
+	PageViewsTable = &schema.Table{
+		Name:       "page_views",
+		Columns:    PageViewsColumns,
+		PrimaryKey: []*schema.Column{PageViewsColumns[0]},
+	}
 	// SitesColumns holds the columns for the "sites" table.
 	SitesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -88,6 +106,40 @@ var (
 		Columns:    VisitorsColumns,
 		PrimaryKey: []*schema.Column{VisitorsColumns[0]},
 	}
+	// VisitorConsentsColumns holds the columns for the "visitor_consents" table.
+	VisitorConsentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "site_id", Type: field.TypeInt64},
+		{Name: "consent_type", Type: field.TypeString},
+		{Name: "status", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// VisitorConsentsTable holds the schema information for the "visitor_consents" table.
+	VisitorConsentsTable = &schema.Table{
+		Name:       "visitor_consents",
+		Columns:    VisitorConsentsColumns,
+		PrimaryKey: []*schema.Column{VisitorConsentsColumns[0]},
+	}
+	// VisitorEventsColumns holds the columns for the "visitor_events" table.
+	VisitorEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "session_id", Type: field.TypeInt64},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "device_id", Type: field.TypeInt64},
+		{Name: "event_name", Type: field.TypeString},
+		{Name: "event_properties", Type: field.TypeJSON, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// VisitorEventsTable holds the schema information for the "visitor_events" table.
+	VisitorEventsTable = &schema.Table{
+		Name:       "visitor_events",
+		Columns:    VisitorEventsColumns,
+		PrimaryKey: []*schema.Column{VisitorEventsColumns[0]},
+	}
 	// VisitorSessionsColumns holds the columns for the "visitor_sessions" table.
 	VisitorSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -115,9 +167,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DevicesTable,
+		PageViewsTable,
 		SitesTable,
 		SiteVisitorsTable,
 		VisitorsTable,
+		VisitorConsentsTable,
+		VisitorEventsTable,
 		VisitorSessionsTable,
 	}
 )

@@ -20,6 +20,18 @@ func (f DeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeviceMutation", m)
 }
 
+// The PageViewFunc type is an adapter to allow the use of ordinary
+// function as PageView mutator.
+type PageViewFunc func(context.Context, *ent.PageViewMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PageViewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PageViewMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PageViewMutation", m)
+}
+
 // The SiteFunc type is an adapter to allow the use of ordinary
 // function as Site mutator.
 type SiteFunc func(context.Context, *ent.SiteMutation) (ent.Value, error)
@@ -54,6 +66,30 @@ func (f VisitorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorMutation", m)
+}
+
+// The VisitorConsentFunc type is an adapter to allow the use of ordinary
+// function as VisitorConsent mutator.
+type VisitorConsentFunc func(context.Context, *ent.VisitorConsentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VisitorConsentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VisitorConsentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorConsentMutation", m)
+}
+
+// The VisitorEventFunc type is an adapter to allow the use of ordinary
+// function as VisitorEvent mutator.
+type VisitorEventFunc func(context.Context, *ent.VisitorEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VisitorEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VisitorEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorEventMutation", m)
 }
 
 // The VisitorSessionFunc type is an adapter to allow the use of ordinary

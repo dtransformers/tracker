@@ -5,10 +5,13 @@ package ent
 import (
 	"time"
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/schemas"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
+	"tracking/internal/ent/visitorconsent"
+	"tracking/internal/ent/visitorevent"
 	"tracking/internal/ent/visitorsession"
 )
 
@@ -38,6 +41,16 @@ func init() {
 	deviceDescLastSeenAt := deviceFields[13].Descriptor()
 	// device.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	device.DefaultLastSeenAt = deviceDescLastSeenAt.Default.(func() time.Time)
+	pageviewFields := schemas.PageView{}.Fields()
+	_ = pageviewFields
+	// pageviewDescUUID is the schema descriptor for uuid field.
+	pageviewDescUUID := pageviewFields[1].Descriptor()
+	// pageview.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	pageview.UUIDValidator = pageviewDescUUID.Validators[0].(func(string) error)
+	// pageviewDescCreatedAt is the schema descriptor for created_at field.
+	pageviewDescCreatedAt := pageviewFields[8].Descriptor()
+	// pageview.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pageview.DefaultCreatedAt = pageviewDescCreatedAt.Default.(func() time.Time)
 	siteFields := schemas.Site{}.Fields()
 	_ = siteFields
 	// siteDescUUID is the schema descriptor for uuid field.
@@ -148,6 +161,32 @@ func init() {
 	visitor.DefaultUpdatedAt = visitorDescUpdatedAt.Default.(func() time.Time)
 	// visitor.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	visitor.UpdateDefaultUpdatedAt = visitorDescUpdatedAt.UpdateDefault.(func() time.Time)
+	visitorconsentFields := schemas.VisitorConsent{}.Fields()
+	_ = visitorconsentFields
+	// visitorconsentDescUUID is the schema descriptor for uuid field.
+	visitorconsentDescUUID := visitorconsentFields[1].Descriptor()
+	// visitorconsent.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	visitorconsent.UUIDValidator = visitorconsentDescUUID.Validators[0].(func(string) error)
+	// visitorconsentDescCreatedAt is the schema descriptor for created_at field.
+	visitorconsentDescCreatedAt := visitorconsentFields[6].Descriptor()
+	// visitorconsent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	visitorconsent.DefaultCreatedAt = visitorconsentDescCreatedAt.Default.(func() time.Time)
+	// visitorconsentDescUpdatedAt is the schema descriptor for updated_at field.
+	visitorconsentDescUpdatedAt := visitorconsentFields[7].Descriptor()
+	// visitorconsent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	visitorconsent.DefaultUpdatedAt = visitorconsentDescUpdatedAt.Default.(func() time.Time)
+	// visitorconsent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	visitorconsent.UpdateDefaultUpdatedAt = visitorconsentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	visitoreventFields := schemas.VisitorEvent{}.Fields()
+	_ = visitoreventFields
+	// visitoreventDescUUID is the schema descriptor for uuid field.
+	visitoreventDescUUID := visitoreventFields[1].Descriptor()
+	// visitorevent.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	visitorevent.UUIDValidator = visitoreventDescUUID.Validators[0].(func(string) error)
+	// visitoreventDescCreatedAt is the schema descriptor for created_at field.
+	visitoreventDescCreatedAt := visitoreventFields[7].Descriptor()
+	// visitorevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	visitorevent.DefaultCreatedAt = visitoreventDescCreatedAt.Default.(func() time.Time)
 	visitorsessionFields := schemas.VisitorSession{}.Fields()
 	_ = visitorsessionFields
 	// visitorsessionDescUUID is the schema descriptor for uuid field.

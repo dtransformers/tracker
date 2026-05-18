@@ -9,6 +9,9 @@ import (
 // Device is the predicate function for device builders.
 type Device func(*sql.Selector)
 
+// PageView is the predicate function for pageview builders.
+type PageView func(*sql.Selector)
+
 // Site is the predicate function for site builders.
 type Site func(*sql.Selector)
 
@@ -17,6 +20,12 @@ type SiteVisitor func(*sql.Selector)
 
 // Visitor is the predicate function for visitor builders.
 type Visitor func(*sql.Selector)
+
+// VisitorConsent is the predicate function for visitorconsent builders.
+type VisitorConsent func(*sql.Selector)
+
+// VisitorEvent is the predicate function for visitorevent builders.
+type VisitorEvent func(*sql.Selector)
 
 // VisitorSession is the predicate function for visitorsession builders.
 type VisitorSession func(*sql.Selector)

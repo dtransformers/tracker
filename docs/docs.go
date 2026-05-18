@@ -335,7 +335,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/visitors/track": {
+        "/api/v1/visitors": {
             "post": {
                 "description": "Track a visitor on a site. Creates a new visitor if not exists, or updates last seen time.",
                 "consumes": [

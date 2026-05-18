@@ -9,10 +9,13 @@ import (
 	"sync"
 	"time"
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
+	"tracking/internal/ent/visitorconsent"
+	"tracking/internal/ent/visitorevent"
 	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
@@ -29,9 +32,12 @@ const (
 
 	// Node types.
 	TypeDevice         = "Device"
+	TypePageView       = "PageView"
 	TypeSite           = "Site"
 	TypeSiteVisitor    = "SiteVisitor"
 	TypeVisitor        = "Visitor"
+	TypeVisitorConsent = "VisitorConsent"
+	TypeVisitorEvent   = "VisitorEvent"
 	TypeVisitorSession = "VisitorSession"
 )
 
@@ -1271,6 +1277,878 @@ func (m *DeviceMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DeviceMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Device edge %s", name)
+}
+
+// PageViewMutation represents an operation that mutates the PageView nodes in the graph.
+type PageViewMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	uuid          *string
+	session_id    *int64
+	addsession_id *int64
+	visitor_id    *int64
+	addvisitor_id *int64
+	device_id     *int64
+	adddevice_id  *int64
+	url           *string
+	title         *string
+	referrer      *string
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*PageView, error)
+	predicates    []predicate.PageView
+}
+
+var _ ent.Mutation = (*PageViewMutation)(nil)
+
+// pageviewOption allows management of the mutation configuration using functional options.
+type pageviewOption func(*PageViewMutation)
+
+// newPageViewMutation creates new mutation for the PageView entity.
+func newPageViewMutation(c config, op Op, opts ...pageviewOption) *PageViewMutation {
+	m := &PageViewMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePageView,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPageViewID sets the ID field of the mutation.
+func withPageViewID(id int64) pageviewOption {
+	return func(m *PageViewMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PageView
+		)
+		m.oldValue = func(ctx context.Context) (*PageView, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PageView.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPageView sets the old PageView of the mutation.
+func withPageView(node *PageView) pageviewOption {
+	return func(m *PageViewMutation) {
+		m.oldValue = func(context.Context) (*PageView, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PageViewMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PageViewMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PageView entities.
+func (m *PageViewMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PageViewMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PageViewMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PageView.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *PageViewMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *PageViewMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *PageViewMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *PageViewMutation) SetSessionID(i int64) {
+	m.session_id = &i
+	m.addsession_id = nil
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *PageViewMutation) SessionID() (r int64, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldSessionID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// AddSessionID adds i to the "session_id" field.
+func (m *PageViewMutation) AddSessionID(i int64) {
+	if m.addsession_id != nil {
+		*m.addsession_id += i
+	} else {
+		m.addsession_id = &i
+	}
+}
+
+// AddedSessionID returns the value that was added to the "session_id" field in this mutation.
+func (m *PageViewMutation) AddedSessionID() (r int64, exists bool) {
+	v := m.addsession_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *PageViewMutation) ResetSessionID() {
+	m.session_id = nil
+	m.addsession_id = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *PageViewMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *PageViewMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *PageViewMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *PageViewMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *PageViewMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetDeviceID sets the "device_id" field.
+func (m *PageViewMutation) SetDeviceID(i int64) {
+	m.device_id = &i
+	m.adddevice_id = nil
+}
+
+// DeviceID returns the value of the "device_id" field in the mutation.
+func (m *PageViewMutation) DeviceID() (r int64, exists bool) {
+	v := m.device_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceID returns the old "device_id" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldDeviceID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceID: %w", err)
+	}
+	return oldValue.DeviceID, nil
+}
+
+// AddDeviceID adds i to the "device_id" field.
+func (m *PageViewMutation) AddDeviceID(i int64) {
+	if m.adddevice_id != nil {
+		*m.adddevice_id += i
+	} else {
+		m.adddevice_id = &i
+	}
+}
+
+// AddedDeviceID returns the value that was added to the "device_id" field in this mutation.
+func (m *PageViewMutation) AddedDeviceID() (r int64, exists bool) {
+	v := m.adddevice_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeviceID resets all changes to the "device_id" field.
+func (m *PageViewMutation) ResetDeviceID() {
+	m.device_id = nil
+	m.adddevice_id = nil
+}
+
+// SetURL sets the "url" field.
+func (m *PageViewMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *PageViewMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ClearURL clears the value of the "url" field.
+func (m *PageViewMutation) ClearURL() {
+	m.url = nil
+	m.clearedFields[pageview.FieldURL] = struct{}{}
+}
+
+// URLCleared returns if the "url" field was cleared in this mutation.
+func (m *PageViewMutation) URLCleared() bool {
+	_, ok := m.clearedFields[pageview.FieldURL]
+	return ok
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *PageViewMutation) ResetURL() {
+	m.url = nil
+	delete(m.clearedFields, pageview.FieldURL)
+}
+
+// SetTitle sets the "title" field.
+func (m *PageViewMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *PageViewMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ClearTitle clears the value of the "title" field.
+func (m *PageViewMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[pageview.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *PageViewMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[pageview.FieldTitle]
+	return ok
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *PageViewMutation) ResetTitle() {
+	m.title = nil
+	delete(m.clearedFields, pageview.FieldTitle)
+}
+
+// SetReferrer sets the "referrer" field.
+func (m *PageViewMutation) SetReferrer(s string) {
+	m.referrer = &s
+}
+
+// Referrer returns the value of the "referrer" field in the mutation.
+func (m *PageViewMutation) Referrer() (r string, exists bool) {
+	v := m.referrer
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferrer returns the old "referrer" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldReferrer(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferrer is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferrer requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferrer: %w", err)
+	}
+	return oldValue.Referrer, nil
+}
+
+// ClearReferrer clears the value of the "referrer" field.
+func (m *PageViewMutation) ClearReferrer() {
+	m.referrer = nil
+	m.clearedFields[pageview.FieldReferrer] = struct{}{}
+}
+
+// ReferrerCleared returns if the "referrer" field was cleared in this mutation.
+func (m *PageViewMutation) ReferrerCleared() bool {
+	_, ok := m.clearedFields[pageview.FieldReferrer]
+	return ok
+}
+
+// ResetReferrer resets all changes to the "referrer" field.
+func (m *PageViewMutation) ResetReferrer() {
+	m.referrer = nil
+	delete(m.clearedFields, pageview.FieldReferrer)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PageViewMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PageViewMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PageView entity.
+// If the PageView object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PageViewMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PageViewMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the PageViewMutation builder.
+func (m *PageViewMutation) Where(ps ...predicate.PageView) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PageViewMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PageViewMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PageView, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PageViewMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PageViewMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PageView).
+func (m *PageViewMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PageViewMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.uuid != nil {
+		fields = append(fields, pageview.FieldUUID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, pageview.FieldSessionID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, pageview.FieldVisitorID)
+	}
+	if m.device_id != nil {
+		fields = append(fields, pageview.FieldDeviceID)
+	}
+	if m.url != nil {
+		fields = append(fields, pageview.FieldURL)
+	}
+	if m.title != nil {
+		fields = append(fields, pageview.FieldTitle)
+	}
+	if m.referrer != nil {
+		fields = append(fields, pageview.FieldReferrer)
+	}
+	if m.created_at != nil {
+		fields = append(fields, pageview.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PageViewMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pageview.FieldUUID:
+		return m.UUID()
+	case pageview.FieldSessionID:
+		return m.SessionID()
+	case pageview.FieldVisitorID:
+		return m.VisitorID()
+	case pageview.FieldDeviceID:
+		return m.DeviceID()
+	case pageview.FieldURL:
+		return m.URL()
+	case pageview.FieldTitle:
+		return m.Title()
+	case pageview.FieldReferrer:
+		return m.Referrer()
+	case pageview.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PageViewMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pageview.FieldUUID:
+		return m.OldUUID(ctx)
+	case pageview.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case pageview.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case pageview.FieldDeviceID:
+		return m.OldDeviceID(ctx)
+	case pageview.FieldURL:
+		return m.OldURL(ctx)
+	case pageview.FieldTitle:
+		return m.OldTitle(ctx)
+	case pageview.FieldReferrer:
+		return m.OldReferrer(ctx)
+	case pageview.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown PageView field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PageViewMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pageview.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case pageview.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case pageview.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case pageview.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceID(v)
+		return nil
+	case pageview.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
+	case pageview.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case pageview.FieldReferrer:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferrer(v)
+		return nil
+	case pageview.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PageView field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PageViewMutation) AddedFields() []string {
+	var fields []string
+	if m.addsession_id != nil {
+		fields = append(fields, pageview.FieldSessionID)
+	}
+	if m.addvisitor_id != nil {
+		fields = append(fields, pageview.FieldVisitorID)
+	}
+	if m.adddevice_id != nil {
+		fields = append(fields, pageview.FieldDeviceID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PageViewMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pageview.FieldSessionID:
+		return m.AddedSessionID()
+	case pageview.FieldVisitorID:
+		return m.AddedVisitorID()
+	case pageview.FieldDeviceID:
+		return m.AddedDeviceID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PageViewMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pageview.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSessionID(v)
+		return nil
+	case pageview.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	case pageview.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeviceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PageView numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PageViewMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(pageview.FieldURL) {
+		fields = append(fields, pageview.FieldURL)
+	}
+	if m.FieldCleared(pageview.FieldTitle) {
+		fields = append(fields, pageview.FieldTitle)
+	}
+	if m.FieldCleared(pageview.FieldReferrer) {
+		fields = append(fields, pageview.FieldReferrer)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PageViewMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PageViewMutation) ClearField(name string) error {
+	switch name {
+	case pageview.FieldURL:
+		m.ClearURL()
+		return nil
+	case pageview.FieldTitle:
+		m.ClearTitle()
+		return nil
+	case pageview.FieldReferrer:
+		m.ClearReferrer()
+		return nil
+	}
+	return fmt.Errorf("unknown PageView nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PageViewMutation) ResetField(name string) error {
+	switch name {
+	case pageview.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case pageview.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case pageview.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case pageview.FieldDeviceID:
+		m.ResetDeviceID()
+		return nil
+	case pageview.FieldURL:
+		m.ResetURL()
+		return nil
+	case pageview.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case pageview.FieldReferrer:
+		m.ResetReferrer()
+		return nil
+	case pageview.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PageView field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PageViewMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PageViewMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PageViewMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PageViewMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PageViewMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PageViewMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PageViewMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PageView unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PageViewMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PageView edge %s", name)
 }
 
 // SiteMutation represents an operation that mutates the Site nodes in the graph.
@@ -3673,6 +4551,1511 @@ func (m *VisitorMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VisitorMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Visitor edge %s", name)
+}
+
+// VisitorConsentMutation represents an operation that mutates the VisitorConsent nodes in the graph.
+type VisitorConsentMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	uuid          *string
+	visitor_id    *int64
+	addvisitor_id *int64
+	site_id       *int64
+	addsite_id    *int64
+	consent_type  *string
+	status        *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*VisitorConsent, error)
+	predicates    []predicate.VisitorConsent
+}
+
+var _ ent.Mutation = (*VisitorConsentMutation)(nil)
+
+// visitorconsentOption allows management of the mutation configuration using functional options.
+type visitorconsentOption func(*VisitorConsentMutation)
+
+// newVisitorConsentMutation creates new mutation for the VisitorConsent entity.
+func newVisitorConsentMutation(c config, op Op, opts ...visitorconsentOption) *VisitorConsentMutation {
+	m := &VisitorConsentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVisitorConsent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVisitorConsentID sets the ID field of the mutation.
+func withVisitorConsentID(id int64) visitorconsentOption {
+	return func(m *VisitorConsentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VisitorConsent
+		)
+		m.oldValue = func(ctx context.Context) (*VisitorConsent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VisitorConsent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVisitorConsent sets the old VisitorConsent of the mutation.
+func withVisitorConsent(node *VisitorConsent) visitorconsentOption {
+	return func(m *VisitorConsentMutation) {
+		m.oldValue = func(context.Context) (*VisitorConsent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VisitorConsentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VisitorConsentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VisitorConsent entities.
+func (m *VisitorConsentMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VisitorConsentMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VisitorConsentMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VisitorConsent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *VisitorConsentMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *VisitorConsentMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *VisitorConsentMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *VisitorConsentMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *VisitorConsentMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *VisitorConsentMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *VisitorConsentMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *VisitorConsentMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetSiteID sets the "site_id" field.
+func (m *VisitorConsentMutation) SetSiteID(i int64) {
+	m.site_id = &i
+	m.addsite_id = nil
+}
+
+// SiteID returns the value of the "site_id" field in the mutation.
+func (m *VisitorConsentMutation) SiteID() (r int64, exists bool) {
+	v := m.site_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteID returns the old "site_id" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldSiteID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteID: %w", err)
+	}
+	return oldValue.SiteID, nil
+}
+
+// AddSiteID adds i to the "site_id" field.
+func (m *VisitorConsentMutation) AddSiteID(i int64) {
+	if m.addsite_id != nil {
+		*m.addsite_id += i
+	} else {
+		m.addsite_id = &i
+	}
+}
+
+// AddedSiteID returns the value that was added to the "site_id" field in this mutation.
+func (m *VisitorConsentMutation) AddedSiteID() (r int64, exists bool) {
+	v := m.addsite_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSiteID resets all changes to the "site_id" field.
+func (m *VisitorConsentMutation) ResetSiteID() {
+	m.site_id = nil
+	m.addsite_id = nil
+}
+
+// SetConsentType sets the "consent_type" field.
+func (m *VisitorConsentMutation) SetConsentType(s string) {
+	m.consent_type = &s
+}
+
+// ConsentType returns the value of the "consent_type" field in the mutation.
+func (m *VisitorConsentMutation) ConsentType() (r string, exists bool) {
+	v := m.consent_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConsentType returns the old "consent_type" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldConsentType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConsentType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConsentType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConsentType: %w", err)
+	}
+	return oldValue.ConsentType, nil
+}
+
+// ResetConsentType resets all changes to the "consent_type" field.
+func (m *VisitorConsentMutation) ResetConsentType() {
+	m.consent_type = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *VisitorConsentMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *VisitorConsentMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *VisitorConsentMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VisitorConsentMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VisitorConsentMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VisitorConsentMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *VisitorConsentMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *VisitorConsentMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the VisitorConsent entity.
+// If the VisitorConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorConsentMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *VisitorConsentMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the VisitorConsentMutation builder.
+func (m *VisitorConsentMutation) Where(ps ...predicate.VisitorConsent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VisitorConsentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VisitorConsentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VisitorConsent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VisitorConsentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VisitorConsentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VisitorConsent).
+func (m *VisitorConsentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VisitorConsentMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.uuid != nil {
+		fields = append(fields, visitorconsent.FieldUUID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, visitorconsent.FieldVisitorID)
+	}
+	if m.site_id != nil {
+		fields = append(fields, visitorconsent.FieldSiteID)
+	}
+	if m.consent_type != nil {
+		fields = append(fields, visitorconsent.FieldConsentType)
+	}
+	if m.status != nil {
+		fields = append(fields, visitorconsent.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, visitorconsent.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, visitorconsent.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VisitorConsentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case visitorconsent.FieldUUID:
+		return m.UUID()
+	case visitorconsent.FieldVisitorID:
+		return m.VisitorID()
+	case visitorconsent.FieldSiteID:
+		return m.SiteID()
+	case visitorconsent.FieldConsentType:
+		return m.ConsentType()
+	case visitorconsent.FieldStatus:
+		return m.Status()
+	case visitorconsent.FieldCreatedAt:
+		return m.CreatedAt()
+	case visitorconsent.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VisitorConsentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case visitorconsent.FieldUUID:
+		return m.OldUUID(ctx)
+	case visitorconsent.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case visitorconsent.FieldSiteID:
+		return m.OldSiteID(ctx)
+	case visitorconsent.FieldConsentType:
+		return m.OldConsentType(ctx)
+	case visitorconsent.FieldStatus:
+		return m.OldStatus(ctx)
+	case visitorconsent.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case visitorconsent.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown VisitorConsent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorConsentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case visitorconsent.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case visitorconsent.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case visitorconsent.FieldSiteID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteID(v)
+		return nil
+	case visitorconsent.FieldConsentType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConsentType(v)
+		return nil
+	case visitorconsent.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case visitorconsent.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case visitorconsent.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorConsent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VisitorConsentMutation) AddedFields() []string {
+	var fields []string
+	if m.addvisitor_id != nil {
+		fields = append(fields, visitorconsent.FieldVisitorID)
+	}
+	if m.addsite_id != nil {
+		fields = append(fields, visitorconsent.FieldSiteID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VisitorConsentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case visitorconsent.FieldVisitorID:
+		return m.AddedVisitorID()
+	case visitorconsent.FieldSiteID:
+		return m.AddedSiteID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorConsentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case visitorconsent.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	case visitorconsent.FieldSiteID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSiteID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorConsent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VisitorConsentMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VisitorConsentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VisitorConsentMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown VisitorConsent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VisitorConsentMutation) ResetField(name string) error {
+	switch name {
+	case visitorconsent.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case visitorconsent.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case visitorconsent.FieldSiteID:
+		m.ResetSiteID()
+		return nil
+	case visitorconsent.FieldConsentType:
+		m.ResetConsentType()
+		return nil
+	case visitorconsent.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case visitorconsent.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case visitorconsent.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorConsent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VisitorConsentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VisitorConsentMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VisitorConsentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VisitorConsentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VisitorConsentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VisitorConsentMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VisitorConsentMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown VisitorConsent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VisitorConsentMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown VisitorConsent edge %s", name)
+}
+
+// VisitorEventMutation represents an operation that mutates the VisitorEvent nodes in the graph.
+type VisitorEventMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int64
+	uuid             *string
+	session_id       *int64
+	addsession_id    *int64
+	visitor_id       *int64
+	addvisitor_id    *int64
+	device_id        *int64
+	adddevice_id     *int64
+	event_name       *string
+	event_properties *map[string]interface{}
+	created_at       *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*VisitorEvent, error)
+	predicates       []predicate.VisitorEvent
+}
+
+var _ ent.Mutation = (*VisitorEventMutation)(nil)
+
+// visitoreventOption allows management of the mutation configuration using functional options.
+type visitoreventOption func(*VisitorEventMutation)
+
+// newVisitorEventMutation creates new mutation for the VisitorEvent entity.
+func newVisitorEventMutation(c config, op Op, opts ...visitoreventOption) *VisitorEventMutation {
+	m := &VisitorEventMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVisitorEvent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVisitorEventID sets the ID field of the mutation.
+func withVisitorEventID(id int64) visitoreventOption {
+	return func(m *VisitorEventMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VisitorEvent
+		)
+		m.oldValue = func(ctx context.Context) (*VisitorEvent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VisitorEvent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVisitorEvent sets the old VisitorEvent of the mutation.
+func withVisitorEvent(node *VisitorEvent) visitoreventOption {
+	return func(m *VisitorEventMutation) {
+		m.oldValue = func(context.Context) (*VisitorEvent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VisitorEventMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VisitorEventMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VisitorEvent entities.
+func (m *VisitorEventMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VisitorEventMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VisitorEventMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VisitorEvent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *VisitorEventMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *VisitorEventMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *VisitorEventMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *VisitorEventMutation) SetSessionID(i int64) {
+	m.session_id = &i
+	m.addsession_id = nil
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *VisitorEventMutation) SessionID() (r int64, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldSessionID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// AddSessionID adds i to the "session_id" field.
+func (m *VisitorEventMutation) AddSessionID(i int64) {
+	if m.addsession_id != nil {
+		*m.addsession_id += i
+	} else {
+		m.addsession_id = &i
+	}
+}
+
+// AddedSessionID returns the value that was added to the "session_id" field in this mutation.
+func (m *VisitorEventMutation) AddedSessionID() (r int64, exists bool) {
+	v := m.addsession_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *VisitorEventMutation) ResetSessionID() {
+	m.session_id = nil
+	m.addsession_id = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *VisitorEventMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *VisitorEventMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *VisitorEventMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *VisitorEventMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *VisitorEventMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetDeviceID sets the "device_id" field.
+func (m *VisitorEventMutation) SetDeviceID(i int64) {
+	m.device_id = &i
+	m.adddevice_id = nil
+}
+
+// DeviceID returns the value of the "device_id" field in the mutation.
+func (m *VisitorEventMutation) DeviceID() (r int64, exists bool) {
+	v := m.device_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceID returns the old "device_id" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldDeviceID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceID: %w", err)
+	}
+	return oldValue.DeviceID, nil
+}
+
+// AddDeviceID adds i to the "device_id" field.
+func (m *VisitorEventMutation) AddDeviceID(i int64) {
+	if m.adddevice_id != nil {
+		*m.adddevice_id += i
+	} else {
+		m.adddevice_id = &i
+	}
+}
+
+// AddedDeviceID returns the value that was added to the "device_id" field in this mutation.
+func (m *VisitorEventMutation) AddedDeviceID() (r int64, exists bool) {
+	v := m.adddevice_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeviceID resets all changes to the "device_id" field.
+func (m *VisitorEventMutation) ResetDeviceID() {
+	m.device_id = nil
+	m.adddevice_id = nil
+}
+
+// SetEventName sets the "event_name" field.
+func (m *VisitorEventMutation) SetEventName(s string) {
+	m.event_name = &s
+}
+
+// EventName returns the value of the "event_name" field in the mutation.
+func (m *VisitorEventMutation) EventName() (r string, exists bool) {
+	v := m.event_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventName returns the old "event_name" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldEventName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventName: %w", err)
+	}
+	return oldValue.EventName, nil
+}
+
+// ResetEventName resets all changes to the "event_name" field.
+func (m *VisitorEventMutation) ResetEventName() {
+	m.event_name = nil
+}
+
+// SetEventProperties sets the "event_properties" field.
+func (m *VisitorEventMutation) SetEventProperties(value map[string]interface{}) {
+	m.event_properties = &value
+}
+
+// EventProperties returns the value of the "event_properties" field in the mutation.
+func (m *VisitorEventMutation) EventProperties() (r map[string]interface{}, exists bool) {
+	v := m.event_properties
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventProperties returns the old "event_properties" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldEventProperties(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventProperties is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventProperties requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventProperties: %w", err)
+	}
+	return oldValue.EventProperties, nil
+}
+
+// ClearEventProperties clears the value of the "event_properties" field.
+func (m *VisitorEventMutation) ClearEventProperties() {
+	m.event_properties = nil
+	m.clearedFields[visitorevent.FieldEventProperties] = struct{}{}
+}
+
+// EventPropertiesCleared returns if the "event_properties" field was cleared in this mutation.
+func (m *VisitorEventMutation) EventPropertiesCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldEventProperties]
+	return ok
+}
+
+// ResetEventProperties resets all changes to the "event_properties" field.
+func (m *VisitorEventMutation) ResetEventProperties() {
+	m.event_properties = nil
+	delete(m.clearedFields, visitorevent.FieldEventProperties)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VisitorEventMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VisitorEventMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VisitorEventMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the VisitorEventMutation builder.
+func (m *VisitorEventMutation) Where(ps ...predicate.VisitorEvent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VisitorEventMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VisitorEventMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VisitorEvent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VisitorEventMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VisitorEventMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VisitorEvent).
+func (m *VisitorEventMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VisitorEventMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.uuid != nil {
+		fields = append(fields, visitorevent.FieldUUID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, visitorevent.FieldSessionID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, visitorevent.FieldVisitorID)
+	}
+	if m.device_id != nil {
+		fields = append(fields, visitorevent.FieldDeviceID)
+	}
+	if m.event_name != nil {
+		fields = append(fields, visitorevent.FieldEventName)
+	}
+	if m.event_properties != nil {
+		fields = append(fields, visitorevent.FieldEventProperties)
+	}
+	if m.created_at != nil {
+		fields = append(fields, visitorevent.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VisitorEventMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case visitorevent.FieldUUID:
+		return m.UUID()
+	case visitorevent.FieldSessionID:
+		return m.SessionID()
+	case visitorevent.FieldVisitorID:
+		return m.VisitorID()
+	case visitorevent.FieldDeviceID:
+		return m.DeviceID()
+	case visitorevent.FieldEventName:
+		return m.EventName()
+	case visitorevent.FieldEventProperties:
+		return m.EventProperties()
+	case visitorevent.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VisitorEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case visitorevent.FieldUUID:
+		return m.OldUUID(ctx)
+	case visitorevent.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case visitorevent.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case visitorevent.FieldDeviceID:
+		return m.OldDeviceID(ctx)
+	case visitorevent.FieldEventName:
+		return m.OldEventName(ctx)
+	case visitorevent.FieldEventProperties:
+		return m.OldEventProperties(ctx)
+	case visitorevent.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown VisitorEvent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorEventMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case visitorevent.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case visitorevent.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case visitorevent.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case visitorevent.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceID(v)
+		return nil
+	case visitorevent.FieldEventName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventName(v)
+		return nil
+	case visitorevent.FieldEventProperties:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventProperties(v)
+		return nil
+	case visitorevent.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorEvent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VisitorEventMutation) AddedFields() []string {
+	var fields []string
+	if m.addsession_id != nil {
+		fields = append(fields, visitorevent.FieldSessionID)
+	}
+	if m.addvisitor_id != nil {
+		fields = append(fields, visitorevent.FieldVisitorID)
+	}
+	if m.adddevice_id != nil {
+		fields = append(fields, visitorevent.FieldDeviceID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VisitorEventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case visitorevent.FieldSessionID:
+		return m.AddedSessionID()
+	case visitorevent.FieldVisitorID:
+		return m.AddedVisitorID()
+	case visitorevent.FieldDeviceID:
+		return m.AddedDeviceID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorEventMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case visitorevent.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSessionID(v)
+		return nil
+	case visitorevent.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	case visitorevent.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeviceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorEvent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VisitorEventMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(visitorevent.FieldEventProperties) {
+		fields = append(fields, visitorevent.FieldEventProperties)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VisitorEventMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VisitorEventMutation) ClearField(name string) error {
+	switch name {
+	case visitorevent.FieldEventProperties:
+		m.ClearEventProperties()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorEvent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VisitorEventMutation) ResetField(name string) error {
+	switch name {
+	case visitorevent.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case visitorevent.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case visitorevent.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case visitorevent.FieldDeviceID:
+		m.ResetDeviceID()
+		return nil
+	case visitorevent.FieldEventName:
+		m.ResetEventName()
+		return nil
+	case visitorevent.FieldEventProperties:
+		m.ResetEventProperties()
+		return nil
+	case visitorevent.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorEvent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VisitorEventMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VisitorEventMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VisitorEventMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VisitorEventMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VisitorEventMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VisitorEventMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VisitorEventMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown VisitorEvent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VisitorEventMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown VisitorEvent edge %s", name)
 }
 
 // VisitorSessionMutation represents an operation that mutates the VisitorSession nodes in the graph.
