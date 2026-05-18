@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"sync"
 	"tracking/internal/ent/site"
+	"tracking/internal/ent/sitevisitor"
+	"tracking/internal/ent/visitor"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -73,7 +75,9 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			site.Table: site.ValidColumn,
+			site.Table:        site.ValidColumn,
+			sitevisitor.Table: sitevisitor.ValidColumn,
+			visitor.Table:     visitor.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -6,6 +6,8 @@ import (
 	"time"
 	"tracking/internal/ent/schemas"
 	"tracking/internal/ent/site"
+	"tracking/internal/ent/sitevisitor"
+	"tracking/internal/ent/visitor"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -58,4 +60,68 @@ func init() {
 	site.DefaultUpdatedAt = siteDescUpdatedAt.Default.(func() time.Time)
 	// site.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	site.UpdateDefaultUpdatedAt = siteDescUpdatedAt.UpdateDefault.(func() time.Time)
+	sitevisitorFields := schemas.SiteVisitor{}.Fields()
+	_ = sitevisitorFields
+	// sitevisitorDescUUID is the schema descriptor for uuid field.
+	sitevisitorDescUUID := sitevisitorFields[0].Descriptor()
+	// sitevisitor.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	sitevisitor.UUIDValidator = sitevisitorDescUUID.Validators[0].(func(string) error)
+	// sitevisitorDescVisitorID is the schema descriptor for visitor_id field.
+	sitevisitorDescVisitorID := sitevisitorFields[1].Descriptor()
+	// sitevisitor.VisitorIDValidator is a validator for the "visitor_id" field. It is called by the builders before save.
+	sitevisitor.VisitorIDValidator = sitevisitorDescVisitorID.Validators[0].(func(int64) error)
+	// sitevisitorDescSessionID is the schema descriptor for session_id field.
+	sitevisitorDescSessionID := sitevisitorFields[2].Descriptor()
+	// sitevisitor.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	sitevisitor.SessionIDValidator = sitevisitorDescSessionID.Validators[0].(func(int64) error)
+	// sitevisitorDescSiteID is the schema descriptor for site_id field.
+	sitevisitorDescSiteID := sitevisitorFields[3].Descriptor()
+	// sitevisitor.SiteIDValidator is a validator for the "site_id" field. It is called by the builders before save.
+	sitevisitor.SiteIDValidator = sitevisitorDescSiteID.Validators[0].(func(int64) error)
+	// sitevisitorDescCreatedAt is the schema descriptor for created_at field.
+	sitevisitorDescCreatedAt := sitevisitorFields[4].Descriptor()
+	// sitevisitor.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sitevisitor.DefaultCreatedAt = sitevisitorDescCreatedAt.Default.(func() time.Time)
+	// sitevisitorDescUpdatedAt is the schema descriptor for updated_at field.
+	sitevisitorDescUpdatedAt := sitevisitorFields[5].Descriptor()
+	// sitevisitor.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sitevisitor.DefaultUpdatedAt = sitevisitorDescUpdatedAt.Default.(func() time.Time)
+	// sitevisitor.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sitevisitor.UpdateDefaultUpdatedAt = sitevisitorDescUpdatedAt.UpdateDefault.(func() time.Time)
+	visitorFields := schemas.Visitor{}.Fields()
+	_ = visitorFields
+	// visitorDescUUID is the schema descriptor for uuid field.
+	visitorDescUUID := visitorFields[0].Descriptor()
+	// visitor.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	visitor.UUIDValidator = visitorDescUUID.Validators[0].(func(string) error)
+	// visitorDescAnonymousID is the schema descriptor for anonymous_id field.
+	visitorDescAnonymousID := visitorFields[1].Descriptor()
+	// visitor.AnonymousIDValidator is a validator for the "anonymous_id" field. It is called by the builders before save.
+	visitor.AnonymousIDValidator = visitorDescAnonymousID.Validators[0].(func(string) error)
+	// visitorDescFirstSeenAt is the schema descriptor for first_seen_at field.
+	visitorDescFirstSeenAt := visitorFields[3].Descriptor()
+	// visitor.DefaultFirstSeenAt holds the default value on creation for the first_seen_at field.
+	visitor.DefaultFirstSeenAt = visitorDescFirstSeenAt.Default.(func() time.Time)
+	// visitorDescLastSeenAt is the schema descriptor for last_seen_at field.
+	visitorDescLastSeenAt := visitorFields[4].Descriptor()
+	// visitor.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
+	visitor.DefaultLastSeenAt = visitorDescLastSeenAt.Default.(func() time.Time)
+	// visitorDescIsBot is the schema descriptor for is_bot field.
+	visitorDescIsBot := visitorFields[5].Descriptor()
+	// visitor.DefaultIsBot holds the default value on creation for the is_bot field.
+	visitor.DefaultIsBot = visitorDescIsBot.Default.(bool)
+	// visitorDescIsVerifiedHuman is the schema descriptor for is_verified_human field.
+	visitorDescIsVerifiedHuman := visitorFields[6].Descriptor()
+	// visitor.DefaultIsVerifiedHuman holds the default value on creation for the is_verified_human field.
+	visitor.DefaultIsVerifiedHuman = visitorDescIsVerifiedHuman.Default.(bool)
+	// visitorDescCreatedAt is the schema descriptor for created_at field.
+	visitorDescCreatedAt := visitorFields[7].Descriptor()
+	// visitor.DefaultCreatedAt holds the default value on creation for the created_at field.
+	visitor.DefaultCreatedAt = visitorDescCreatedAt.Default.(func() time.Time)
+	// visitorDescUpdatedAt is the schema descriptor for updated_at field.
+	visitorDescUpdatedAt := visitorFields[8].Descriptor()
+	// visitor.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	visitor.DefaultUpdatedAt = visitorDescUpdatedAt.Default.(func() time.Time)
+	// visitor.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	visitor.UpdateDefaultUpdatedAt = visitorDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

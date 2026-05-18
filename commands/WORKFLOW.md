@@ -2,8 +2,6 @@
 
 the workflow rules of changes and user requests implementations :
 
-## Backend Development Rule Set (LLM-Governed)
-
 ## 1. Scope Compliance (Root README Gate)
 
 Every code change MUST be validated against the project scope defined in `Root README.md`.

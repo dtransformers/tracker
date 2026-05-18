@@ -8,3 +8,9 @@ import (
 
 // Site is the predicate function for site builders.
 type Site func(*sql.Selector)
+
+// SiteVisitor is the predicate function for sitevisitor builders.
+type SiteVisitor func(*sql.Selector)
+
+// Visitor is the predicate function for visitor builders.
+type Visitor func(*sql.Selector)

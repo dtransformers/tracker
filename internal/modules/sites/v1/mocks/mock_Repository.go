@@ -292,6 +292,74 @@ func (_c *MockRepository_GetByDomain_Call) RunAndReturn(run func(ctx context.Con
 	return _c
 }
 
+// GetByPublicKey provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetByPublicKey(ctx context.Context, publicKey string) (*ent.Site, error) {
+	ret := _mock.Called(ctx, publicKey)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByPublicKey")
+	}
+
+	var r0 *ent.Site
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*ent.Site, error)); ok {
+		return returnFunc(ctx, publicKey)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *ent.Site); ok {
+		r0 = returnFunc(ctx, publicKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.Site)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, publicKey)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetByPublicKey_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByPublicKey'
+type MockRepository_GetByPublicKey_Call struct {
+	*mock.Call
+}
+
+// GetByPublicKey is a helper method to define mock.On call
+//   - ctx context.Context
+//   - publicKey string
+func (_e *MockRepository_Expecter) GetByPublicKey(ctx interface{}, publicKey interface{}) *MockRepository_GetByPublicKey_Call {
+	return &MockRepository_GetByPublicKey_Call{Call: _e.mock.On("GetByPublicKey", ctx, publicKey)}
+}
+
+func (_c *MockRepository_GetByPublicKey_Call) Run(run func(ctx context.Context, publicKey string)) *MockRepository_GetByPublicKey_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetByPublicKey_Call) Return(site *ent.Site, err error) *MockRepository_GetByPublicKey_Call {
+	_c.Call.Return(site, err)
+	return _c
+}
+
+func (_c *MockRepository_GetByPublicKey_Call) RunAndReturn(run func(ctx context.Context, publicKey string) (*ent.Site, error)) *MockRepository_GetByPublicKey_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetByUUID provides a mock function for the type MockRepository
 func (_mock *MockRepository) GetByUUID(ctx context.Context, uuid string) (*ent.Site, error) {
 	ret := _mock.Called(ctx, uuid)

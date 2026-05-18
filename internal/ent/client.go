@@ -12,6 +12,8 @@ import (
 	"tracking/internal/ent/migrate"
 
 	"tracking/internal/ent/site"
+	"tracking/internal/ent/sitevisitor"
+	"tracking/internal/ent/visitor"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -25,6 +27,10 @@ type Client struct {
 	Schema *migrate.Schema
 	// Site is the client for interacting with the Site builders.
 	Site *SiteClient
+	// SiteVisitor is the client for interacting with the SiteVisitor builders.
+	SiteVisitor *SiteVisitorClient
+	// Visitor is the client for interacting with the Visitor builders.
+	Visitor *VisitorClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -37,6 +43,8 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Site = NewSiteClient(c.config)
+	c.SiteVisitor = NewSiteVisitorClient(c.config)
+	c.Visitor = NewVisitorClient(c.config)
 }
 
 type (
@@ -127,9 +135,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Site:   NewSiteClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Site:        NewSiteClient(cfg),
+		SiteVisitor: NewSiteVisitorClient(cfg),
+		Visitor:     NewVisitorClient(cfg),
 	}, nil
 }
 
@@ -147,9 +157,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Site:   NewSiteClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Site:        NewSiteClient(cfg),
+		SiteVisitor: NewSiteVisitorClient(cfg),
+		Visitor:     NewVisitorClient(cfg),
 	}, nil
 }
 
@@ -179,12 +191,16 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Site.Use(hooks...)
+	c.SiteVisitor.Use(hooks...)
+	c.Visitor.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Site.Intercept(interceptors...)
+	c.SiteVisitor.Intercept(interceptors...)
+	c.Visitor.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -192,6 +208,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *SiteMutation:
 		return c.Site.mutate(ctx, m)
+	case *SiteVisitorMutation:
+		return c.SiteVisitor.mutate(ctx, m)
+	case *VisitorMutation:
+		return c.Visitor.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -330,12 +350,278 @@ func (c *SiteClient) mutate(ctx context.Context, m *SiteMutation) (Value, error)
 	}
 }
 
+// SiteVisitorClient is a client for the SiteVisitor schema.
+type SiteVisitorClient struct {
+	config
+}
+
+// NewSiteVisitorClient returns a client for the SiteVisitor from the given config.
+func NewSiteVisitorClient(c config) *SiteVisitorClient {
+	return &SiteVisitorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sitevisitor.Hooks(f(g(h())))`.
+func (c *SiteVisitorClient) Use(hooks ...Hook) {
+	c.hooks.SiteVisitor = append(c.hooks.SiteVisitor, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sitevisitor.Intercept(f(g(h())))`.
+func (c *SiteVisitorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SiteVisitor = append(c.inters.SiteVisitor, interceptors...)
+}
+
+// Create returns a builder for creating a SiteVisitor entity.
+func (c *SiteVisitorClient) Create() *SiteVisitorCreate {
+	mutation := newSiteVisitorMutation(c.config, OpCreate)
+	return &SiteVisitorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SiteVisitor entities.
+func (c *SiteVisitorClient) CreateBulk(builders ...*SiteVisitorCreate) *SiteVisitorCreateBulk {
+	return &SiteVisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SiteVisitorClient) MapCreateBulk(slice any, setFunc func(*SiteVisitorCreate, int)) *SiteVisitorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SiteVisitorCreateBulk{err: fmt.Errorf("calling to SiteVisitorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SiteVisitorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SiteVisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SiteVisitor.
+func (c *SiteVisitorClient) Update() *SiteVisitorUpdate {
+	mutation := newSiteVisitorMutation(c.config, OpUpdate)
+	return &SiteVisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SiteVisitorClient) UpdateOne(_m *SiteVisitor) *SiteVisitorUpdateOne {
+	mutation := newSiteVisitorMutation(c.config, OpUpdateOne, withSiteVisitor(_m))
+	return &SiteVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SiteVisitorClient) UpdateOneID(id int) *SiteVisitorUpdateOne {
+	mutation := newSiteVisitorMutation(c.config, OpUpdateOne, withSiteVisitorID(id))
+	return &SiteVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SiteVisitor.
+func (c *SiteVisitorClient) Delete() *SiteVisitorDelete {
+	mutation := newSiteVisitorMutation(c.config, OpDelete)
+	return &SiteVisitorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SiteVisitorClient) DeleteOne(_m *SiteVisitor) *SiteVisitorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SiteVisitorClient) DeleteOneID(id int) *SiteVisitorDeleteOne {
+	builder := c.Delete().Where(sitevisitor.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SiteVisitorDeleteOne{builder}
+}
+
+// Query returns a query builder for SiteVisitor.
+func (c *SiteVisitorClient) Query() *SiteVisitorQuery {
+	return &SiteVisitorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSiteVisitor},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SiteVisitor entity by its id.
+func (c *SiteVisitorClient) Get(ctx context.Context, id int) (*SiteVisitor, error) {
+	return c.Query().Where(sitevisitor.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SiteVisitorClient) GetX(ctx context.Context, id int) *SiteVisitor {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SiteVisitorClient) Hooks() []Hook {
+	return c.hooks.SiteVisitor
+}
+
+// Interceptors returns the client interceptors.
+func (c *SiteVisitorClient) Interceptors() []Interceptor {
+	return c.inters.SiteVisitor
+}
+
+func (c *SiteVisitorClient) mutate(ctx context.Context, m *SiteVisitorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SiteVisitorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SiteVisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SiteVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SiteVisitorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SiteVisitor mutation op: %q", m.Op())
+	}
+}
+
+// VisitorClient is a client for the Visitor schema.
+type VisitorClient struct {
+	config
+}
+
+// NewVisitorClient returns a client for the Visitor from the given config.
+func NewVisitorClient(c config) *VisitorClient {
+	return &VisitorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `visitor.Hooks(f(g(h())))`.
+func (c *VisitorClient) Use(hooks ...Hook) {
+	c.hooks.Visitor = append(c.hooks.Visitor, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `visitor.Intercept(f(g(h())))`.
+func (c *VisitorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Visitor = append(c.inters.Visitor, interceptors...)
+}
+
+// Create returns a builder for creating a Visitor entity.
+func (c *VisitorClient) Create() *VisitorCreate {
+	mutation := newVisitorMutation(c.config, OpCreate)
+	return &VisitorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Visitor entities.
+func (c *VisitorClient) CreateBulk(builders ...*VisitorCreate) *VisitorCreateBulk {
+	return &VisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VisitorClient) MapCreateBulk(slice any, setFunc func(*VisitorCreate, int)) *VisitorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VisitorCreateBulk{err: fmt.Errorf("calling to VisitorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VisitorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Visitor.
+func (c *VisitorClient) Update() *VisitorUpdate {
+	mutation := newVisitorMutation(c.config, OpUpdate)
+	return &VisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VisitorClient) UpdateOne(_m *Visitor) *VisitorUpdateOne {
+	mutation := newVisitorMutation(c.config, OpUpdateOne, withVisitor(_m))
+	return &VisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VisitorClient) UpdateOneID(id int) *VisitorUpdateOne {
+	mutation := newVisitorMutation(c.config, OpUpdateOne, withVisitorID(id))
+	return &VisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Visitor.
+func (c *VisitorClient) Delete() *VisitorDelete {
+	mutation := newVisitorMutation(c.config, OpDelete)
+	return &VisitorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VisitorClient) DeleteOne(_m *Visitor) *VisitorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VisitorClient) DeleteOneID(id int) *VisitorDeleteOne {
+	builder := c.Delete().Where(visitor.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VisitorDeleteOne{builder}
+}
+
+// Query returns a query builder for Visitor.
+func (c *VisitorClient) Query() *VisitorQuery {
+	return &VisitorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVisitor},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Visitor entity by its id.
+func (c *VisitorClient) Get(ctx context.Context, id int) (*Visitor, error) {
+	return c.Query().Where(visitor.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VisitorClient) GetX(ctx context.Context, id int) *Visitor {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VisitorClient) Hooks() []Hook {
+	return c.hooks.Visitor
+}
+
+// Interceptors returns the client interceptors.
+func (c *VisitorClient) Interceptors() []Interceptor {
+	return c.inters.Visitor
+}
+
+func (c *VisitorClient) mutate(ctx context.Context, m *VisitorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VisitorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VisitorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Visitor mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Site []ent.Hook
+		Site, SiteVisitor, Visitor []ent.Hook
 	}
 	inters struct {
-		Site []ent.Interceptor
+		Site, SiteVisitor, Visitor []ent.Interceptor
 	}
 )

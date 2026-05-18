@@ -13,6 +13,7 @@ type Repository interface {
 	GetByUUID(ctx context.Context, uuid string) (*ent.Site, error)
 
 	GetByDomain(ctx context.Context, domain string) (*ent.Site, error)
+	GetByPublicKey(ctx context.Context, publicKey string) (*ent.Site, error)
 	List(ctx context.Context) ([]*ent.Site, error)
 
 	Update(ctx context.Context, uuid string, input UpdateSiteInput) (*ent.Site, error)
@@ -100,6 +101,23 @@ func (r *entRepository) GetByDomain(ctx context.Context, domain string) (*ent.Si
 			return nil, err
 		}
 		return nil, fmt.Errorf("failed to get site by domain: %w", err)
+	}
+
+	return site, nil
+}
+
+// GetByPublicKey retrieves a site by its public key.
+func (r *entRepository) GetByPublicKey(ctx context.Context, publicKey string) (*ent.Site, error) {
+	site, err := r.client.Site.
+		Query().
+		Where(site.PublicKey(publicKey)).
+		Only(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to get site by public key: %w", err)
 	}
 
 	return site, nil

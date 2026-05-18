@@ -28,6 +28,7 @@ import (
 	"tracking/internal/database"
 	"tracking/internal/modules/health"
 	"tracking/internal/modules/sites"
+	"tracking/internal/modules/visitors"
 	"tracking/internal/server"
 
 	"github.com/arl/statsviz"
@@ -117,6 +118,7 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	app.registerHealthRoutes(router)
 
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
+	visitors.RegisterV1(router, app.db.Client, nil)
 	app.registerSwaggerRoutes(router)
 }
 

@@ -10,6 +10,8 @@ import (
 	"time"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/site"
+	"tracking/internal/ent/sitevisitor"
+	"tracking/internal/ent/visitor"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,7 +26,9 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeSite = "Site"
+	TypeSite        = "Site"
+	TypeSiteVisitor = "SiteVisitor"
+	TypeVisitor     = "Visitor"
 )
 
 // SiteMutation represents an operation that mutates the Site nodes in the graph.
@@ -949,4 +953,1482 @@ func (m *SiteMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SiteMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Site edge %s", name)
+}
+
+// SiteVisitorMutation represents an operation that mutates the SiteVisitor nodes in the graph.
+type SiteVisitorMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	uuid          *string
+	visitor_id    *int64
+	addvisitor_id *int64
+	session_id    *int64
+	addsession_id *int64
+	site_id       *int64
+	addsite_id    *int64
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SiteVisitor, error)
+	predicates    []predicate.SiteVisitor
+}
+
+var _ ent.Mutation = (*SiteVisitorMutation)(nil)
+
+// sitevisitorOption allows management of the mutation configuration using functional options.
+type sitevisitorOption func(*SiteVisitorMutation)
+
+// newSiteVisitorMutation creates new mutation for the SiteVisitor entity.
+func newSiteVisitorMutation(c config, op Op, opts ...sitevisitorOption) *SiteVisitorMutation {
+	m := &SiteVisitorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSiteVisitor,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSiteVisitorID sets the ID field of the mutation.
+func withSiteVisitorID(id int) sitevisitorOption {
+	return func(m *SiteVisitorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SiteVisitor
+		)
+		m.oldValue = func(ctx context.Context) (*SiteVisitor, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SiteVisitor.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSiteVisitor sets the old SiteVisitor of the mutation.
+func withSiteVisitor(node *SiteVisitor) sitevisitorOption {
+	return func(m *SiteVisitorMutation) {
+		m.oldValue = func(context.Context) (*SiteVisitor, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SiteVisitorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SiteVisitorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SiteVisitorMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SiteVisitorMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SiteVisitor.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *SiteVisitorMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *SiteVisitorMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *SiteVisitorMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *SiteVisitorMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *SiteVisitorMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *SiteVisitorMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *SiteVisitorMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *SiteVisitorMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *SiteVisitorMutation) SetSessionID(i int64) {
+	m.session_id = &i
+	m.addsession_id = nil
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *SiteVisitorMutation) SessionID() (r int64, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldSessionID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// AddSessionID adds i to the "session_id" field.
+func (m *SiteVisitorMutation) AddSessionID(i int64) {
+	if m.addsession_id != nil {
+		*m.addsession_id += i
+	} else {
+		m.addsession_id = &i
+	}
+}
+
+// AddedSessionID returns the value that was added to the "session_id" field in this mutation.
+func (m *SiteVisitorMutation) AddedSessionID() (r int64, exists bool) {
+	v := m.addsession_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *SiteVisitorMutation) ResetSessionID() {
+	m.session_id = nil
+	m.addsession_id = nil
+}
+
+// SetSiteID sets the "site_id" field.
+func (m *SiteVisitorMutation) SetSiteID(i int64) {
+	m.site_id = &i
+	m.addsite_id = nil
+}
+
+// SiteID returns the value of the "site_id" field in the mutation.
+func (m *SiteVisitorMutation) SiteID() (r int64, exists bool) {
+	v := m.site_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteID returns the old "site_id" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldSiteID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteID: %w", err)
+	}
+	return oldValue.SiteID, nil
+}
+
+// AddSiteID adds i to the "site_id" field.
+func (m *SiteVisitorMutation) AddSiteID(i int64) {
+	if m.addsite_id != nil {
+		*m.addsite_id += i
+	} else {
+		m.addsite_id = &i
+	}
+}
+
+// AddedSiteID returns the value that was added to the "site_id" field in this mutation.
+func (m *SiteVisitorMutation) AddedSiteID() (r int64, exists bool) {
+	v := m.addsite_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSiteID resets all changes to the "site_id" field.
+func (m *SiteVisitorMutation) ResetSiteID() {
+	m.site_id = nil
+	m.addsite_id = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SiteVisitorMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SiteVisitorMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SiteVisitorMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SiteVisitorMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SiteVisitorMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SiteVisitor entity.
+// If the SiteVisitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteVisitorMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SiteVisitorMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the SiteVisitorMutation builder.
+func (m *SiteVisitorMutation) Where(ps ...predicate.SiteVisitor) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SiteVisitorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SiteVisitorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SiteVisitor, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SiteVisitorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SiteVisitorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SiteVisitor).
+func (m *SiteVisitorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SiteVisitorMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.uuid != nil {
+		fields = append(fields, sitevisitor.FieldUUID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, sitevisitor.FieldVisitorID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, sitevisitor.FieldSessionID)
+	}
+	if m.site_id != nil {
+		fields = append(fields, sitevisitor.FieldSiteID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, sitevisitor.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, sitevisitor.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SiteVisitorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sitevisitor.FieldUUID:
+		return m.UUID()
+	case sitevisitor.FieldVisitorID:
+		return m.VisitorID()
+	case sitevisitor.FieldSessionID:
+		return m.SessionID()
+	case sitevisitor.FieldSiteID:
+		return m.SiteID()
+	case sitevisitor.FieldCreatedAt:
+		return m.CreatedAt()
+	case sitevisitor.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SiteVisitorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sitevisitor.FieldUUID:
+		return m.OldUUID(ctx)
+	case sitevisitor.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case sitevisitor.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case sitevisitor.FieldSiteID:
+		return m.OldSiteID(ctx)
+	case sitevisitor.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case sitevisitor.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SiteVisitor field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SiteVisitorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sitevisitor.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case sitevisitor.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case sitevisitor.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case sitevisitor.FieldSiteID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteID(v)
+		return nil
+	case sitevisitor.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case sitevisitor.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SiteVisitor field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SiteVisitorMutation) AddedFields() []string {
+	var fields []string
+	if m.addvisitor_id != nil {
+		fields = append(fields, sitevisitor.FieldVisitorID)
+	}
+	if m.addsession_id != nil {
+		fields = append(fields, sitevisitor.FieldSessionID)
+	}
+	if m.addsite_id != nil {
+		fields = append(fields, sitevisitor.FieldSiteID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SiteVisitorMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case sitevisitor.FieldVisitorID:
+		return m.AddedVisitorID()
+	case sitevisitor.FieldSessionID:
+		return m.AddedSessionID()
+	case sitevisitor.FieldSiteID:
+		return m.AddedSiteID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SiteVisitorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case sitevisitor.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	case sitevisitor.FieldSessionID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSessionID(v)
+		return nil
+	case sitevisitor.FieldSiteID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSiteID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SiteVisitor numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SiteVisitorMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SiteVisitorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SiteVisitorMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SiteVisitor nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SiteVisitorMutation) ResetField(name string) error {
+	switch name {
+	case sitevisitor.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case sitevisitor.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case sitevisitor.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case sitevisitor.FieldSiteID:
+		m.ResetSiteID()
+		return nil
+	case sitevisitor.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case sitevisitor.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SiteVisitor field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SiteVisitorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SiteVisitorMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SiteVisitorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SiteVisitorMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SiteVisitorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SiteVisitorMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SiteVisitorMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SiteVisitor unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SiteVisitorMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SiteVisitor edge %s", name)
+}
+
+// VisitorMutation represents an operation that mutates the Visitor nodes in the graph.
+type VisitorMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	uuid              *string
+	anonymous_id      *string
+	primary_user_id   *string
+	first_seen_at     *time.Time
+	last_seen_at      *time.Time
+	is_bot            *bool
+	is_verified_human *bool
+	created_at        *time.Time
+	updated_at        *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*Visitor, error)
+	predicates        []predicate.Visitor
+}
+
+var _ ent.Mutation = (*VisitorMutation)(nil)
+
+// visitorOption allows management of the mutation configuration using functional options.
+type visitorOption func(*VisitorMutation)
+
+// newVisitorMutation creates new mutation for the Visitor entity.
+func newVisitorMutation(c config, op Op, opts ...visitorOption) *VisitorMutation {
+	m := &VisitorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVisitor,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVisitorID sets the ID field of the mutation.
+func withVisitorID(id int) visitorOption {
+	return func(m *VisitorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Visitor
+		)
+		m.oldValue = func(ctx context.Context) (*Visitor, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Visitor.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVisitor sets the old Visitor of the mutation.
+func withVisitor(node *Visitor) visitorOption {
+	return func(m *VisitorMutation) {
+		m.oldValue = func(context.Context) (*Visitor, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VisitorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VisitorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VisitorMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VisitorMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Visitor.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *VisitorMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *VisitorMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *VisitorMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetAnonymousID sets the "anonymous_id" field.
+func (m *VisitorMutation) SetAnonymousID(s string) {
+	m.anonymous_id = &s
+}
+
+// AnonymousID returns the value of the "anonymous_id" field in the mutation.
+func (m *VisitorMutation) AnonymousID() (r string, exists bool) {
+	v := m.anonymous_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnonymousID returns the old "anonymous_id" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldAnonymousID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnonymousID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnonymousID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnonymousID: %w", err)
+	}
+	return oldValue.AnonymousID, nil
+}
+
+// ResetAnonymousID resets all changes to the "anonymous_id" field.
+func (m *VisitorMutation) ResetAnonymousID() {
+	m.anonymous_id = nil
+}
+
+// SetPrimaryUserID sets the "primary_user_id" field.
+func (m *VisitorMutation) SetPrimaryUserID(s string) {
+	m.primary_user_id = &s
+}
+
+// PrimaryUserID returns the value of the "primary_user_id" field in the mutation.
+func (m *VisitorMutation) PrimaryUserID() (r string, exists bool) {
+	v := m.primary_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrimaryUserID returns the old "primary_user_id" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldPrimaryUserID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrimaryUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrimaryUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrimaryUserID: %w", err)
+	}
+	return oldValue.PrimaryUserID, nil
+}
+
+// ClearPrimaryUserID clears the value of the "primary_user_id" field.
+func (m *VisitorMutation) ClearPrimaryUserID() {
+	m.primary_user_id = nil
+	m.clearedFields[visitor.FieldPrimaryUserID] = struct{}{}
+}
+
+// PrimaryUserIDCleared returns if the "primary_user_id" field was cleared in this mutation.
+func (m *VisitorMutation) PrimaryUserIDCleared() bool {
+	_, ok := m.clearedFields[visitor.FieldPrimaryUserID]
+	return ok
+}
+
+// ResetPrimaryUserID resets all changes to the "primary_user_id" field.
+func (m *VisitorMutation) ResetPrimaryUserID() {
+	m.primary_user_id = nil
+	delete(m.clearedFields, visitor.FieldPrimaryUserID)
+}
+
+// SetFirstSeenAt sets the "first_seen_at" field.
+func (m *VisitorMutation) SetFirstSeenAt(t time.Time) {
+	m.first_seen_at = &t
+}
+
+// FirstSeenAt returns the value of the "first_seen_at" field in the mutation.
+func (m *VisitorMutation) FirstSeenAt() (r time.Time, exists bool) {
+	v := m.first_seen_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstSeenAt returns the old "first_seen_at" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldFirstSeenAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstSeenAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstSeenAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstSeenAt: %w", err)
+	}
+	return oldValue.FirstSeenAt, nil
+}
+
+// ResetFirstSeenAt resets all changes to the "first_seen_at" field.
+func (m *VisitorMutation) ResetFirstSeenAt() {
+	m.first_seen_at = nil
+}
+
+// SetLastSeenAt sets the "last_seen_at" field.
+func (m *VisitorMutation) SetLastSeenAt(t time.Time) {
+	m.last_seen_at = &t
+}
+
+// LastSeenAt returns the value of the "last_seen_at" field in the mutation.
+func (m *VisitorMutation) LastSeenAt() (r time.Time, exists bool) {
+	v := m.last_seen_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSeenAt returns the old "last_seen_at" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldLastSeenAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSeenAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSeenAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSeenAt: %w", err)
+	}
+	return oldValue.LastSeenAt, nil
+}
+
+// ResetLastSeenAt resets all changes to the "last_seen_at" field.
+func (m *VisitorMutation) ResetLastSeenAt() {
+	m.last_seen_at = nil
+}
+
+// SetIsBot sets the "is_bot" field.
+func (m *VisitorMutation) SetIsBot(b bool) {
+	m.is_bot = &b
+}
+
+// IsBot returns the value of the "is_bot" field in the mutation.
+func (m *VisitorMutation) IsBot() (r bool, exists bool) {
+	v := m.is_bot
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsBot returns the old "is_bot" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldIsBot(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsBot is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsBot requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsBot: %w", err)
+	}
+	return oldValue.IsBot, nil
+}
+
+// ResetIsBot resets all changes to the "is_bot" field.
+func (m *VisitorMutation) ResetIsBot() {
+	m.is_bot = nil
+}
+
+// SetIsVerifiedHuman sets the "is_verified_human" field.
+func (m *VisitorMutation) SetIsVerifiedHuman(b bool) {
+	m.is_verified_human = &b
+}
+
+// IsVerifiedHuman returns the value of the "is_verified_human" field in the mutation.
+func (m *VisitorMutation) IsVerifiedHuman() (r bool, exists bool) {
+	v := m.is_verified_human
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsVerifiedHuman returns the old "is_verified_human" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldIsVerifiedHuman(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsVerifiedHuman is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsVerifiedHuman requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsVerifiedHuman: %w", err)
+	}
+	return oldValue.IsVerifiedHuman, nil
+}
+
+// ResetIsVerifiedHuman resets all changes to the "is_verified_human" field.
+func (m *VisitorMutation) ResetIsVerifiedHuman() {
+	m.is_verified_human = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VisitorMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VisitorMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VisitorMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *VisitorMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *VisitorMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Visitor entity.
+// If the Visitor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *VisitorMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the VisitorMutation builder.
+func (m *VisitorMutation) Where(ps ...predicate.Visitor) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VisitorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VisitorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Visitor, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VisitorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VisitorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Visitor).
+func (m *VisitorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VisitorMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.uuid != nil {
+		fields = append(fields, visitor.FieldUUID)
+	}
+	if m.anonymous_id != nil {
+		fields = append(fields, visitor.FieldAnonymousID)
+	}
+	if m.primary_user_id != nil {
+		fields = append(fields, visitor.FieldPrimaryUserID)
+	}
+	if m.first_seen_at != nil {
+		fields = append(fields, visitor.FieldFirstSeenAt)
+	}
+	if m.last_seen_at != nil {
+		fields = append(fields, visitor.FieldLastSeenAt)
+	}
+	if m.is_bot != nil {
+		fields = append(fields, visitor.FieldIsBot)
+	}
+	if m.is_verified_human != nil {
+		fields = append(fields, visitor.FieldIsVerifiedHuman)
+	}
+	if m.created_at != nil {
+		fields = append(fields, visitor.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, visitor.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VisitorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case visitor.FieldUUID:
+		return m.UUID()
+	case visitor.FieldAnonymousID:
+		return m.AnonymousID()
+	case visitor.FieldPrimaryUserID:
+		return m.PrimaryUserID()
+	case visitor.FieldFirstSeenAt:
+		return m.FirstSeenAt()
+	case visitor.FieldLastSeenAt:
+		return m.LastSeenAt()
+	case visitor.FieldIsBot:
+		return m.IsBot()
+	case visitor.FieldIsVerifiedHuman:
+		return m.IsVerifiedHuman()
+	case visitor.FieldCreatedAt:
+		return m.CreatedAt()
+	case visitor.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VisitorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case visitor.FieldUUID:
+		return m.OldUUID(ctx)
+	case visitor.FieldAnonymousID:
+		return m.OldAnonymousID(ctx)
+	case visitor.FieldPrimaryUserID:
+		return m.OldPrimaryUserID(ctx)
+	case visitor.FieldFirstSeenAt:
+		return m.OldFirstSeenAt(ctx)
+	case visitor.FieldLastSeenAt:
+		return m.OldLastSeenAt(ctx)
+	case visitor.FieldIsBot:
+		return m.OldIsBot(ctx)
+	case visitor.FieldIsVerifiedHuman:
+		return m.OldIsVerifiedHuman(ctx)
+	case visitor.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case visitor.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Visitor field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case visitor.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case visitor.FieldAnonymousID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnonymousID(v)
+		return nil
+	case visitor.FieldPrimaryUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrimaryUserID(v)
+		return nil
+	case visitor.FieldFirstSeenAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstSeenAt(v)
+		return nil
+	case visitor.FieldLastSeenAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSeenAt(v)
+		return nil
+	case visitor.FieldIsBot:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsBot(v)
+		return nil
+	case visitor.FieldIsVerifiedHuman:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsVerifiedHuman(v)
+		return nil
+	case visitor.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case visitor.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Visitor field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VisitorMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VisitorMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Visitor numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VisitorMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(visitor.FieldPrimaryUserID) {
+		fields = append(fields, visitor.FieldPrimaryUserID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VisitorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VisitorMutation) ClearField(name string) error {
+	switch name {
+	case visitor.FieldPrimaryUserID:
+		m.ClearPrimaryUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown Visitor nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VisitorMutation) ResetField(name string) error {
+	switch name {
+	case visitor.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case visitor.FieldAnonymousID:
+		m.ResetAnonymousID()
+		return nil
+	case visitor.FieldPrimaryUserID:
+		m.ResetPrimaryUserID()
+		return nil
+	case visitor.FieldFirstSeenAt:
+		m.ResetFirstSeenAt()
+		return nil
+	case visitor.FieldLastSeenAt:
+		m.ResetLastSeenAt()
+		return nil
+	case visitor.FieldIsBot:
+		m.ResetIsBot()
+		return nil
+	case visitor.FieldIsVerifiedHuman:
+		m.ResetIsVerifiedHuman()
+		return nil
+	case visitor.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case visitor.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Visitor field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VisitorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VisitorMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VisitorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VisitorMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VisitorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VisitorMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VisitorMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Visitor unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VisitorMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Visitor edge %s", name)
 }

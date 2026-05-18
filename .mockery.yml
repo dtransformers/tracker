@@ -11,3 +11,10 @@ packages:
       dir: "internal/modules/sites/v1/mocks"
       filename: "mock_{{.InterfaceName}}.go"
       pkgname: "mocks"
+
+  tracking/internal/modules/visitors/v1:
+    config:
+      all: true
+      dir: "internal/modules/visitors/v1/mocks"
+      filename: "mock_{{.InterfaceName}}.go"
+      pkgname: "mocks"

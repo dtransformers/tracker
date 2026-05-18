@@ -14,6 +14,10 @@ type Tx struct {
 	config
 	// Site is the client for interacting with the Site builders.
 	Site *SiteClient
+	// SiteVisitor is the client for interacting with the SiteVisitor builders.
+	SiteVisitor *SiteVisitorClient
+	// Visitor is the client for interacting with the Visitor builders.
+	Visitor *VisitorClient
 
 	// lazily loaded.
 	client     *Client
@@ -146,6 +150,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Site = NewSiteClient(tx.config)
+	tx.SiteVisitor = NewSiteVisitorClient(tx.config)
+	tx.Visitor = NewVisitorClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

@@ -200,6 +200,38 @@ func (s *Service) GetSite(ctx context.Context, siteUUID string) (*Response, erro
 	return toResponse(site), nil
 }
 
+// VerifySiteKey verifies if a site exists and is active for a given public key.
+func (s *Service) VerifySiteKey(ctx context.Context, publicKey string) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	site, err := s.repo.GetByPublicKey(ctx, publicKey)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to verify site key: %w", err)
+	}
+
+	return site.IsActive, nil
+}
+
+// GetSiteKey retrieves a site by its public key.
+func (s *Service) GetSiteKey(ctx context.Context, publicKey string) (*ent.Site, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	site, err := s.repo.GetByPublicKey(ctx, publicKey)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrSiteNotFound
+		}
+		return nil, fmt.Errorf("failed to get site by key: %w", err)
+	}
+
+	return site, nil
+}
+
 // ListSites retrieves sites, optionally filtered by tenant ID.
 func (s *Service) ListSites(ctx context.Context, tenantID *int64) (*ListResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)

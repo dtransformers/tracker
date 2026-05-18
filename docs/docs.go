@@ -26,7 +26,12 @@ const docTemplate = `{
     "paths": {
         "/api/v1/sites": {
             "get": {
-                "description": "Get a list of all active sites",
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get a list of all sites",
                 "produces": [
                     "application/json"
                 ],
@@ -34,29 +39,37 @@ const docTemplate = `{
                     "sites"
                 ],
                 "summary": "List all sites",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Filter by Tenant ID",
+                        "name": "tenant_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ent.Site"
-                            }
+                            "$ref": "#/definitions/v1.ListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new site with name and domain",
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Create a new site with auto-generated security keys and assigned tenant ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -70,7 +83,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Site creation request",
-                        "name": "request",
+                        "name": "site",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -82,25 +95,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Site"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Domain already exists",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     }
                 }
@@ -108,14 +121,19 @@ const docTemplate = `{
         },
         "/api/v1/sites/{uuid}": {
             "get": {
-                "description": "Get a site by its UUID",
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get detailed information about a specific site",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "sites"
                 ],
-                "summary": "Get a site",
+                "summary": "Get a site by UUID",
                 "parameters": [
                     {
                         "type": "string",
@@ -129,22 +147,36 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Site"
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Soft-delete a site by its UUID",
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Permanently delete a site",
                 "tags": [
                     "sites"
                 ],
@@ -162,19 +194,33 @@ const docTemplate = `{
                     "204": {
                         "description": "No Content"
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     }
                 }
             },
             "patch": {
-                "description": "Update site name, domain, or status",
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Update site information",
                 "consumes": [
                     "application/json"
                 ],
@@ -195,7 +241,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "Site update request",
-                        "name": "request",
+                        "name": "site",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -207,25 +253,143 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Site"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Domain already in use",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sites/{uuid}/regenerate-keys": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Generate new public and secret keys for a site",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Regenerate site security keys",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/visitors/track": {
+            "post": {
+                "description": "Track a visitor on a site. Creates a new visitor if not exists, or updates last seen time.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Track a visitor",
+                "parameters": [
+                    {
+                        "description": "Track visitor request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.TrackVisitorRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Public API Key",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HMAC Signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.VisitorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
                         }
                     }
                 }
@@ -233,47 +397,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "ent.Site": {
+        "internal_modules_sites_v1.ErrorResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                "details": {
                     "type": "string"
                 },
-                "deleted_at": {
-                    "description": "DeletedAt holds the value of the \"deleted_at\" field.",
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
                     "type": "string"
                 },
-                "domain": {
-                    "description": "Domain holds the value of the \"domain\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "is_active": {
-                    "description": "IsActive holds the value of the \"is_active\" field.",
-                    "type": "boolean"
-                },
-                "is_deleted": {
-                    "description": "IsDeleted holds the value of the \"is_deleted\" field.",
-                    "type": "boolean"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                },
-                "public_key": {
-                    "description": "PublicKey holds the value of the \"public_key\" field.",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "description": "UpdatedAt holds the value of the \"updated_at\" field.",
-                    "type": "string"
-                },
-                "uuid": {
-                    "description": "UUID holds the value of the \"uuid\" field.",
+                "error": {
                     "type": "string"
                 }
             }
@@ -282,16 +423,83 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "domain",
-                "name"
+                "name",
+                "tenant_id"
             ],
             "properties": {
                 "domain": {
-                    "description": "Domain of the site (must be unique)",
+                    "description": "Domain of the site (required, must be unique and valid)",
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the site",
+                    "description": "Name of the site (required, 1-255 characters)",
                     "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID of the site",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.ListResponse": {
+            "type": "object",
+            "properties": {
+                "sites": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Response"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.Response": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.TrackVisitorRequest": {
+            "type": "object",
+            "required": [
+                "anonymous_id",
+                "public_key",
+                "session_id"
+            ],
+            "properties": {
+                "anonymous_id": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -309,8 +517,43 @@ const docTemplate = `{
                 "name": {
                     "description": "Optional new name for the site",
                     "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Optional new tenant ID",
+                    "type": "integer"
                 }
             }
+        },
+        "v1.VisitorResponse": {
+            "type": "object",
+            "properties": {
+                "anonymous_id": {
+                    "type": "string"
+                },
+                "first_seen_at": {
+                    "type": "string"
+                },
+                "is_bot": {
+                    "type": "boolean"
+                },
+                "is_verified_human": {
+                    "type": "boolean"
+                },
+                "last_seen_at": {
+                    "type": "string"
+                },
+                "primary_user_id": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }`

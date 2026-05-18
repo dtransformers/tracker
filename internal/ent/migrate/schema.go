@@ -29,9 +29,46 @@ var (
 		Columns:    SitesColumns,
 		PrimaryKey: []*schema.Column{SitesColumns[0]},
 	}
+	// SiteVisitorsColumns holds the columns for the "site_visitors" table.
+	SiteVisitorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "session_id", Type: field.TypeInt64},
+		{Name: "site_id", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SiteVisitorsTable holds the schema information for the "site_visitors" table.
+	SiteVisitorsTable = &schema.Table{
+		Name:       "site_visitors",
+		Columns:    SiteVisitorsColumns,
+		PrimaryKey: []*schema.Column{SiteVisitorsColumns[0]},
+	}
+	// VisitorsColumns holds the columns for the "visitors" table.
+	VisitorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "anonymous_id", Type: field.TypeString, Unique: true},
+		{Name: "primary_user_id", Type: field.TypeString, Nullable: true},
+		{Name: "first_seen_at", Type: field.TypeTime},
+		{Name: "last_seen_at", Type: field.TypeTime},
+		{Name: "is_bot", Type: field.TypeBool, Default: false},
+		{Name: "is_verified_human", Type: field.TypeBool, Default: false},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// VisitorsTable holds the schema information for the "visitors" table.
+	VisitorsTable = &schema.Table{
+		Name:       "visitors",
+		Columns:    VisitorsColumns,
+		PrimaryKey: []*schema.Column{VisitorsColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		SitesTable,
+		SiteVisitorsTable,
+		VisitorsTable,
 	}
 )
 

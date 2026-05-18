@@ -20,6 +20,30 @@ func (f SiteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SiteMutation", m)
 }
 
+// The SiteVisitorFunc type is an adapter to allow the use of ordinary
+// function as SiteVisitor mutator.
+type SiteVisitorFunc func(context.Context, *ent.SiteVisitorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SiteVisitorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SiteVisitorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SiteVisitorMutation", m)
+}
+
+// The VisitorFunc type is an adapter to allow the use of ordinary
+// function as Visitor mutator.
+type VisitorFunc func(context.Context, *ent.VisitorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VisitorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VisitorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 
