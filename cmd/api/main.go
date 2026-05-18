@@ -28,6 +28,7 @@ import (
 	"tracking/internal/database"
 	"tracking/internal/modules/health"
 	"tracking/internal/modules/sites"
+	"tracking/internal/modules/state"
 	"tracking/internal/modules/visitors"
 	"tracking/internal/server"
 
@@ -56,6 +57,7 @@ func run() error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 	db, err := initDatabase(cfg)
+	state.Init(cfg.Redis)
 	if err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}

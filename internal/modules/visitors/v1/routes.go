@@ -6,6 +6,7 @@ import (
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	sitesv1 "tracking/internal/modules/sites/v1"
+	"tracking/internal/modules/state"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,15 +37,15 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
 
 	// Apply HMAC middleware
-	visitors.Use(middlewares.HMAC(func(publicKey string) (string, error) {
-		site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
-		if err != nil {
-			return "", err
-		}
-		// Assuming site struct has SecretKey field accessible
-		// We need to make sure it's exported or available.
-		// In ent, it generates a field in the struct.
-		return site.SecretKey, nil
+	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
+		GetSecretKey: func(publicKey string) (string, error) {
+			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
+			if err != nil {
+				return "", err
+			}
+			return site.SecretKey, nil
+		},
+		NonceStore: state.NewNonceStore(state.Redis),
 	}))
 
 	visitors.POST("/track", m.handler.Track)
