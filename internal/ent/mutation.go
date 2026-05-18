@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"tracking/internal/ent/device"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
+	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -26,10 +28,1250 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeSite        = "Site"
-	TypeSiteVisitor = "SiteVisitor"
-	TypeVisitor     = "Visitor"
+	TypeDevice         = "Device"
+	TypeSite           = "Site"
+	TypeSiteVisitor    = "SiteVisitor"
+	TypeVisitor        = "Visitor"
+	TypeVisitorSession = "VisitorSession"
 )
+
+// DeviceMutation represents an operation that mutates the Device nodes in the graph.
+type DeviceMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	uuid             *string
+	visitor_id       *int64
+	addvisitor_id    *int64
+	fingerprint_hash *string
+	device_type      *string
+	os               *string
+	address_ip       *string
+	country          *string
+	region           *string
+	city             *string
+	browser          *string
+	language         *string
+	timezone         *string
+	first_seen_at    *time.Time
+	last_seen_at     *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*Device, error)
+	predicates       []predicate.Device
+}
+
+var _ ent.Mutation = (*DeviceMutation)(nil)
+
+// deviceOption allows management of the mutation configuration using functional options.
+type deviceOption func(*DeviceMutation)
+
+// newDeviceMutation creates new mutation for the Device entity.
+func newDeviceMutation(c config, op Op, opts ...deviceOption) *DeviceMutation {
+	m := &DeviceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDevice,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeviceID sets the ID field of the mutation.
+func withDeviceID(id int) deviceOption {
+	return func(m *DeviceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Device
+		)
+		m.oldValue = func(ctx context.Context) (*Device, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Device.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDevice sets the old Device of the mutation.
+func withDevice(node *Device) deviceOption {
+	return func(m *DeviceMutation) {
+		m.oldValue = func(context.Context) (*Device, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeviceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeviceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeviceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeviceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Device.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *DeviceMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *DeviceMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *DeviceMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *DeviceMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *DeviceMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *DeviceMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *DeviceMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *DeviceMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetFingerprintHash sets the "fingerprint_hash" field.
+func (m *DeviceMutation) SetFingerprintHash(s string) {
+	m.fingerprint_hash = &s
+}
+
+// FingerprintHash returns the value of the "fingerprint_hash" field in the mutation.
+func (m *DeviceMutation) FingerprintHash() (r string, exists bool) {
+	v := m.fingerprint_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFingerprintHash returns the old "fingerprint_hash" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldFingerprintHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFingerprintHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFingerprintHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFingerprintHash: %w", err)
+	}
+	return oldValue.FingerprintHash, nil
+}
+
+// ResetFingerprintHash resets all changes to the "fingerprint_hash" field.
+func (m *DeviceMutation) ResetFingerprintHash() {
+	m.fingerprint_hash = nil
+}
+
+// SetDeviceType sets the "device_type" field.
+func (m *DeviceMutation) SetDeviceType(s string) {
+	m.device_type = &s
+}
+
+// DeviceType returns the value of the "device_type" field in the mutation.
+func (m *DeviceMutation) DeviceType() (r string, exists bool) {
+	v := m.device_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceType returns the old "device_type" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldDeviceType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceType: %w", err)
+	}
+	return oldValue.DeviceType, nil
+}
+
+// ClearDeviceType clears the value of the "device_type" field.
+func (m *DeviceMutation) ClearDeviceType() {
+	m.device_type = nil
+	m.clearedFields[device.FieldDeviceType] = struct{}{}
+}
+
+// DeviceTypeCleared returns if the "device_type" field was cleared in this mutation.
+func (m *DeviceMutation) DeviceTypeCleared() bool {
+	_, ok := m.clearedFields[device.FieldDeviceType]
+	return ok
+}
+
+// ResetDeviceType resets all changes to the "device_type" field.
+func (m *DeviceMutation) ResetDeviceType() {
+	m.device_type = nil
+	delete(m.clearedFields, device.FieldDeviceType)
+}
+
+// SetOs sets the "os" field.
+func (m *DeviceMutation) SetOs(s string) {
+	m.os = &s
+}
+
+// Os returns the value of the "os" field in the mutation.
+func (m *DeviceMutation) Os() (r string, exists bool) {
+	v := m.os
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOs returns the old "os" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldOs(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOs: %w", err)
+	}
+	return oldValue.Os, nil
+}
+
+// ClearOs clears the value of the "os" field.
+func (m *DeviceMutation) ClearOs() {
+	m.os = nil
+	m.clearedFields[device.FieldOs] = struct{}{}
+}
+
+// OsCleared returns if the "os" field was cleared in this mutation.
+func (m *DeviceMutation) OsCleared() bool {
+	_, ok := m.clearedFields[device.FieldOs]
+	return ok
+}
+
+// ResetOs resets all changes to the "os" field.
+func (m *DeviceMutation) ResetOs() {
+	m.os = nil
+	delete(m.clearedFields, device.FieldOs)
+}
+
+// SetAddressIP sets the "address_ip" field.
+func (m *DeviceMutation) SetAddressIP(s string) {
+	m.address_ip = &s
+}
+
+// AddressIP returns the value of the "address_ip" field in the mutation.
+func (m *DeviceMutation) AddressIP() (r string, exists bool) {
+	v := m.address_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddressIP returns the old "address_ip" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldAddressIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddressIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddressIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddressIP: %w", err)
+	}
+	return oldValue.AddressIP, nil
+}
+
+// ClearAddressIP clears the value of the "address_ip" field.
+func (m *DeviceMutation) ClearAddressIP() {
+	m.address_ip = nil
+	m.clearedFields[device.FieldAddressIP] = struct{}{}
+}
+
+// AddressIPCleared returns if the "address_ip" field was cleared in this mutation.
+func (m *DeviceMutation) AddressIPCleared() bool {
+	_, ok := m.clearedFields[device.FieldAddressIP]
+	return ok
+}
+
+// ResetAddressIP resets all changes to the "address_ip" field.
+func (m *DeviceMutation) ResetAddressIP() {
+	m.address_ip = nil
+	delete(m.clearedFields, device.FieldAddressIP)
+}
+
+// SetCountry sets the "country" field.
+func (m *DeviceMutation) SetCountry(s string) {
+	m.country = &s
+}
+
+// Country returns the value of the "country" field in the mutation.
+func (m *DeviceMutation) Country() (r string, exists bool) {
+	v := m.country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCountry returns the old "country" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldCountry(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCountry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCountry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCountry: %w", err)
+	}
+	return oldValue.Country, nil
+}
+
+// ClearCountry clears the value of the "country" field.
+func (m *DeviceMutation) ClearCountry() {
+	m.country = nil
+	m.clearedFields[device.FieldCountry] = struct{}{}
+}
+
+// CountryCleared returns if the "country" field was cleared in this mutation.
+func (m *DeviceMutation) CountryCleared() bool {
+	_, ok := m.clearedFields[device.FieldCountry]
+	return ok
+}
+
+// ResetCountry resets all changes to the "country" field.
+func (m *DeviceMutation) ResetCountry() {
+	m.country = nil
+	delete(m.clearedFields, device.FieldCountry)
+}
+
+// SetRegion sets the "region" field.
+func (m *DeviceMutation) SetRegion(s string) {
+	m.region = &s
+}
+
+// Region returns the value of the "region" field in the mutation.
+func (m *DeviceMutation) Region() (r string, exists bool) {
+	v := m.region
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRegion returns the old "region" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldRegion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRegion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRegion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRegion: %w", err)
+	}
+	return oldValue.Region, nil
+}
+
+// ClearRegion clears the value of the "region" field.
+func (m *DeviceMutation) ClearRegion() {
+	m.region = nil
+	m.clearedFields[device.FieldRegion] = struct{}{}
+}
+
+// RegionCleared returns if the "region" field was cleared in this mutation.
+func (m *DeviceMutation) RegionCleared() bool {
+	_, ok := m.clearedFields[device.FieldRegion]
+	return ok
+}
+
+// ResetRegion resets all changes to the "region" field.
+func (m *DeviceMutation) ResetRegion() {
+	m.region = nil
+	delete(m.clearedFields, device.FieldRegion)
+}
+
+// SetCity sets the "city" field.
+func (m *DeviceMutation) SetCity(s string) {
+	m.city = &s
+}
+
+// City returns the value of the "city" field in the mutation.
+func (m *DeviceMutation) City() (r string, exists bool) {
+	v := m.city
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCity returns the old "city" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldCity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCity: %w", err)
+	}
+	return oldValue.City, nil
+}
+
+// ClearCity clears the value of the "city" field.
+func (m *DeviceMutation) ClearCity() {
+	m.city = nil
+	m.clearedFields[device.FieldCity] = struct{}{}
+}
+
+// CityCleared returns if the "city" field was cleared in this mutation.
+func (m *DeviceMutation) CityCleared() bool {
+	_, ok := m.clearedFields[device.FieldCity]
+	return ok
+}
+
+// ResetCity resets all changes to the "city" field.
+func (m *DeviceMutation) ResetCity() {
+	m.city = nil
+	delete(m.clearedFields, device.FieldCity)
+}
+
+// SetBrowser sets the "browser" field.
+func (m *DeviceMutation) SetBrowser(s string) {
+	m.browser = &s
+}
+
+// Browser returns the value of the "browser" field in the mutation.
+func (m *DeviceMutation) Browser() (r string, exists bool) {
+	v := m.browser
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowser returns the old "browser" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldBrowser(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowser: %w", err)
+	}
+	return oldValue.Browser, nil
+}
+
+// ClearBrowser clears the value of the "browser" field.
+func (m *DeviceMutation) ClearBrowser() {
+	m.browser = nil
+	m.clearedFields[device.FieldBrowser] = struct{}{}
+}
+
+// BrowserCleared returns if the "browser" field was cleared in this mutation.
+func (m *DeviceMutation) BrowserCleared() bool {
+	_, ok := m.clearedFields[device.FieldBrowser]
+	return ok
+}
+
+// ResetBrowser resets all changes to the "browser" field.
+func (m *DeviceMutation) ResetBrowser() {
+	m.browser = nil
+	delete(m.clearedFields, device.FieldBrowser)
+}
+
+// SetLanguage sets the "language" field.
+func (m *DeviceMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *DeviceMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ClearLanguage clears the value of the "language" field.
+func (m *DeviceMutation) ClearLanguage() {
+	m.language = nil
+	m.clearedFields[device.FieldLanguage] = struct{}{}
+}
+
+// LanguageCleared returns if the "language" field was cleared in this mutation.
+func (m *DeviceMutation) LanguageCleared() bool {
+	_, ok := m.clearedFields[device.FieldLanguage]
+	return ok
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *DeviceMutation) ResetLanguage() {
+	m.language = nil
+	delete(m.clearedFields, device.FieldLanguage)
+}
+
+// SetTimezone sets the "timezone" field.
+func (m *DeviceMutation) SetTimezone(s string) {
+	m.timezone = &s
+}
+
+// Timezone returns the value of the "timezone" field in the mutation.
+func (m *DeviceMutation) Timezone() (r string, exists bool) {
+	v := m.timezone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimezone returns the old "timezone" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldTimezone(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimezone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimezone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimezone: %w", err)
+	}
+	return oldValue.Timezone, nil
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (m *DeviceMutation) ClearTimezone() {
+	m.timezone = nil
+	m.clearedFields[device.FieldTimezone] = struct{}{}
+}
+
+// TimezoneCleared returns if the "timezone" field was cleared in this mutation.
+func (m *DeviceMutation) TimezoneCleared() bool {
+	_, ok := m.clearedFields[device.FieldTimezone]
+	return ok
+}
+
+// ResetTimezone resets all changes to the "timezone" field.
+func (m *DeviceMutation) ResetTimezone() {
+	m.timezone = nil
+	delete(m.clearedFields, device.FieldTimezone)
+}
+
+// SetFirstSeenAt sets the "first_seen_at" field.
+func (m *DeviceMutation) SetFirstSeenAt(t time.Time) {
+	m.first_seen_at = &t
+}
+
+// FirstSeenAt returns the value of the "first_seen_at" field in the mutation.
+func (m *DeviceMutation) FirstSeenAt() (r time.Time, exists bool) {
+	v := m.first_seen_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstSeenAt returns the old "first_seen_at" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldFirstSeenAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstSeenAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstSeenAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstSeenAt: %w", err)
+	}
+	return oldValue.FirstSeenAt, nil
+}
+
+// ResetFirstSeenAt resets all changes to the "first_seen_at" field.
+func (m *DeviceMutation) ResetFirstSeenAt() {
+	m.first_seen_at = nil
+}
+
+// SetLastSeenAt sets the "last_seen_at" field.
+func (m *DeviceMutation) SetLastSeenAt(t time.Time) {
+	m.last_seen_at = &t
+}
+
+// LastSeenAt returns the value of the "last_seen_at" field in the mutation.
+func (m *DeviceMutation) LastSeenAt() (r time.Time, exists bool) {
+	v := m.last_seen_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSeenAt returns the old "last_seen_at" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldLastSeenAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSeenAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSeenAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSeenAt: %w", err)
+	}
+	return oldValue.LastSeenAt, nil
+}
+
+// ResetLastSeenAt resets all changes to the "last_seen_at" field.
+func (m *DeviceMutation) ResetLastSeenAt() {
+	m.last_seen_at = nil
+}
+
+// Where appends a list predicates to the DeviceMutation builder.
+func (m *DeviceMutation) Where(ps ...predicate.Device) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DeviceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DeviceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Device, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DeviceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DeviceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Device).
+func (m *DeviceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeviceMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.uuid != nil {
+		fields = append(fields, device.FieldUUID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, device.FieldVisitorID)
+	}
+	if m.fingerprint_hash != nil {
+		fields = append(fields, device.FieldFingerprintHash)
+	}
+	if m.device_type != nil {
+		fields = append(fields, device.FieldDeviceType)
+	}
+	if m.os != nil {
+		fields = append(fields, device.FieldOs)
+	}
+	if m.address_ip != nil {
+		fields = append(fields, device.FieldAddressIP)
+	}
+	if m.country != nil {
+		fields = append(fields, device.FieldCountry)
+	}
+	if m.region != nil {
+		fields = append(fields, device.FieldRegion)
+	}
+	if m.city != nil {
+		fields = append(fields, device.FieldCity)
+	}
+	if m.browser != nil {
+		fields = append(fields, device.FieldBrowser)
+	}
+	if m.language != nil {
+		fields = append(fields, device.FieldLanguage)
+	}
+	if m.timezone != nil {
+		fields = append(fields, device.FieldTimezone)
+	}
+	if m.first_seen_at != nil {
+		fields = append(fields, device.FieldFirstSeenAt)
+	}
+	if m.last_seen_at != nil {
+		fields = append(fields, device.FieldLastSeenAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case device.FieldUUID:
+		return m.UUID()
+	case device.FieldVisitorID:
+		return m.VisitorID()
+	case device.FieldFingerprintHash:
+		return m.FingerprintHash()
+	case device.FieldDeviceType:
+		return m.DeviceType()
+	case device.FieldOs:
+		return m.Os()
+	case device.FieldAddressIP:
+		return m.AddressIP()
+	case device.FieldCountry:
+		return m.Country()
+	case device.FieldRegion:
+		return m.Region()
+	case device.FieldCity:
+		return m.City()
+	case device.FieldBrowser:
+		return m.Browser()
+	case device.FieldLanguage:
+		return m.Language()
+	case device.FieldTimezone:
+		return m.Timezone()
+	case device.FieldFirstSeenAt:
+		return m.FirstSeenAt()
+	case device.FieldLastSeenAt:
+		return m.LastSeenAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case device.FieldUUID:
+		return m.OldUUID(ctx)
+	case device.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case device.FieldFingerprintHash:
+		return m.OldFingerprintHash(ctx)
+	case device.FieldDeviceType:
+		return m.OldDeviceType(ctx)
+	case device.FieldOs:
+		return m.OldOs(ctx)
+	case device.FieldAddressIP:
+		return m.OldAddressIP(ctx)
+	case device.FieldCountry:
+		return m.OldCountry(ctx)
+	case device.FieldRegion:
+		return m.OldRegion(ctx)
+	case device.FieldCity:
+		return m.OldCity(ctx)
+	case device.FieldBrowser:
+		return m.OldBrowser(ctx)
+	case device.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case device.FieldTimezone:
+		return m.OldTimezone(ctx)
+	case device.FieldFirstSeenAt:
+		return m.OldFirstSeenAt(ctx)
+	case device.FieldLastSeenAt:
+		return m.OldLastSeenAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Device field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case device.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case device.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case device.FieldFingerprintHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFingerprintHash(v)
+		return nil
+	case device.FieldDeviceType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceType(v)
+		return nil
+	case device.FieldOs:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOs(v)
+		return nil
+	case device.FieldAddressIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddressIP(v)
+		return nil
+	case device.FieldCountry:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCountry(v)
+		return nil
+	case device.FieldRegion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRegion(v)
+		return nil
+	case device.FieldCity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCity(v)
+		return nil
+	case device.FieldBrowser:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowser(v)
+		return nil
+	case device.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case device.FieldTimezone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimezone(v)
+		return nil
+	case device.FieldFirstSeenAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstSeenAt(v)
+		return nil
+	case device.FieldLastSeenAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSeenAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeviceMutation) AddedFields() []string {
+	var fields []string
+	if m.addvisitor_id != nil {
+		fields = append(fields, device.FieldVisitorID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeviceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case device.FieldVisitorID:
+		return m.AddedVisitorID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case device.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Device numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeviceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(device.FieldDeviceType) {
+		fields = append(fields, device.FieldDeviceType)
+	}
+	if m.FieldCleared(device.FieldOs) {
+		fields = append(fields, device.FieldOs)
+	}
+	if m.FieldCleared(device.FieldAddressIP) {
+		fields = append(fields, device.FieldAddressIP)
+	}
+	if m.FieldCleared(device.FieldCountry) {
+		fields = append(fields, device.FieldCountry)
+	}
+	if m.FieldCleared(device.FieldRegion) {
+		fields = append(fields, device.FieldRegion)
+	}
+	if m.FieldCleared(device.FieldCity) {
+		fields = append(fields, device.FieldCity)
+	}
+	if m.FieldCleared(device.FieldBrowser) {
+		fields = append(fields, device.FieldBrowser)
+	}
+	if m.FieldCleared(device.FieldLanguage) {
+		fields = append(fields, device.FieldLanguage)
+	}
+	if m.FieldCleared(device.FieldTimezone) {
+		fields = append(fields, device.FieldTimezone)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeviceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeviceMutation) ClearField(name string) error {
+	switch name {
+	case device.FieldDeviceType:
+		m.ClearDeviceType()
+		return nil
+	case device.FieldOs:
+		m.ClearOs()
+		return nil
+	case device.FieldAddressIP:
+		m.ClearAddressIP()
+		return nil
+	case device.FieldCountry:
+		m.ClearCountry()
+		return nil
+	case device.FieldRegion:
+		m.ClearRegion()
+		return nil
+	case device.FieldCity:
+		m.ClearCity()
+		return nil
+	case device.FieldBrowser:
+		m.ClearBrowser()
+		return nil
+	case device.FieldLanguage:
+		m.ClearLanguage()
+		return nil
+	case device.FieldTimezone:
+		m.ClearTimezone()
+		return nil
+	}
+	return fmt.Errorf("unknown Device nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeviceMutation) ResetField(name string) error {
+	switch name {
+	case device.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case device.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case device.FieldFingerprintHash:
+		m.ResetFingerprintHash()
+		return nil
+	case device.FieldDeviceType:
+		m.ResetDeviceType()
+		return nil
+	case device.FieldOs:
+		m.ResetOs()
+		return nil
+	case device.FieldAddressIP:
+		m.ResetAddressIP()
+		return nil
+	case device.FieldCountry:
+		m.ResetCountry()
+		return nil
+	case device.FieldRegion:
+		m.ResetRegion()
+		return nil
+	case device.FieldCity:
+		m.ResetCity()
+		return nil
+	case device.FieldBrowser:
+		m.ResetBrowser()
+		return nil
+	case device.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case device.FieldTimezone:
+		m.ResetTimezone()
+		return nil
+	case device.FieldFirstSeenAt:
+		m.ResetFirstSeenAt()
+		return nil
+	case device.FieldLastSeenAt:
+		m.ResetLastSeenAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeviceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeviceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeviceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeviceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeviceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeviceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeviceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Device unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeviceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Device edge %s", name)
+}
 
 // SiteMutation represents an operation that mutates the Site nodes in the graph.
 type SiteMutation struct {
@@ -2431,4 +3673,1237 @@ func (m *VisitorMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VisitorMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Visitor edge %s", name)
+}
+
+// VisitorSessionMutation represents an operation that mutates the VisitorSession nodes in the graph.
+type VisitorSessionMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *int
+	uuid                 *string
+	visitor_id           *int64
+	addvisitor_id        *int64
+	device_id            *int64
+	adddevice_id         *int64
+	session_token        *string
+	started_at           *time.Time
+	ended_at             *time.Time
+	last_activity_at     *time.Time
+	entry_page           *string
+	exit_page            *string
+	acquisition_source   *string
+	acquisition_medium   *string
+	acquisition_campaign *string
+	referrer_host        *string
+	created_at           *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*VisitorSession, error)
+	predicates           []predicate.VisitorSession
+}
+
+var _ ent.Mutation = (*VisitorSessionMutation)(nil)
+
+// visitorsessionOption allows management of the mutation configuration using functional options.
+type visitorsessionOption func(*VisitorSessionMutation)
+
+// newVisitorSessionMutation creates new mutation for the VisitorSession entity.
+func newVisitorSessionMutation(c config, op Op, opts ...visitorsessionOption) *VisitorSessionMutation {
+	m := &VisitorSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVisitorSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVisitorSessionID sets the ID field of the mutation.
+func withVisitorSessionID(id int) visitorsessionOption {
+	return func(m *VisitorSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VisitorSession
+		)
+		m.oldValue = func(ctx context.Context) (*VisitorSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VisitorSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVisitorSession sets the old VisitorSession of the mutation.
+func withVisitorSession(node *VisitorSession) visitorsessionOption {
+	return func(m *VisitorSessionMutation) {
+		m.oldValue = func(context.Context) (*VisitorSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VisitorSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VisitorSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VisitorSessionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VisitorSessionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VisitorSession.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUUID sets the "uuid" field.
+func (m *VisitorSessionMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *VisitorSessionMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *VisitorSessionMutation) ResetUUID() {
+	m.uuid = nil
+}
+
+// SetVisitorID sets the "visitor_id" field.
+func (m *VisitorSessionMutation) SetVisitorID(i int64) {
+	m.visitor_id = &i
+	m.addvisitor_id = nil
+}
+
+// VisitorID returns the value of the "visitor_id" field in the mutation.
+func (m *VisitorSessionMutation) VisitorID() (r int64, exists bool) {
+	v := m.visitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisitorID returns the old "visitor_id" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldVisitorID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisitorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisitorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisitorID: %w", err)
+	}
+	return oldValue.VisitorID, nil
+}
+
+// AddVisitorID adds i to the "visitor_id" field.
+func (m *VisitorSessionMutation) AddVisitorID(i int64) {
+	if m.addvisitor_id != nil {
+		*m.addvisitor_id += i
+	} else {
+		m.addvisitor_id = &i
+	}
+}
+
+// AddedVisitorID returns the value that was added to the "visitor_id" field in this mutation.
+func (m *VisitorSessionMutation) AddedVisitorID() (r int64, exists bool) {
+	v := m.addvisitor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisitorID resets all changes to the "visitor_id" field.
+func (m *VisitorSessionMutation) ResetVisitorID() {
+	m.visitor_id = nil
+	m.addvisitor_id = nil
+}
+
+// SetDeviceID sets the "device_id" field.
+func (m *VisitorSessionMutation) SetDeviceID(i int64) {
+	m.device_id = &i
+	m.adddevice_id = nil
+}
+
+// DeviceID returns the value of the "device_id" field in the mutation.
+func (m *VisitorSessionMutation) DeviceID() (r int64, exists bool) {
+	v := m.device_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceID returns the old "device_id" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldDeviceID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceID: %w", err)
+	}
+	return oldValue.DeviceID, nil
+}
+
+// AddDeviceID adds i to the "device_id" field.
+func (m *VisitorSessionMutation) AddDeviceID(i int64) {
+	if m.adddevice_id != nil {
+		*m.adddevice_id += i
+	} else {
+		m.adddevice_id = &i
+	}
+}
+
+// AddedDeviceID returns the value that was added to the "device_id" field in this mutation.
+func (m *VisitorSessionMutation) AddedDeviceID() (r int64, exists bool) {
+	v := m.adddevice_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeviceID resets all changes to the "device_id" field.
+func (m *VisitorSessionMutation) ResetDeviceID() {
+	m.device_id = nil
+	m.adddevice_id = nil
+}
+
+// SetSessionToken sets the "session_token" field.
+func (m *VisitorSessionMutation) SetSessionToken(s string) {
+	m.session_token = &s
+}
+
+// SessionToken returns the value of the "session_token" field in the mutation.
+func (m *VisitorSessionMutation) SessionToken() (r string, exists bool) {
+	v := m.session_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionToken returns the old "session_token" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldSessionToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionToken: %w", err)
+	}
+	return oldValue.SessionToken, nil
+}
+
+// ResetSessionToken resets all changes to the "session_token" field.
+func (m *VisitorSessionMutation) ResetSessionToken() {
+	m.session_token = nil
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *VisitorSessionMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *VisitorSessionMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldStartedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *VisitorSessionMutation) ResetStartedAt() {
+	m.started_at = nil
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (m *VisitorSessionMutation) SetEndedAt(t time.Time) {
+	m.ended_at = &t
+}
+
+// EndedAt returns the value of the "ended_at" field in the mutation.
+func (m *VisitorSessionMutation) EndedAt() (r time.Time, exists bool) {
+	v := m.ended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndedAt returns the old "ended_at" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldEndedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndedAt: %w", err)
+	}
+	return oldValue.EndedAt, nil
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (m *VisitorSessionMutation) ClearEndedAt() {
+	m.ended_at = nil
+	m.clearedFields[visitorsession.FieldEndedAt] = struct{}{}
+}
+
+// EndedAtCleared returns if the "ended_at" field was cleared in this mutation.
+func (m *VisitorSessionMutation) EndedAtCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldEndedAt]
+	return ok
+}
+
+// ResetEndedAt resets all changes to the "ended_at" field.
+func (m *VisitorSessionMutation) ResetEndedAt() {
+	m.ended_at = nil
+	delete(m.clearedFields, visitorsession.FieldEndedAt)
+}
+
+// SetLastActivityAt sets the "last_activity_at" field.
+func (m *VisitorSessionMutation) SetLastActivityAt(t time.Time) {
+	m.last_activity_at = &t
+}
+
+// LastActivityAt returns the value of the "last_activity_at" field in the mutation.
+func (m *VisitorSessionMutation) LastActivityAt() (r time.Time, exists bool) {
+	v := m.last_activity_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastActivityAt returns the old "last_activity_at" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldLastActivityAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastActivityAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastActivityAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastActivityAt: %w", err)
+	}
+	return oldValue.LastActivityAt, nil
+}
+
+// ResetLastActivityAt resets all changes to the "last_activity_at" field.
+func (m *VisitorSessionMutation) ResetLastActivityAt() {
+	m.last_activity_at = nil
+}
+
+// SetEntryPage sets the "entry_page" field.
+func (m *VisitorSessionMutation) SetEntryPage(s string) {
+	m.entry_page = &s
+}
+
+// EntryPage returns the value of the "entry_page" field in the mutation.
+func (m *VisitorSessionMutation) EntryPage() (r string, exists bool) {
+	v := m.entry_page
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntryPage returns the old "entry_page" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldEntryPage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntryPage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntryPage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntryPage: %w", err)
+	}
+	return oldValue.EntryPage, nil
+}
+
+// ClearEntryPage clears the value of the "entry_page" field.
+func (m *VisitorSessionMutation) ClearEntryPage() {
+	m.entry_page = nil
+	m.clearedFields[visitorsession.FieldEntryPage] = struct{}{}
+}
+
+// EntryPageCleared returns if the "entry_page" field was cleared in this mutation.
+func (m *VisitorSessionMutation) EntryPageCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldEntryPage]
+	return ok
+}
+
+// ResetEntryPage resets all changes to the "entry_page" field.
+func (m *VisitorSessionMutation) ResetEntryPage() {
+	m.entry_page = nil
+	delete(m.clearedFields, visitorsession.FieldEntryPage)
+}
+
+// SetExitPage sets the "exit_page" field.
+func (m *VisitorSessionMutation) SetExitPage(s string) {
+	m.exit_page = &s
+}
+
+// ExitPage returns the value of the "exit_page" field in the mutation.
+func (m *VisitorSessionMutation) ExitPage() (r string, exists bool) {
+	v := m.exit_page
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExitPage returns the old "exit_page" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldExitPage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExitPage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExitPage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExitPage: %w", err)
+	}
+	return oldValue.ExitPage, nil
+}
+
+// ClearExitPage clears the value of the "exit_page" field.
+func (m *VisitorSessionMutation) ClearExitPage() {
+	m.exit_page = nil
+	m.clearedFields[visitorsession.FieldExitPage] = struct{}{}
+}
+
+// ExitPageCleared returns if the "exit_page" field was cleared in this mutation.
+func (m *VisitorSessionMutation) ExitPageCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldExitPage]
+	return ok
+}
+
+// ResetExitPage resets all changes to the "exit_page" field.
+func (m *VisitorSessionMutation) ResetExitPage() {
+	m.exit_page = nil
+	delete(m.clearedFields, visitorsession.FieldExitPage)
+}
+
+// SetAcquisitionSource sets the "acquisition_source" field.
+func (m *VisitorSessionMutation) SetAcquisitionSource(s string) {
+	m.acquisition_source = &s
+}
+
+// AcquisitionSource returns the value of the "acquisition_source" field in the mutation.
+func (m *VisitorSessionMutation) AcquisitionSource() (r string, exists bool) {
+	v := m.acquisition_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAcquisitionSource returns the old "acquisition_source" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldAcquisitionSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAcquisitionSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAcquisitionSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAcquisitionSource: %w", err)
+	}
+	return oldValue.AcquisitionSource, nil
+}
+
+// ClearAcquisitionSource clears the value of the "acquisition_source" field.
+func (m *VisitorSessionMutation) ClearAcquisitionSource() {
+	m.acquisition_source = nil
+	m.clearedFields[visitorsession.FieldAcquisitionSource] = struct{}{}
+}
+
+// AcquisitionSourceCleared returns if the "acquisition_source" field was cleared in this mutation.
+func (m *VisitorSessionMutation) AcquisitionSourceCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldAcquisitionSource]
+	return ok
+}
+
+// ResetAcquisitionSource resets all changes to the "acquisition_source" field.
+func (m *VisitorSessionMutation) ResetAcquisitionSource() {
+	m.acquisition_source = nil
+	delete(m.clearedFields, visitorsession.FieldAcquisitionSource)
+}
+
+// SetAcquisitionMedium sets the "acquisition_medium" field.
+func (m *VisitorSessionMutation) SetAcquisitionMedium(s string) {
+	m.acquisition_medium = &s
+}
+
+// AcquisitionMedium returns the value of the "acquisition_medium" field in the mutation.
+func (m *VisitorSessionMutation) AcquisitionMedium() (r string, exists bool) {
+	v := m.acquisition_medium
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAcquisitionMedium returns the old "acquisition_medium" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldAcquisitionMedium(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAcquisitionMedium is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAcquisitionMedium requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAcquisitionMedium: %w", err)
+	}
+	return oldValue.AcquisitionMedium, nil
+}
+
+// ClearAcquisitionMedium clears the value of the "acquisition_medium" field.
+func (m *VisitorSessionMutation) ClearAcquisitionMedium() {
+	m.acquisition_medium = nil
+	m.clearedFields[visitorsession.FieldAcquisitionMedium] = struct{}{}
+}
+
+// AcquisitionMediumCleared returns if the "acquisition_medium" field was cleared in this mutation.
+func (m *VisitorSessionMutation) AcquisitionMediumCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldAcquisitionMedium]
+	return ok
+}
+
+// ResetAcquisitionMedium resets all changes to the "acquisition_medium" field.
+func (m *VisitorSessionMutation) ResetAcquisitionMedium() {
+	m.acquisition_medium = nil
+	delete(m.clearedFields, visitorsession.FieldAcquisitionMedium)
+}
+
+// SetAcquisitionCampaign sets the "acquisition_campaign" field.
+func (m *VisitorSessionMutation) SetAcquisitionCampaign(s string) {
+	m.acquisition_campaign = &s
+}
+
+// AcquisitionCampaign returns the value of the "acquisition_campaign" field in the mutation.
+func (m *VisitorSessionMutation) AcquisitionCampaign() (r string, exists bool) {
+	v := m.acquisition_campaign
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAcquisitionCampaign returns the old "acquisition_campaign" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldAcquisitionCampaign(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAcquisitionCampaign is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAcquisitionCampaign requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAcquisitionCampaign: %w", err)
+	}
+	return oldValue.AcquisitionCampaign, nil
+}
+
+// ClearAcquisitionCampaign clears the value of the "acquisition_campaign" field.
+func (m *VisitorSessionMutation) ClearAcquisitionCampaign() {
+	m.acquisition_campaign = nil
+	m.clearedFields[visitorsession.FieldAcquisitionCampaign] = struct{}{}
+}
+
+// AcquisitionCampaignCleared returns if the "acquisition_campaign" field was cleared in this mutation.
+func (m *VisitorSessionMutation) AcquisitionCampaignCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldAcquisitionCampaign]
+	return ok
+}
+
+// ResetAcquisitionCampaign resets all changes to the "acquisition_campaign" field.
+func (m *VisitorSessionMutation) ResetAcquisitionCampaign() {
+	m.acquisition_campaign = nil
+	delete(m.clearedFields, visitorsession.FieldAcquisitionCampaign)
+}
+
+// SetReferrerHost sets the "referrer_host" field.
+func (m *VisitorSessionMutation) SetReferrerHost(s string) {
+	m.referrer_host = &s
+}
+
+// ReferrerHost returns the value of the "referrer_host" field in the mutation.
+func (m *VisitorSessionMutation) ReferrerHost() (r string, exists bool) {
+	v := m.referrer_host
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferrerHost returns the old "referrer_host" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldReferrerHost(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferrerHost is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferrerHost requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferrerHost: %w", err)
+	}
+	return oldValue.ReferrerHost, nil
+}
+
+// ClearReferrerHost clears the value of the "referrer_host" field.
+func (m *VisitorSessionMutation) ClearReferrerHost() {
+	m.referrer_host = nil
+	m.clearedFields[visitorsession.FieldReferrerHost] = struct{}{}
+}
+
+// ReferrerHostCleared returns if the "referrer_host" field was cleared in this mutation.
+func (m *VisitorSessionMutation) ReferrerHostCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldReferrerHost]
+	return ok
+}
+
+// ResetReferrerHost resets all changes to the "referrer_host" field.
+func (m *VisitorSessionMutation) ResetReferrerHost() {
+	m.referrer_host = nil
+	delete(m.clearedFields, visitorsession.FieldReferrerHost)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *VisitorSessionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *VisitorSessionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *VisitorSessionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the VisitorSessionMutation builder.
+func (m *VisitorSessionMutation) Where(ps ...predicate.VisitorSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VisitorSessionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VisitorSessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VisitorSession, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VisitorSessionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VisitorSessionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VisitorSession).
+func (m *VisitorSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VisitorSessionMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.uuid != nil {
+		fields = append(fields, visitorsession.FieldUUID)
+	}
+	if m.visitor_id != nil {
+		fields = append(fields, visitorsession.FieldVisitorID)
+	}
+	if m.device_id != nil {
+		fields = append(fields, visitorsession.FieldDeviceID)
+	}
+	if m.session_token != nil {
+		fields = append(fields, visitorsession.FieldSessionToken)
+	}
+	if m.started_at != nil {
+		fields = append(fields, visitorsession.FieldStartedAt)
+	}
+	if m.ended_at != nil {
+		fields = append(fields, visitorsession.FieldEndedAt)
+	}
+	if m.last_activity_at != nil {
+		fields = append(fields, visitorsession.FieldLastActivityAt)
+	}
+	if m.entry_page != nil {
+		fields = append(fields, visitorsession.FieldEntryPage)
+	}
+	if m.exit_page != nil {
+		fields = append(fields, visitorsession.FieldExitPage)
+	}
+	if m.acquisition_source != nil {
+		fields = append(fields, visitorsession.FieldAcquisitionSource)
+	}
+	if m.acquisition_medium != nil {
+		fields = append(fields, visitorsession.FieldAcquisitionMedium)
+	}
+	if m.acquisition_campaign != nil {
+		fields = append(fields, visitorsession.FieldAcquisitionCampaign)
+	}
+	if m.referrer_host != nil {
+		fields = append(fields, visitorsession.FieldReferrerHost)
+	}
+	if m.created_at != nil {
+		fields = append(fields, visitorsession.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VisitorSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case visitorsession.FieldUUID:
+		return m.UUID()
+	case visitorsession.FieldVisitorID:
+		return m.VisitorID()
+	case visitorsession.FieldDeviceID:
+		return m.DeviceID()
+	case visitorsession.FieldSessionToken:
+		return m.SessionToken()
+	case visitorsession.FieldStartedAt:
+		return m.StartedAt()
+	case visitorsession.FieldEndedAt:
+		return m.EndedAt()
+	case visitorsession.FieldLastActivityAt:
+		return m.LastActivityAt()
+	case visitorsession.FieldEntryPage:
+		return m.EntryPage()
+	case visitorsession.FieldExitPage:
+		return m.ExitPage()
+	case visitorsession.FieldAcquisitionSource:
+		return m.AcquisitionSource()
+	case visitorsession.FieldAcquisitionMedium:
+		return m.AcquisitionMedium()
+	case visitorsession.FieldAcquisitionCampaign:
+		return m.AcquisitionCampaign()
+	case visitorsession.FieldReferrerHost:
+		return m.ReferrerHost()
+	case visitorsession.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VisitorSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case visitorsession.FieldUUID:
+		return m.OldUUID(ctx)
+	case visitorsession.FieldVisitorID:
+		return m.OldVisitorID(ctx)
+	case visitorsession.FieldDeviceID:
+		return m.OldDeviceID(ctx)
+	case visitorsession.FieldSessionToken:
+		return m.OldSessionToken(ctx)
+	case visitorsession.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case visitorsession.FieldEndedAt:
+		return m.OldEndedAt(ctx)
+	case visitorsession.FieldLastActivityAt:
+		return m.OldLastActivityAt(ctx)
+	case visitorsession.FieldEntryPage:
+		return m.OldEntryPage(ctx)
+	case visitorsession.FieldExitPage:
+		return m.OldExitPage(ctx)
+	case visitorsession.FieldAcquisitionSource:
+		return m.OldAcquisitionSource(ctx)
+	case visitorsession.FieldAcquisitionMedium:
+		return m.OldAcquisitionMedium(ctx)
+	case visitorsession.FieldAcquisitionCampaign:
+		return m.OldAcquisitionCampaign(ctx)
+	case visitorsession.FieldReferrerHost:
+		return m.OldReferrerHost(ctx)
+	case visitorsession.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown VisitorSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case visitorsession.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
+		return nil
+	case visitorsession.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisitorID(v)
+		return nil
+	case visitorsession.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceID(v)
+		return nil
+	case visitorsession.FieldSessionToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionToken(v)
+		return nil
+	case visitorsession.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case visitorsession.FieldEndedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndedAt(v)
+		return nil
+	case visitorsession.FieldLastActivityAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastActivityAt(v)
+		return nil
+	case visitorsession.FieldEntryPage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntryPage(v)
+		return nil
+	case visitorsession.FieldExitPage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExitPage(v)
+		return nil
+	case visitorsession.FieldAcquisitionSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAcquisitionSource(v)
+		return nil
+	case visitorsession.FieldAcquisitionMedium:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAcquisitionMedium(v)
+		return nil
+	case visitorsession.FieldAcquisitionCampaign:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAcquisitionCampaign(v)
+		return nil
+	case visitorsession.FieldReferrerHost:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferrerHost(v)
+		return nil
+	case visitorsession.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VisitorSessionMutation) AddedFields() []string {
+	var fields []string
+	if m.addvisitor_id != nil {
+		fields = append(fields, visitorsession.FieldVisitorID)
+	}
+	if m.adddevice_id != nil {
+		fields = append(fields, visitorsession.FieldDeviceID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VisitorSessionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case visitorsession.FieldVisitorID:
+		return m.AddedVisitorID()
+	case visitorsession.FieldDeviceID:
+		return m.AddedDeviceID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case visitorsession.FieldVisitorID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisitorID(v)
+		return nil
+	case visitorsession.FieldDeviceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeviceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VisitorSessionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(visitorsession.FieldEndedAt) {
+		fields = append(fields, visitorsession.FieldEndedAt)
+	}
+	if m.FieldCleared(visitorsession.FieldEntryPage) {
+		fields = append(fields, visitorsession.FieldEntryPage)
+	}
+	if m.FieldCleared(visitorsession.FieldExitPage) {
+		fields = append(fields, visitorsession.FieldExitPage)
+	}
+	if m.FieldCleared(visitorsession.FieldAcquisitionSource) {
+		fields = append(fields, visitorsession.FieldAcquisitionSource)
+	}
+	if m.FieldCleared(visitorsession.FieldAcquisitionMedium) {
+		fields = append(fields, visitorsession.FieldAcquisitionMedium)
+	}
+	if m.FieldCleared(visitorsession.FieldAcquisitionCampaign) {
+		fields = append(fields, visitorsession.FieldAcquisitionCampaign)
+	}
+	if m.FieldCleared(visitorsession.FieldReferrerHost) {
+		fields = append(fields, visitorsession.FieldReferrerHost)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VisitorSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VisitorSessionMutation) ClearField(name string) error {
+	switch name {
+	case visitorsession.FieldEndedAt:
+		m.ClearEndedAt()
+		return nil
+	case visitorsession.FieldEntryPage:
+		m.ClearEntryPage()
+		return nil
+	case visitorsession.FieldExitPage:
+		m.ClearExitPage()
+		return nil
+	case visitorsession.FieldAcquisitionSource:
+		m.ClearAcquisitionSource()
+		return nil
+	case visitorsession.FieldAcquisitionMedium:
+		m.ClearAcquisitionMedium()
+		return nil
+	case visitorsession.FieldAcquisitionCampaign:
+		m.ClearAcquisitionCampaign()
+		return nil
+	case visitorsession.FieldReferrerHost:
+		m.ClearReferrerHost()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VisitorSessionMutation) ResetField(name string) error {
+	switch name {
+	case visitorsession.FieldUUID:
+		m.ResetUUID()
+		return nil
+	case visitorsession.FieldVisitorID:
+		m.ResetVisitorID()
+		return nil
+	case visitorsession.FieldDeviceID:
+		m.ResetDeviceID()
+		return nil
+	case visitorsession.FieldSessionToken:
+		m.ResetSessionToken()
+		return nil
+	case visitorsession.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case visitorsession.FieldEndedAt:
+		m.ResetEndedAt()
+		return nil
+	case visitorsession.FieldLastActivityAt:
+		m.ResetLastActivityAt()
+		return nil
+	case visitorsession.FieldEntryPage:
+		m.ResetEntryPage()
+		return nil
+	case visitorsession.FieldExitPage:
+		m.ResetExitPage()
+		return nil
+	case visitorsession.FieldAcquisitionSource:
+		m.ResetAcquisitionSource()
+		return nil
+	case visitorsession.FieldAcquisitionMedium:
+		m.ResetAcquisitionMedium()
+		return nil
+	case visitorsession.FieldAcquisitionCampaign:
+		m.ResetAcquisitionCampaign()
+		return nil
+	case visitorsession.FieldReferrerHost:
+		m.ResetReferrerHost()
+		return nil
+	case visitorsession.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VisitorSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VisitorSessionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VisitorSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VisitorSessionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VisitorSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VisitorSessionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VisitorSessionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown VisitorSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VisitorSessionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown VisitorSession edge %s", name)
 }

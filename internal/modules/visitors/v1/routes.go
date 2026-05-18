@@ -36,7 +36,6 @@ func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.L
 func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
 
-	// Apply HMAC middleware
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
 		GetSecretKey: func(publicKey string) (string, error) {
 			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
@@ -48,5 +47,5 @@ func (m *Module) Register(router *gin.RouterGroup) {
 		NonceStore: state.NewNonceStore(state.Redis),
 	}))
 
-	visitors.POST("/track", m.handler.Track)
+	visitors.POST("/", m.handler.Create)
 }

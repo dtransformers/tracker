@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Device is the predicate function for device builders.
+type Device func(*sql.Selector)
+
 // Site is the predicate function for site builders.
 type Site func(*sql.Selector)
 
@@ -14,3 +17,6 @@ type SiteVisitor func(*sql.Selector)
 
 // Visitor is the predicate function for visitor builders.
 type Visitor func(*sql.Selector)
+
+// VisitorSession is the predicate function for visitorsession builders.
+type VisitorSession func(*sql.Selector)

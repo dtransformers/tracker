@@ -34,8 +34,8 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
-// @Router /api/v1/visitors/track [post]
-func (h *Handler) Track(c *gin.Context) {
+// @Router /api/v1/visitors [post]
+func (h *Handler) Create(c *gin.Context) {
 	var req TrackVisitorRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

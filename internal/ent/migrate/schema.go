@@ -8,6 +8,30 @@ import (
 )
 
 var (
+	// DevicesColumns holds the columns for the "devices" table.
+	DevicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "fingerprint_hash", Type: field.TypeString},
+		{Name: "device_type", Type: field.TypeString, Nullable: true},
+		{Name: "os", Type: field.TypeString, Nullable: true},
+		{Name: "address_ip", Type: field.TypeString, Nullable: true},
+		{Name: "country", Type: field.TypeString, Nullable: true},
+		{Name: "region", Type: field.TypeString, Nullable: true},
+		{Name: "city", Type: field.TypeString, Nullable: true},
+		{Name: "browser", Type: field.TypeString, Nullable: true},
+		{Name: "language", Type: field.TypeString, Nullable: true},
+		{Name: "timezone", Type: field.TypeString, Nullable: true},
+		{Name: "first_seen_at", Type: field.TypeTime},
+		{Name: "last_seen_at", Type: field.TypeTime},
+	}
+	// DevicesTable holds the schema information for the "devices" table.
+	DevicesTable = &schema.Table{
+		Name:       "devices",
+		Columns:    DevicesColumns,
+		PrimaryKey: []*schema.Column{DevicesColumns[0]},
+	}
 	// SitesColumns holds the columns for the "sites" table.
 	SitesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -64,11 +88,37 @@ var (
 		Columns:    VisitorsColumns,
 		PrimaryKey: []*schema.Column{VisitorsColumns[0]},
 	}
+	// VisitorSessionsColumns holds the columns for the "visitor_sessions" table.
+	VisitorSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uuid", Type: field.TypeString, Unique: true},
+		{Name: "visitor_id", Type: field.TypeInt64},
+		{Name: "device_id", Type: field.TypeInt64},
+		{Name: "session_token", Type: field.TypeString, Unique: true},
+		{Name: "started_at", Type: field.TypeTime},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_activity_at", Type: field.TypeTime},
+		{Name: "entry_page", Type: field.TypeString, Nullable: true},
+		{Name: "exit_page", Type: field.TypeString, Nullable: true},
+		{Name: "acquisition_source", Type: field.TypeString, Nullable: true},
+		{Name: "acquisition_medium", Type: field.TypeString, Nullable: true},
+		{Name: "acquisition_campaign", Type: field.TypeString, Nullable: true},
+		{Name: "referrer_host", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// VisitorSessionsTable holds the schema information for the "visitor_sessions" table.
+	VisitorSessionsTable = &schema.Table{
+		Name:       "visitor_sessions",
+		Columns:    VisitorSessionsColumns,
+		PrimaryKey: []*schema.Column{VisitorSessionsColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DevicesTable,
 		SitesTable,
 		SiteVisitorsTable,
 		VisitorsTable,
+		VisitorSessionsTable,
 	}
 )
 
