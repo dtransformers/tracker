@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"log/slog"
+
 	"net"
 	"net/http"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/mssola/user_agent"
 	"github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
+
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 

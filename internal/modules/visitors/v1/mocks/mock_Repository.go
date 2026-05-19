@@ -40,7 +40,7 @@ func (_m *MockRepository) EXPECT() *MockRepository_Expecter {
 }
 
 // Create provides a mock function for the type MockRepository
-func (_mock *MockRepository) Create(ctx context.Context, input v1.CreateVisitorInput) (*ent.Visitor, error) {
+func (_mock *MockRepository) Create(ctx context.Context, input v1.CreateSessionInput) (*ent.Visitor, error) {
 	ret := _mock.Called(ctx, input)
 
 	if len(ret) == 0 {
@@ -49,17 +49,17 @@ func (_mock *MockRepository) Create(ctx context.Context, input v1.CreateVisitorI
 
 	var r0 *ent.Visitor
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateVisitorInput) (*ent.Visitor, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateSessionInput) (*ent.Visitor, error)); ok {
 		return returnFunc(ctx, input)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateVisitorInput) *ent.Visitor); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateSessionInput) *ent.Visitor); ok {
 		r0 = returnFunc(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*ent.Visitor)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, v1.CreateVisitorInput) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, v1.CreateSessionInput) error); ok {
 		r1 = returnFunc(ctx, input)
 	} else {
 		r1 = ret.Error(1)
@@ -74,20 +74,20 @@ type MockRepository_Create_Call struct {
 
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
-//   - input v1.CreateVisitorInput
+//   - input v1.CreateSessionInput
 func (_e *MockRepository_Expecter) Create(ctx interface{}, input interface{}) *MockRepository_Create_Call {
 	return &MockRepository_Create_Call{Call: _e.mock.On("Create", ctx, input)}
 }
 
-func (_c *MockRepository_Create_Call) Run(run func(ctx context.Context, input v1.CreateVisitorInput)) *MockRepository_Create_Call {
+func (_c *MockRepository_Create_Call) Run(run func(ctx context.Context, input v1.CreateSessionInput)) *MockRepository_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 v1.CreateVisitorInput
+		var arg1 v1.CreateSessionInput
 		if args[1] != nil {
-			arg1 = args[1].(v1.CreateVisitorInput)
+			arg1 = args[1].(v1.CreateSessionInput)
 		}
 		run(
 			arg0,
@@ -102,7 +102,7 @@ func (_c *MockRepository_Create_Call) Return(visitor *ent.Visitor, err error) *M
 	return _c
 }
 
-func (_c *MockRepository_Create_Call) RunAndReturn(run func(ctx context.Context, input v1.CreateVisitorInput) (*ent.Visitor, error)) *MockRepository_Create_Call {
+func (_c *MockRepository_Create_Call) RunAndReturn(run func(ctx context.Context, input v1.CreateSessionInput) (*ent.Visitor, error)) *MockRepository_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, input CreateVisitorInput) (*ent.Visitor, error)
+	Create(ctx context.Context, input CreateSessionInput) (*ent.Visitor, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.Visitor, error)
 	GetByAnonymousID(ctx context.Context, anonymousID string) (*ent.Visitor, error)
 	Update(ctx context.Context, uuid string, input UpdateVisitorInput) (*ent.Visitor, error)
@@ -29,7 +29,7 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-type CreateVisitorInput struct {
+type CreateSessionInput struct {
 	UUID            string
 	AnonymousID     string
 	PrimaryUserID   *string
@@ -51,7 +51,7 @@ type CreateSiteVisitorInput struct {
 	SiteID    int64
 }
 
-func (r *entRepository) Create(ctx context.Context, input CreateVisitorInput) (*ent.Visitor, error) {
+func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*ent.Visitor, error) {
 	query := r.client.Visitor.
 		Create().
 		SetUUID(input.UUID).

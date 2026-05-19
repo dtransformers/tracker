@@ -1,186 +1,49 @@
 ---
-description: research and history of request
+description: AGENT EXECUTION PROTOCOL
 ---
 
-# WORKFLOW
+# AGENT EXECUTION PROTOCOL
 
-the workflow rules of changes and user requests implementations :
+You are an autonomous AI coding agent. You MUST execute every user request following this strict, step-by-step operational pipeline. You are required to use your available tools (File Reader, File Writer, Terminal, MCP) to complete these steps. Do NOT skip any phases.
 
-## 1. Scope Compliance (Root README Gate)
+## PHASE 1: Discovery & Scope Validation
 
-Every code change MUST be validated against the project scope defined in `Root README.md`.
+_Objective: Understand constraints before writing code._
 
-### Rules:
+1. **Scan Scope:** Use your file reading tool to scan `Root README.md` to validate the project boundaries.
+2. **Query Knowledge Base:** Search `FAQ.md` or use the Notion MCP to search for existing architectural rules or similar past problems.
+3. **SCOPE GATE:** If the user request is outside the scope of `README.md`, you MUST halt and ask the user for clarification or permission to expand the scope. Do not assume implicit expansion.
 
-- The LLM must parse and interpret `Root README.md` before generating or modifying any code.
-- Any new feature, module, or refactor must:
-  - Explicitly map to an existing scope item, OR
-  - Be justified as a scoped extension with rationale.
+## PHASE 2: Code Implementation
 
-- If a change is outside scope:
-  - It MUST be rejected or flagged for explicit user confirmation.
-- No implicit expansion of project boundaries is allowed.
+_Objective: Write structurally aligned code._
 
-### MCP USAGE
+1. **Apply Changes:** Write or modify the code to fulfill the user request.
+2. **Align Architecture:** Ensure new code fits existing domain, service, or repository boundaries. Do not introduce new architectural paradigms without explicitly asking the user first.
 
-- For every question you have about not included on the README.md you must ask using notion MCP, if not found you can add it to the FAQ.md with Q/A format.
+## PHASE 3: Verification
 
-### Enforcement Condition:
+\*Objective: Ensure system integrity.
 
-> If a change cannot be traced to a README-defined objective, it is invalid.
+1. **Execute Tests:** You MUST use your terminal execution tool to run the relevant test suite (e.g., `npm test`, `go test ./...`, or `cargo test`).
+2. **TEST GATE:** If the test suite fails, you must debug and fix the code. Do NOT proceed to Phase 4 until you receive a successful exit code from the test runner.
 
----
+## PHASE 4: State Synchronization (MANDATORY)
 
-## 2. Structural Alignment (Architecture Consistency Rule)
+_Objective: Update the system of record. You MUST use your file writing tool for these steps._
 
-All modifications MUST align with the existing repository structure.
+1. **Append to History:** Open `./HISTORY.md` and append a new log entry. You must explicitly save this file. Use this exact format:
+   - **Timestamp:** [Insert current date/time]
+   - **Request:** [Summary of user prompt]
+   - **Changes:** [Technical breakdown of modules/files edited]
+   - **Reasoning:** [Why you chose this approach]
+   - **Impact:** [How system behavior changed]
+2. **Sync Docs:** Update any relevant inline documentation, API docs, or `README.md` sections that were affected by your code changes.
+3. **Update FAQ:** If you discovered a new edge case, or if the Notion MCP lacked an answer, use your file writing tool to add a new Q/A entry to `./commands/FAQ.md`.
 
-### Rules:
+## PHASE 5: Completion Handoff
 
-- Follow current module boundaries, naming conventions, and layering (e.g., domain / service / repository / transport).
-- Do NOT introduce new structural paradigms unless:
-  - Existing architecture cannot support the requirement, AND
-  - A migration plan is documented.
+_Objective: Report status to the user._
 
-- Ensure:
-  - No orphan modules
-  - No duplicated responsibility layers
-  - No bypassing of established abstractions
-
-### Enforcement Condition:
-
-> New code must “fit” the architecture, not reshape it by default.
-
----
-
-## 3. Change History Enforcement (`./HISTORY.md`)
-
-Every user-requested change MUST be recorded in:
-
-```
-./HISTORY.md
-```
-
-### Required Entry Format:
-
-Each entry must include:
-
-- Timestamp
-- Request summary
-- Implemented changes (technical breakdown)
-- Reasoning / design decisions
-- Impact analysis (what changed in system behavior)
-- Linked files/modules affected
-
-### Rules:
-
-- No code change is valid without a HISTORY entry.
-- Entries must be appended, never overwritten.
-- Must be written in deterministic, structured format (not conversational).
-
-### Enforcement Condition:
-
-> HISTORY.md is the system of record for all evolution of the codebase.
-
----
-
-## 4. Documentation Synchronization Rule
-
-Any code change MUST be reflected in documentation.
-
-### Rules:
-
-- Update all relevant docs, including but not limited to:
-  - README.md (if scope or usage changes)
-  - module-level docs
-  - API documentation
-  - architecture notes
-
-- Documentation must never lag behind implementation.
-- Outdated documentation is treated as a critical defect.
-
-### Enforcement Condition:
-
-> Code and documentation must remain bidirectionally consistent.
-
----
-
-## 5. Test Integrity Rule
-
-All changes MUST preserve or improve the current test suite.
-
-### Rules:
-
-- Existing tests must continue to pass.
-- New features require corresponding tests.
-- If tests are broken:
-  - Fix implementation first, not tests, unless tests are incorrect by design.
-
-- No commit is valid if it degrades test coverage or correctness.
-
-### Enforcement Condition:
-
-> “Green tests” is a mandatory gate before change acceptance.
-
----
-
-## 6. FAQ Knowledge Base Requirement
-
-The system MUST maintain a living FAQ used by the LLM agent.
-
-### Location:
-
-```
-./commands/FAQ.md
-```
-
-### Rules:
-
-- FAQ must contain:
-  - Known system behaviors
-  - Common user questions
-  - Architectural decisions and rationale
-  - Operational constraints and deployment rules
-
-- After each user request:
-  - Add new discovered questions if they emerge
-  - Or update existing answers if knowledge evolves
-
-- FAQ must be structured for retrieval, not prose (Q/A format preferred)
-
-### Agent Behavior Requirement:
-
-- The LLM must consult FAQ BEFORE proposing solutions.
-- If ambiguity exists, the LLM should:
-  - Check FAQ first
-  - Then Root README.md
-  - Then codebase
-
-### Enforcement Condition:
-
-> FAQ is a first-class knowledge dependency, not optional documentation.
-
----
-
-## 7. Global Consistency Rule (Meta Constraint)
-
-All changes MUST satisfy all constraints simultaneously:
-
-- README scope compliance
-- Architectural alignment
-- HISTORY.md traceability
-- Documentation synchronization
-- Test suite integrity
-- FAQ consistency
-
-If any constraint conflicts:
-
-1. Halt generation
-2. Report conflict explicitly
-3. Request clarification or decision
-
----
-
-## Summary Constraint Statement
-
-> No backend change is valid unless it is scoped, structured, traceable, documented, tested, and knowledge-integrated.
+1. Respond to the user confirming the task is complete.
+2. Explicitly state: "I have updated HISTORY.md and run the test suite."

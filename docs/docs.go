@@ -355,7 +355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateVisitorRequest"
+                            "$ref": "#/definitions/v1.CreateSessionRequest"
                         }
                     },
                     {
@@ -484,7 +484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.CreateVisitorRequest": {
+        "v1.CreateSessionRequest": {
             "type": "object",
             "required": [
                 "anonymous_id",

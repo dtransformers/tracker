@@ -24,21 +24,21 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 	}
 }
 
-// CreateVisitor godoc
+// CreateSession godoc
 // @Summary Create a visitor
 // @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.
 // @Tags visitors
 // @Accept json
 // @Produce json
-// @Param request body CreateVisitorRequest true "Track visitor request"
+// @Param request body CreateSessionRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/visitors [post]
-func (h *Handler) CreateVisitor(c *gin.Context) {
-	var req CreateVisitorRequest
+func (h *Handler) CreateSession(c *gin.Context) {
+	var req CreateSessionRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
@@ -61,9 +61,9 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreateVisitor(c.Request.Context(), req, site)
+	res, err := h.service.CreateSession(c.Request.Context(), req, site)
 	if err != nil {
-		h.logger.Error("failed to track visitor", "error", err)
+		h.logger.Error("failed to create visitor session", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}

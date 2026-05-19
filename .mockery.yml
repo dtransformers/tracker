@@ -18,3 +18,17 @@ packages:
       dir: "internal/modules/visitors/v1/mocks"
       filename: "mock_{{.InterfaceName}}.go"
       pkgname: "mocks"
+
+  tracking/internal/modules/devices/v1:
+    config:
+      all: true
+      dir: "internal/modules/devices/v1/mocks"
+      filename: "mock_{{.InterfaceName}}.go"
+      pkgname: "mocks"
+
+  tracking/internal/modules/visitor_sessions/v1:
+    config:
+      all: true
+      dir: "internal/modules/visitor_sessions/v1/mocks"
+      filename: "mock_{{.InterfaceName}}.go"
+      pkgname: "mocks"

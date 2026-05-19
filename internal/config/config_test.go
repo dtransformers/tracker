@@ -29,7 +29,7 @@ func baseValidEnv() MapEnv {
 		"REDIS_PORT":     "6379",
 		"REDIS_DATABASE": "0",
 
-		"TLS_ENABLED": "false",
+		"TLS_ENABLED":   "false",
 		"ROOT_USERNAME": "admin",
 		"ROOT_PASSWORD": "password123",
 	}

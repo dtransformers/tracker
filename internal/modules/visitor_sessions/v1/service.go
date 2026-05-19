@@ -100,7 +100,7 @@ func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 		return nil
 	}
 	var endedAt *time.Time
-	// Note: s.EndedAt might be a time.Time, check if it's optional in schema. 
+	// Note: s.EndedAt might be a time.Time, check if it's optional in schema.
 	// The schema says field.Time("ended_at").Optional().Nillable(). So it's a pointer.
 	endedAt = s.EndedAt
 

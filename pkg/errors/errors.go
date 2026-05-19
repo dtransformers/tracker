@@ -13,10 +13,10 @@ type HTTPError interface {
 }
 
 type BaseError struct {
-	Version string
-	Code    int
-	Message string
-	Cause   error
+	Version string `json:"version"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Cause   error  `json:"cause,omitempty"`
 }
 
 func unwrapCause(cause []error) error {
@@ -25,6 +25,7 @@ func unwrapCause(cause []error) error {
 	}
 	return nil
 }
+
 func (e *BaseError) Error() string {
 	if e.Cause != nil {
 		return fmt.Sprintf("%s: %v", e.Message, e.Cause)
@@ -44,9 +45,10 @@ type UnauthorizedError struct {
 	BaseError
 }
 
-func NewUnauthorizedError(message string, cause ...error) *UnauthorizedError {
+func NewUnauthorizedError(version string, message string, cause ...error) *UnauthorizedError {
 	return &UnauthorizedError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusUnauthorized,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -58,9 +60,10 @@ type NotFoundError struct {
 	BaseError
 }
 
-func NewNotFoundError(message string, cause ...error) *NotFoundError {
+func NewNotFoundError(version string, message string, cause ...error) *NotFoundError {
 	return &NotFoundError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusNotFound,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -68,10 +71,11 @@ func NewNotFoundError(message string, cause ...error) *NotFoundError {
 	}
 }
 
-func NewBadRequestError(message string, cause ...error) *BadRequestError {
+func NewBadRequestError(version string, message string, cause ...error) *BadRequestError {
 
 	return &BadRequestError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusBadRequest,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -83,10 +87,11 @@ type BadRequestError struct {
 	BaseError
 }
 
-func NewInternalError(message string, cause ...error) *InternalError {
+func NewInternalError(version string, message string, cause ...error) *InternalError {
 
 	return &InternalError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusInternalServerError,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -98,10 +103,11 @@ type InternalError struct {
 	BaseError
 }
 
-func NewForbiddenError(message string, cause ...error) *ForbiddenError {
+func NewForbiddenError(version string, message string, cause ...error) *ForbiddenError {
 
 	return &ForbiddenError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusForbidden,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -113,9 +119,10 @@ type ForbiddenError struct {
 	BaseError
 }
 
-func NewConflictError(message string, cause ...error) *ConflictError {
+func NewConflictError(version string, message string, cause ...error) *ConflictError {
 	return &ConflictError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusConflict,
 			Message: message,
 			Cause:   unwrapCause(cause),
@@ -127,9 +134,10 @@ type ConflictError struct {
 	BaseError
 }
 
-func NewServiceUnavailableError(message string, cause ...error) *ServiceUnavailableError {
+func NewServiceUnavailableError(version string, message string, cause ...error) *ServiceUnavailableError {
 	return &ServiceUnavailableError{
 		BaseError: BaseError{
+			Version: version,
 			Code:    http.StatusServiceUnavailable,
 			Message: message,
 			Cause:   unwrapCause(cause),

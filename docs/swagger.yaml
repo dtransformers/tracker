@@ -58,7 +58,7 @@ definitions:
       uuid:
         type: string
     type: object
-  v1.CreateVisitorRequest:
+  v1.CreateSessionRequest:
     properties:
       anonymous_id:
         type: string
@@ -330,7 +330,7 @@ paths:
           name: request
           required: true
           schema:
-            $ref: "#/definitions/v1.CreateVisitorRequest"
+            $ref: "#/definitions/v1.CreateSessionRequest"
         - description: Public API Key
           in: header
           name: X-API-Key

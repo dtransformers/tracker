@@ -37,7 +37,7 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 	}
 }
 
-type CreateVisitorRequest struct {
+type CreateSessionRequest struct {
 	// AnonymousID is extracted from cookie by the handler
 	AnonymousID string `json:"-"`
 
@@ -79,9 +79,12 @@ type VisitorResponse struct {
 }
 
 /*
-CreateVisitor godoc
+CreateSession godoc
+responsible on creating the visitor session  since the sdk didn't find any current session, the session creation implecitly requires a device if not found, means also the visitor entity is not found since the device and the entity are conencted, also we need to store this event as a visit to the website on the site visitor entity
+input: the device info, the request info, the site info : all those info are on the request context
+response: the visitor session
 */
-func (s *Service) CreateVisitor(ctx context.Context, req CreateVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
+func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -117,14 +120,14 @@ func (s *Service) CreateVisitor(ctx context.Context, req CreateVisitorRequest, s
 	return toVisitorResponse(v), nil
 }
 
-func (s *Service) handleVisitor(ctx context.Context, req CreateVisitorRequest) (*ent.Visitor, error) {
+func (s *Service) handleVisitor(ctx context.Context, req CreateSessionRequest) (*ent.Visitor, error) {
 	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
 	if err != nil {
 		if !ent.IsNotFound(err) {
 			return nil, fmt.Errorf("failed to get visitor: %w", err)
 		}
 
-		v, err = s.repo.Create(ctx, CreateVisitorInput{
+		v, err = s.repo.Create(ctx, CreateSessionInput{
 			UUID:        uuid.New().String(),
 			AnonymousID: req.AnonymousID,
 		})
@@ -143,7 +146,7 @@ func (s *Service) handleVisitor(ctx context.Context, req CreateVisitorRequest) (
 	return v, nil
 }
 
-func (s *Service) handleDevice(ctx context.Context, req CreateVisitorRequest, visitorID int64) (*ent.Device, error) {
+func (s *Service) handleDevice(ctx context.Context, req CreateSessionRequest, visitorID int64) (*ent.Device, error) {
 	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
 	if err != nil && !ent.IsNotFound(err) {
 		return nil, fmt.Errorf("failed to check device: %w", err)
@@ -181,7 +184,7 @@ func (s *Service) handleDevice(ctx context.Context, req CreateVisitorRequest, vi
 	return d, nil
 }
 
-func (s *Service) handleSession(ctx context.Context, req CreateVisitorRequest, visitorID int64, deviceID int64) (int64, error) {
+func (s *Service) handleSession(ctx context.Context, req CreateSessionRequest, visitorID int64, deviceID int64) (int64, error) {
 	if req.SessionToken == "" {
 		return 0, nil
 	}
