@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -51,7 +50,6 @@ func RequestTracking() gin.HandlerFunc {
 
 		tracking.Referer = c.Request.Referer()
 		tracking.AcceptLanguage = c.GetHeader("Accept-Language")
-		fmt.Println("Extracting tracking info:", tracking)
 		c.Set(TrackingInfoKey, tracking)
 
 		c.Next()
