@@ -1,3 +1,7 @@
+---
+description: research and history of request
+---
+
 # WORKFLOW
 
 the workflow rules of changes and user requests implementations :
@@ -15,8 +19,11 @@ Every code change MUST be validated against the project scope defined in `Root R
 
 - If a change is outside scope:
   - It MUST be rejected or flagged for explicit user confirmation.
-
 - No implicit expansion of project boundaries is allowed.
+
+### MCP USAGE
+
+- For every question you have about not included on the README.md you must ask using notion MCP, if not found you can add it to the FAQ.md with Q/A format.
 
 ### Enforcement Condition:
 
