@@ -11,6 +11,9 @@ import (
 )
 
 func RegisterV1(router *gin.Engine, client *ent.Client, logger *slog.Logger) {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	v1Group := router.Group("/api/v1")
 
 	sitesRepo := sitesv1.NewRepository(client)

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -121,7 +122,7 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	app.registerHealthRoutes(router)
 
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
-	visitors.RegisterV1(router, app.db.Client, nil)
+	visitors.RegisterV1(router, app.db.Client, slog.Default())
 	app.registerSwaggerRoutes(router)
 }
 

@@ -23,6 +23,9 @@ type Module struct {
 }
 
 func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.Logger) *Module {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	repo := NewRepository(client)
 	deviceRepo := devicesv1.NewRepository(client)
 	sessionRepo := visitor_sessionsv1.NewRepository(client)

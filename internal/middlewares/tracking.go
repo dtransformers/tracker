@@ -166,6 +166,9 @@ func RateLimit(RateLimitWindow time.Duration, RateLimitRequests int) gin.Handler
 }
 
 func Metrics(logger *slog.Logger) gin.HandlerFunc {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
