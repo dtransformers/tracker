@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"time"
 
 	"tracking/internal/ent"
+	"tracking/internal/middlewares"
 	devicesv1 "tracking/internal/modules/devices/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
@@ -88,7 +90,39 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	s.logger.InfoContext(ctx, "tracking visitor", "site_id", site.ID)
+	var originalIP string
+	var isBot bool
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		originalIP = tracking.OriginalIP
+		if tracking.Cookies != nil && tracking.Cookies["anonymous_id"] != "" {
+			req.AnonymousID = tracking.Cookies["anonymous_id"]
+		}
+		req.DeviceType = tracking.DeviceType
+		if req.OS == "" {
+			req.OS = tracking.OS
+		}
+		if req.Browser == "" {
+			req.Browser = tracking.Browser
+		}
+		if req.DeviceType == "" {
+			req.DeviceType = tracking.DeviceType
+		}
+		if req.Language == "" {
+			req.Language = tracking.AcceptLanguage
+		}
+		req.AddressIP = tracking.OriginalIP
+
+		if req.ReferrerHost == "" {
+			if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
+				req.ReferrerHost = u.Host
+			} else {
+				req.ReferrerHost = tracking.Referer
+			}
+		}
+		isBot = tracking.Bot
+	}
+
+	s.logger.InfoContext(ctx, "tracking visitor from ip", "address_ip", originalIP)
 
 	v, err := s.getVisitor(ctx, req.AnonymousID)
 	if err != nil {
@@ -96,7 +130,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	}
 
 	if v == nil {
-		v, err = s.createVisitor(ctx, req)
+		v, err = s.createVisitor(ctx, req, isBot)
 		if err != nil {
 			return nil, err
 		}
@@ -175,14 +209,16 @@ func (s *Service) getVisitor(ctx context.Context, anonymousID string) (*ent.Visi
 	return v, nil
 }
 
-func (s *Service) createVisitor(ctx context.Context, req CreateSessionRequest) (*ent.Visitor, error) {
+func (s *Service) createVisitor(ctx context.Context, req CreateSessionRequest, isBot bool) (*ent.Visitor, error) {
 	anonID := req.AnonymousID
 	if anonID == "" {
 		anonID = uuid.New().String()
 	}
 	v, err := s.repo.Create(ctx, CreateSessionInput{
-		UUID:        uuid.New().String(),
-		AnonymousID: anonID,
+		UUID:            uuid.New().String(),
+		AnonymousID:     anonID,
+		IsBot:           isBot,
+		IsVerifiedHuman: !isBot,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create visitor: %w", err)

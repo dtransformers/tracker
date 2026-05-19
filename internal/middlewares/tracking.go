@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"log/slog"
 
 	"net"
@@ -52,7 +53,9 @@ func RequestTracking() gin.HandlerFunc {
 
 		tracking.Referer = c.Request.Referer()
 		tracking.AcceptLanguage = c.GetHeader("Accept-Language")
+
 		c.Set(TrackingInfoKey, tracking)
+		c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), TrackingInfoKey, tracking))
 
 		c.Next()
 	}
@@ -142,8 +145,11 @@ func extractCookies(c *gin.Context) map[string]string {
 	return cookies
 }
 
-func GetTrackingInfo(c *gin.Context) (*TrackingInfo, bool) {
-	if info, exists := c.Get(TrackingInfoKey); exists {
+func GetTrackingInfo(ctx context.Context) (*TrackingInfo, bool) {
+	if ctx == nil {
+		return nil, false
+	}
+	if info := ctx.Value(TrackingInfoKey); info != nil {
 		if tracking, ok := info.(*TrackingInfo); ok {
 			return tracking, true
 		}

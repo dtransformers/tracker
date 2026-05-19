@@ -50,8 +50,6 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	pubKey := c.GetString("publicKey")
-	req.PublicKey = pubKey
 	siteObj, exists := c.Get("site")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
