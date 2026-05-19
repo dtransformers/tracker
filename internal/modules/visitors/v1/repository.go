@@ -6,16 +6,21 @@ import (
 	"time"
 	"tracking/internal/ent"
 	"tracking/internal/ent/visitor"
+
+	"github.com/google/uuid"
 )
 
 type Repository interface {
 	Create(ctx context.Context, input CreateSessionInput) (*ent.Visitor, error)
+	GetByID(ctx context.Context, id int64) (*ent.Visitor, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.Visitor, error)
 	GetByAnonymousID(ctx context.Context, anonymousID string) (*ent.Visitor, error)
 	Update(ctx context.Context, uuid string, input UpdateVisitorInput) (*ent.Visitor, error)
 	Delete(ctx context.Context, uuid string) error
 
 	CreateSiteVisitor(ctx context.Context, input CreateSiteVisitorInput) (*ent.SiteVisitor, error)
+	CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error)
+	CreatePageView(ctx context.Context, input CreatePageViewInput) (*ent.PageView, error)
 }
 
 type entRepository struct {
@@ -68,6 +73,14 @@ func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*
 		return nil, fmt.Errorf("failed to create visitor: %w", err)
 	}
 
+	return v, nil
+}
+
+func (r *entRepository) GetByID(ctx context.Context, id int64) (*ent.Visitor, error) {
+	v, err := r.client.Visitor.Get(ctx, int(id))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get visitor by id: %w", err)
+	}
 	return v, nil
 }
 
@@ -158,4 +171,54 @@ func (r *entRepository) CreateSiteVisitor(ctx context.Context, input CreateSiteV
 	}
 
 	return sv, nil
+}
+
+type CreateEventInput struct {
+	SessionID       int64
+	VisitorID       int64
+	DeviceID        int64
+	EventName       string
+	EventProperties map[string]interface{}
+}
+
+type CreatePageViewInput struct {
+	SessionID int64
+	VisitorID int64
+	DeviceID  int64
+	URL       string
+	Title     string
+	Referrer  string
+}
+
+func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error) {
+	ev, err := r.client.VisitorEvent.
+		Create().
+		SetUUID(uuid.New().String()).
+		SetSessionID(input.SessionID).
+		SetVisitorID(input.VisitorID).
+		SetDeviceID(input.DeviceID).
+		SetEventName(input.EventName).
+		SetEventProperties(input.EventProperties).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create visitor event: %w", err)
+	}
+	return ev, nil
+}
+
+func (r *entRepository) CreatePageView(ctx context.Context, input CreatePageViewInput) (*ent.PageView, error) {
+	pv, err := r.client.PageView.
+		Create().
+		SetUUID(uuid.New().String()).
+		SetSessionID(input.SessionID).
+		SetVisitorID(input.VisitorID).
+		SetDeviceID(input.DeviceID).
+		SetURL(input.URL).
+		SetTitle(input.Title).
+		SetReferrer(input.Referrer).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create page view: %w", err)
+	}
+	return pv, nil
 }

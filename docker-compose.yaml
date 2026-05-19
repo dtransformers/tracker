@@ -16,7 +16,7 @@ services:
       - "5432:5432"
 
     volumes:
-      - tracking_data:/var/lib/postgresql/data
+      - tracking_database:/var/lib/postgresql/data
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}" ]
@@ -37,5 +37,5 @@ services:
       timeout: 5s
       retries: 5
 volumes:
-  tracking_data:
+  tracking_database:
   tracking_redis_data:

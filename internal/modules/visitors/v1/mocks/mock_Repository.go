@@ -107,6 +107,142 @@ func (_c *MockRepository_Create_Call) RunAndReturn(run func(ctx context.Context,
 	return _c
 }
 
+// CreateEvent provides a mock function for the type MockRepository
+func (_mock *MockRepository) CreateEvent(ctx context.Context, input v1.CreateEventInput) (*ent.VisitorEvent, error) {
+	ret := _mock.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateEvent")
+	}
+
+	var r0 *ent.VisitorEvent
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateEventInput) (*ent.VisitorEvent, error)); ok {
+		return returnFunc(ctx, input)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreateEventInput) *ent.VisitorEvent); ok {
+		r0 = returnFunc(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.VisitorEvent)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, v1.CreateEventInput) error); ok {
+		r1 = returnFunc(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_CreateEvent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateEvent'
+type MockRepository_CreateEvent_Call struct {
+	*mock.Call
+}
+
+// CreateEvent is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input v1.CreateEventInput
+func (_e *MockRepository_Expecter) CreateEvent(ctx interface{}, input interface{}) *MockRepository_CreateEvent_Call {
+	return &MockRepository_CreateEvent_Call{Call: _e.mock.On("CreateEvent", ctx, input)}
+}
+
+func (_c *MockRepository_CreateEvent_Call) Run(run func(ctx context.Context, input v1.CreateEventInput)) *MockRepository_CreateEvent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 v1.CreateEventInput
+		if args[1] != nil {
+			arg1 = args[1].(v1.CreateEventInput)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_CreateEvent_Call) Return(visitorEvent *ent.VisitorEvent, err error) *MockRepository_CreateEvent_Call {
+	_c.Call.Return(visitorEvent, err)
+	return _c
+}
+
+func (_c *MockRepository_CreateEvent_Call) RunAndReturn(run func(ctx context.Context, input v1.CreateEventInput) (*ent.VisitorEvent, error)) *MockRepository_CreateEvent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreatePageView provides a mock function for the type MockRepository
+func (_mock *MockRepository) CreatePageView(ctx context.Context, input v1.CreatePageViewInput) (*ent.PageView, error) {
+	ret := _mock.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePageView")
+	}
+
+	var r0 *ent.PageView
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreatePageViewInput) (*ent.PageView, error)); ok {
+		return returnFunc(ctx, input)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, v1.CreatePageViewInput) *ent.PageView); ok {
+		r0 = returnFunc(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.PageView)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, v1.CreatePageViewInput) error); ok {
+		r1 = returnFunc(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_CreatePageView_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePageView'
+type MockRepository_CreatePageView_Call struct {
+	*mock.Call
+}
+
+// CreatePageView is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input v1.CreatePageViewInput
+func (_e *MockRepository_Expecter) CreatePageView(ctx interface{}, input interface{}) *MockRepository_CreatePageView_Call {
+	return &MockRepository_CreatePageView_Call{Call: _e.mock.On("CreatePageView", ctx, input)}
+}
+
+func (_c *MockRepository_CreatePageView_Call) Run(run func(ctx context.Context, input v1.CreatePageViewInput)) *MockRepository_CreatePageView_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 v1.CreatePageViewInput
+		if args[1] != nil {
+			arg1 = args[1].(v1.CreatePageViewInput)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_CreatePageView_Call) Return(pageView *ent.PageView, err error) *MockRepository_CreatePageView_Call {
+	_c.Call.Return(pageView, err)
+	return _c
+}
+
+func (_c *MockRepository_CreatePageView_Call) RunAndReturn(run func(ctx context.Context, input v1.CreatePageViewInput) (*ent.PageView, error)) *MockRepository_CreatePageView_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateSiteVisitor provides a mock function for the type MockRepository
 func (_mock *MockRepository) CreateSiteVisitor(ctx context.Context, input v1.CreateSiteVisitorInput) (*ent.SiteVisitor, error) {
 	ret := _mock.Called(ctx, input)
@@ -296,6 +432,74 @@ func (_c *MockRepository_GetByAnonymousID_Call) Return(visitor *ent.Visitor, err
 }
 
 func (_c *MockRepository_GetByAnonymousID_Call) RunAndReturn(run func(ctx context.Context, anonymousID string) (*ent.Visitor, error)) *MockRepository_GetByAnonymousID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetByID provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetByID(ctx context.Context, id int64) (*ent.Visitor, error) {
+	ret := _mock.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByID")
+	}
+
+	var r0 *ent.Visitor
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*ent.Visitor, error)); ok {
+		return returnFunc(ctx, id)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *ent.Visitor); ok {
+		r0 = returnFunc(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.Visitor)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByID'
+type MockRepository_GetByID_Call struct {
+	*mock.Call
+}
+
+// GetByID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id int64
+func (_e *MockRepository_Expecter) GetByID(ctx interface{}, id interface{}) *MockRepository_GetByID_Call {
+	return &MockRepository_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
+}
+
+func (_c *MockRepository_GetByID_Call) Run(run func(ctx context.Context, id int64)) *MockRepository_GetByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetByID_Call) Return(visitor *ent.Visitor, err error) *MockRepository_GetByID_Call {
+	_c.Call.Return(visitor, err)
+	return _c
+}
+
+func (_c *MockRepository_GetByID_Call) RunAndReturn(run func(ctx context.Context, id int64) (*ent.Visitor, error)) *MockRepository_GetByID_Call {
 	_c.Call.Return(run)
 	return _c
 }

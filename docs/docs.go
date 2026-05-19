@@ -401,6 +401,126 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/visitors/events": {
+            "post": {
+                "description": "Create a new visitor event linked to a valid session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Create a visitor event",
+                "parameters": [
+                    {
+                        "description": "Create event request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.CreateEventRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Public API Key",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HMAC Signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.EventResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/visitors/pageviews": {
+            "post": {
+                "description": "Create a new page view linked to a valid session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Create a page view",
+                "parameters": [
+                    {
+                        "description": "Create page view request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.CreatePageViewRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Public API Key",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HMAC Signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.PageViewResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -434,6 +554,80 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CreateEventRequest": {
+            "type": "object",
+            "required": [
+                "event_name",
+                "fingerprint_hash",
+                "session_token"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Geolocation fields if provided",
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CreatePageViewRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash",
+                "session_token",
+                "url"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Geolocation fields if provided",
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -479,6 +673,9 @@ const docTemplate = `{
                     "description": "Geo location information extracted from ip",
                     "type": "string"
                 },
+                "anonymous_id": {
+                    "type": "string"
+                },
                 "browser": {
                     "type": "string"
                 },
@@ -522,6 +719,33 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.EventResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_uuid": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "session_uuid": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_uuid": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.ListResponse": {
             "type": "object",
             "properties": {
@@ -533,6 +757,35 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.PageViewResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_uuid": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "session_uuid": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_uuid": {
+                    "type": "string"
                 }
             }
         },

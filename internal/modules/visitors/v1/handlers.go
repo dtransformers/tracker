@@ -72,6 +72,101 @@ func (h *Handler) CreateSession(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// CreateEvent godoc
+// @Summary Create a visitor event
+// @Description Create a new visitor event linked to a valid session.
+// @Tags visitors
+// @Accept json
+// @Produce json
+// @Param request body CreateEventRequest true "Create event request"
+// @Param X-API-Key header string true "Public API Key"
+// @Param X-Signature header string true "HMAC Signature"
+// @Success 200 {object} EventResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/visitors/events [post]
+func (h *Handler) CreateEvent(c *gin.Context) {
+	var req CreateEventRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Warn("invalid request body", "error", err)
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "Invalid request body",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	siteObj, exists := c.Get("site")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	site, ok := siteObj.(*ent.Site)
+	if !ok || site == nil || !site.IsActive || site.IsDeleted {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	res, err := h.service.CreateEvent(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("failed to create visitor event", "error", err)
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+// CreatePageView godoc
+// @Summary Create a page view
+// @Description Create a new page view linked to a valid session.
+// @Tags visitors
+// @Accept json
+// @Produce json
+// @Param request body CreatePageViewRequest true "Create page view request"
+// @Param X-API-Key header string true "Public API Key"
+// @Param X-Signature header string true "HMAC Signature"
+// @Success 200 {object} PageViewResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/visitors/pageviews [post]
+func (h *Handler) CreatePageView(c *gin.Context) {
+	var req CreatePageViewRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Warn("invalid request body", "error", err)
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "Invalid request body",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	siteObj, exists := c.Get("site")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	site, ok := siteObj.(*ent.Site)
+	if !ok || site == nil || !site.IsActive || site.IsDeleted {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	res, err := h.service.CreatePageView(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("failed to create page view", "error", err)
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`

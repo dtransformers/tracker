@@ -2,8 +2,11 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -80,6 +83,54 @@ type VisitorResponse struct {
 	IsVerifiedHuman bool      `json:"is_verified_human"`
 }
 
+type CreateEventRequest struct {
+	SessionToken    string                 `json:"session_token" binding:"required"`
+	FingerprintHash string                 `json:"fingerprint_hash" binding:"required"`
+	EventName       string                 `json:"event_name" binding:"required"`
+	EventProperties map[string]interface{} `json:"event_properties"`
+
+	// Geolocation fields if provided
+	Country  string `json:"country"`
+	Region   string `json:"region"`
+	City     string `json:"city"`
+	Timezone string `json:"timezone"`
+}
+
+type EventResponse struct {
+	UUID            string                 `json:"uuid"`
+	SessionUUID     string                 `json:"session_uuid"`
+	VisitorUUID     string                 `json:"visitor_uuid"`
+	DeviceUUID      string                 `json:"device_uuid"`
+	EventName       string                 `json:"event_name"`
+	EventProperties map[string]interface{} `json:"event_properties,omitempty"`
+	CreatedAt       time.Time              `json:"created_at"`
+}
+
+type CreatePageViewRequest struct {
+	SessionToken    string `json:"session_token" binding:"required"`
+	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
+	URL             string `json:"url" binding:"required"`
+	Title           string `json:"title"`
+	Referrer        string `json:"referrer"`
+
+	// Geolocation fields if provided
+	Country  string `json:"country"`
+	Region   string `json:"region"`
+	City     string `json:"city"`
+	Timezone string `json:"timezone"`
+}
+
+type PageViewResponse struct {
+	UUID        string    `json:"uuid"`
+	SessionUUID string    `json:"session_uuid"`
+	VisitorUUID string    `json:"visitor_uuid"`
+	DeviceUUID  string    `json:"device_uuid"`
+	URL         string    `json:"url"`
+	Title       string    `json:"title,omitempty"`
+	Referrer    string    `json:"referrer,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 /*
 CreateSession godoc
 responsible on creating the visitor session  since the sdk didn't find any current session, the session creation implecitly requires a device if not found, means also the visitor entity is not found since the device and the entity are conencted, also we need to store this event as a visit to the website on the site visitor entity
@@ -122,31 +173,50 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		isBot = tracking.Bot
 	}
 
+	// Populate geo fields if not already provided and we have an IP
+	if req.Country == "" && req.AddressIP != "" {
+		country, region, city, timezone := s.resolveIPGeolocation(ctx, req.AddressIP)
+		if country != "" {
+			req.Country = country
+		}
+		if region != "" {
+			req.Region = region
+		}
+		if city != "" {
+			req.City = city
+		}
+		if timezone != "" {
+			req.Timezone = timezone
+		}
+	}
+
 	s.logger.InfoContext(ctx, "tracking visitor from ip", "address_ip", originalIP)
-
-	v, err := s.getVisitor(ctx, req.AnonymousID)
-	if err != nil {
-		return nil, err
-	}
-
-	if v == nil {
-		v, err = s.createVisitor(ctx, req, isBot)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		v, err = s.updateVisitor(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	device, err := s.getDevice(ctx, req.FingerprintHash)
 	if err != nil {
 		return nil, err
 	}
 
+	var v *ent.Visitor
+	var isNewDevice bool
+
 	if device == nil {
+		isNewDevice = true
+		// With the creation of every device, a new visitor must be created.
+		// If req.AnonymousID already exists, generate a new one to avoid unique constraint violations.
+		if req.AnonymousID != "" {
+			existingV, err := s.getVisitor(ctx, req.AnonymousID)
+			if err != nil {
+				return nil, err
+			}
+			if existingV != nil {
+				req.AnonymousID = uuid.New().String()
+			}
+		}
+		v, err = s.createVisitor(ctx, req, isBot)
+		if err != nil {
+			return nil, err
+		}
 		device, err = s.createDevice(ctx, req, int64(v.ID))
 		if err != nil {
 			return nil, err
@@ -156,10 +226,22 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		if err != nil {
 			return nil, err
 		}
+		v, err = s.repo.GetByID(ctx, device.VisitorID)
+		if err != nil {
+			return nil, err
+		}
+		v, err = s.updateVisitor(ctx, v)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var sessionID int64
-	if req.SessionToken != "" {
+	if isNewDevice || req.SessionToken != "" {
+		if req.SessionToken == "" {
+			req.SessionToken = uuid.New().String()
+		}
+
 		session, err := s.getSession(ctx, req.SessionToken)
 		if err != nil {
 			return nil, err
@@ -342,4 +424,270 @@ func toVisitorResponse(v *ent.Visitor) *VisitorResponse {
 		IsBot:           v.IsBot,
 		IsVerifiedHuman: v.IsVerifiedHuman,
 	}
+}
+
+func (s *Service) resolveIPGeolocation(ctx context.Context, ip string) (country, region, city, timezone string) {
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil || parsedIP.IsLoopback() || parsedIP.IsPrivate() || parsedIP.IsUnspecified() {
+		return "", "", "", ""
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to create geoip request", "error", err, "ip", ip)
+		return "", "", "", ""
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		s.logger.WarnContext(ctx, "geoip lookup request failed", "error", err, "ip", ip)
+		return "", "", "", ""
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		s.logger.WarnContext(ctx, "geoip lookup returned non-200 status", "status", resp.Status, "ip", ip)
+		return "", "", "", ""
+	}
+
+	var data struct {
+		Status     string `json:"status"`
+		Country    string `json:"country"`
+		RegionName string `json:"regionName"`
+		City       string `json:"city"`
+		Timezone   string `json:"timezone"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		s.logger.WarnContext(ctx, "failed to decode geoip response", "error", err, "ip", ip)
+		return "", "", "", ""
+	}
+
+	if data.Status != "success" {
+		s.logger.WarnContext(ctx, "geoip lookup API returned failure status", "data", data, "ip", ip)
+		return "", "", "", ""
+	}
+
+	return data.Country, data.RegionName, data.City, data.Timezone
+}
+
+func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateSessionRequest) (*ent.VisitorSession, error) {
+	session, err := s.getSession(ctx, sessionToken)
+	if err != nil {
+		return nil, err
+	}
+	if session != nil {
+		return session, nil
+	}
+
+	device, err := s.getDevice(ctx, fingerprintHash)
+	if err != nil {
+		return nil, err
+	}
+
+	var v *ent.Visitor
+	if device == nil {
+		var anonID string
+		if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+			if tracking.Cookies != nil {
+				anonID = tracking.Cookies["anonymous_id"]
+			}
+		}
+		if anonID == "" {
+			anonID = uuid.New().String()
+		}
+		existingV, err := s.getVisitor(ctx, anonID)
+		if err != nil {
+			return nil, err
+		}
+		if existingV != nil {
+			anonID = uuid.New().String()
+		}
+
+		geo.AnonymousID = anonID
+		geo.FingerprintHash = fingerprintHash
+		geo.SessionToken = sessionToken
+
+		var isBot bool
+		if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+			isBot = tracking.Bot
+		}
+
+		v, err = s.createVisitor(ctx, geo, isBot)
+		if err != nil {
+			return nil, err
+		}
+
+		device, err = s.createDevice(ctx, geo, int64(v.ID))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		v, err = s.repo.GetByID(ctx, device.VisitorID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	geo.FingerprintHash = fingerprintHash
+	geo.SessionToken = sessionToken
+	session, err = s.createSession(ctx, geo, int64(v.ID), int64(device.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*EventResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	var geo CreateSessionRequest
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		geo.AddressIP = tracking.OriginalIP
+		geo.DeviceType = tracking.DeviceType
+		geo.OS = tracking.OS
+		geo.Browser = tracking.Browser
+		geo.Language = tracking.AcceptLanguage
+	}
+	if req.Country != "" {
+		geo.Country = req.Country
+	}
+	if req.Region != "" {
+		geo.Region = req.Region
+	}
+	if req.City != "" {
+		geo.City = req.City
+	}
+	if req.Timezone != "" {
+		geo.Timezone = req.Timezone
+	}
+
+	if geo.Country == "" && geo.AddressIP != "" {
+		country, region, city, timezone := s.resolveIPGeolocation(ctx, geo.AddressIP)
+		geo.Country = country
+		geo.Region = region
+		geo.City = city
+		geo.Timezone = timezone
+	}
+
+	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := s.repo.GetByID(ctx, session.VisitorID)
+	if err != nil {
+		return nil, err
+	}
+
+	device, err := s.getDevice(ctx, req.FingerprintHash)
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return nil, fmt.Errorf("device not found")
+	}
+
+	ev, err := s.repo.CreateEvent(ctx, CreateEventInput{
+		SessionID:       int64(session.ID),
+		VisitorID:       int64(v.ID),
+		DeviceID:        int64(device.ID),
+		EventName:       req.EventName,
+		EventProperties: req.EventProperties,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &EventResponse{
+		UUID:            ev.UUID,
+		SessionUUID:     session.UUID,
+		VisitorUUID:     v.UUID,
+		DeviceUUID:      device.UUID,
+		EventName:       ev.EventName,
+		EventProperties: ev.EventProperties,
+		CreatedAt:       ev.CreatedAt,
+	}, nil
+}
+
+func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest) (*PageViewResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	var geo CreateSessionRequest
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		geo.AddressIP = tracking.OriginalIP
+		geo.DeviceType = tracking.DeviceType
+		geo.OS = tracking.OS
+		geo.Browser = tracking.Browser
+		geo.Language = tracking.AcceptLanguage
+	}
+	if req.Country != "" {
+		geo.Country = req.Country
+	}
+	if req.Region != "" {
+		geo.Region = req.Region
+	}
+	if req.City != "" {
+		geo.City = req.City
+	}
+	if req.Timezone != "" {
+		geo.Timezone = req.Timezone
+	}
+
+	if geo.Country == "" && geo.AddressIP != "" {
+		country, region, city, timezone := s.resolveIPGeolocation(ctx, geo.AddressIP)
+		geo.Country = country
+		geo.Region = region
+		geo.City = city
+		geo.Timezone = timezone
+	}
+
+	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := s.repo.GetByID(ctx, session.VisitorID)
+	if err != nil {
+		return nil, err
+	}
+
+	device, err := s.getDevice(ctx, req.FingerprintHash)
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return nil, fmt.Errorf("device not found")
+	}
+
+	pv, err := s.repo.CreatePageView(ctx, CreatePageViewInput{
+		SessionID: int64(session.ID),
+		VisitorID: int64(v.ID),
+		DeviceID:  int64(device.ID),
+		URL:       req.URL,
+		Title:     req.Title,
+		Referrer:  req.Referrer,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &PageViewResponse{
+		UUID:        pv.UUID,
+		SessionUUID: session.UUID,
+		VisitorUUID: v.UUID,
+		DeviceUUID:  device.UUID,
+		URL:         pv.URL,
+		Title:       pv.Title,
+		Referrer:    pv.Referrer,
+		CreatedAt:   pv.CreatedAt,
+	}, nil
 }

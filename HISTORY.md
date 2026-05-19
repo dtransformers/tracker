@@ -1,5 +1,25 @@
 # LLM Interactions History
 
+## [2026-05-19T20:36:00+01:00] - Implement Event Tracking and Page View API Endpoints
+
+- **Request Summary**: Add new endpoints for Capturing Events and Page Views, along with underlying repository methods, service layer orchestration, unit tests, and routes registration.
+- **Implemented Changes**:
+  - Enhanced visitor repository to support `CreateEvent` and `CreatePageView`.
+  - Added `CreateEvent` and `CreatePageView` in the visitor service layer, supported by a shared `resolveSession` helper that automatically handles "find-or-create" logic for visitors, devices, and sessions.
+  - Registered `POST /api/v1/visitors/events` and `POST /api/v1/visitors/pageviews` routes.
+  - Implemented `CreateEvent` and `CreatePageView` in the visitor handler layer.
+  - Added unit tests for the service layer in `service_test.go` and regenerated mock files using Mockery.
+- **Reasoning / Design Decisions**:
+  - Centralized session resolving to avoid code duplication and maintain consistency across tracking pathways.
+  - Adhered strictly to the Repository pattern and Clean Architecture guidelines defined in the project.
+- **Linked Files/Modules Affected**:
+  - `internal/modules/visitors/v1/repository.go`
+  - `internal/modules/visitors/v1/service.go`
+  - `internal/modules/visitors/v1/handlers.go`
+  - `internal/modules/visitors/v1/routes.go`
+  - `internal/modules/visitors/v1/service_test.go`
+  - `internal/modules/visitors/v1/mocks/mock_Repository.go`
+
 ## [2026-05-19T14:33:56+01:00] - Connect Device and Session Handling in Visitor Creation Flow
 
 - **Request Summary**: Connect `handleDevice` and `handleSession` inside the visitor creation service flow, generate the required mocks for device and session repositories, and update unit tests to resolve nil pointer dereferences.
