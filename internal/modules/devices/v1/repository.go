@@ -45,6 +45,7 @@ type CreateDeviceInput struct {
 
 type UpdateDeviceInput struct {
 	LastSeenAt *time.Time
+	AddressIP  *string
 }
 
 func (r *entRepository) Create(ctx context.Context, input CreateDeviceInput) (*ent.Device, error) {
@@ -117,6 +118,9 @@ func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateDev
 
 	if input.LastSeenAt != nil {
 		query.SetLastSeenAt(*input.LastSeenAt)
+	}
+	if input.AddressIP != nil {
+		query.SetAddressIP(*input.AddressIP)
 	}
 
 	affected, err := query.Save(ctx)

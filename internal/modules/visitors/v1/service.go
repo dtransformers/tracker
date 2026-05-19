@@ -5,34 +5,63 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
+
 	"tracking/internal/ent"
+	devicesv1 "tracking/internal/modules/devices/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
+	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
+
 	"github.com/google/uuid"
 )
 
 type Service struct {
 	repo         Repository
 	sitesService *sitesv1.Service
+	deviceRepo   devicesv1.Repository
+	sessionRepo  visitor_sessionsv1.Repository
 	logger       *slog.Logger
 	timeout      time.Duration
 }
 
-func NewService(repo Repository, sitesService *sitesv1.Service, logger *slog.Logger) *Service {
+func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devicesv1.Repository, sessionRepo visitor_sessionsv1.Repository, logger *slog.Logger) *Service {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &Service{
 		repo:         repo,
 		sitesService: sitesService,
+		deviceRepo:   deviceRepo,
+		sessionRepo:  sessionRepo,
 		logger:       logger,
 		timeout:      5 * time.Second,
 	}
 }
 
 type TrackVisitorRequest struct {
-	PublicKey   string `json:"public_key" binding:"required"`
-	AnonymousID string `json:"anonymous_id" binding:"required"`
-	SessionID   int64  `json:"session_id" binding:"required"`
+	// AnonymousID is extracted from cookie by the handler
+	AnonymousID string `json:"-"`
+	PublicKey   string `json:"-"`
+
+	// Device Info
+	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
+	DeviceType      string `json:"device_type"`
+	OS              string `json:"os"`
+	AddressIP       string `json:"address_ip"`
+	Country         string `json:"country"`
+	Region          string `json:"region"`
+	City            string `json:"city"`
+	Browser         string `json:"browser"`
+	Language        string `json:"language"`
+	Timezone        string `json:"timezone"`
+
+	// Session Info
+	SessionToken        string `json:"session_token"`
+	EntryPage           string `json:"entry_page"`
+	ExitPage            string `json:"exit_page"`
+	AcquisitionSource   string `json:"acquisition_source"`
+	AcquisitionMedium   string `json:"acquisition_medium"`
+	AcquisitionCampaign string `json:"acquisition_campaign"`
+	ReferrerHost        string `json:"referrer_host"`
 }
 
 type VisitorResponse struct {
@@ -45,26 +74,11 @@ type VisitorResponse struct {
 	IsVerifiedHuman bool      `json:"is_verified_human"`
 }
 
-func (s *Service) TrackVisitor(ctx context.Context, req TrackVisitorRequest) (*VisitorResponse, error) {
+func (s *Service) TrackVisitor(ctx context.Context, req TrackVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	s.logger.InfoContext(ctx, "tracking visitor", "anonymous_id", req.AnonymousID, "public_key", req.PublicKey)
-
-	// 1. Verify site key
-	ok, err := s.sitesService.VerifySiteKey(ctx, req.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to verify site key: %w", err)
-	}
-	if !ok {
-		return nil, fmt.Errorf("invalid or inactive site key")
-	}
-
-	// 2. Get site to get site_id
-	site, err := s.sitesService.GetSiteKey(ctx, req.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get site: %w", err)
-	}
+	s.logger.InfoContext(ctx, "tracking visitor", "anonymous_id", req.AnonymousID, "site_id", site.ID)
 
 	// 3. Check if visitor exists by anonymous ID
 	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
@@ -92,15 +106,96 @@ func (s *Service) TrackVisitor(ctx context.Context, req TrackVisitorRequest) (*V
 		}
 	}
 
-	// 4. Create SiteVisitor link
-	_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
-		UUID:      uuid.New().String(),
-		VisitorID: int64(v.ID),
-		SiteID:    int64(site.ID),
-		SessionID: req.SessionID,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create site visitor link: %w", err)
+	// 4. Handle Device
+	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, fmt.Errorf("failed to check device: %w", err)
+	}
+
+	if device == nil {
+		// Create new device
+		d, err := s.deviceRepo.Create(ctx, devicesv1.CreateDeviceInput{
+			UUID:            uuid.New().String(),
+			VisitorID:       int64(v.ID),
+			FingerprintHash: req.FingerprintHash,
+			DeviceType:      req.DeviceType,
+			OS:              req.OS,
+			AddressIP:       req.AddressIP,
+			Country:         req.Country,
+			Region:          req.Region,
+			City:            req.City,
+			Browser:         req.Browser,
+			Language:        req.Language,
+			Timezone:        req.Timezone,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create device: %w", err)
+		}
+		device = d
+	} else {
+		now := time.Now()
+		d, err := s.deviceRepo.Update(ctx, device.UUID, devicesv1.UpdateDeviceInput{
+			LastSeenAt: &now,
+			AddressIP:  &req.AddressIP,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to update device: %w", err)
+		}
+		device = d
+	}
+
+	// 5. Handle Session
+	var sessionID int64
+	if req.SessionToken != "" {
+		session, err := s.sessionRepo.GetBySessionToken(ctx, req.SessionToken)
+		if err != nil && !ent.IsNotFound(err) {
+			return nil, fmt.Errorf("failed to get session: %w", err)
+		}
+
+		if session == nil {
+			// Create session
+			sess, err := s.sessionRepo.Create(ctx, visitor_sessionsv1.CreateSessionInput{
+				UUID:                uuid.New().String(),
+				VisitorID:           int64(v.ID),
+				DeviceID:            int64(device.ID),
+				SessionToken:        req.SessionToken,
+				StartedAt:           time.Now(),
+				EntryPage:           req.EntryPage,
+				AcquisitionSource:   req.AcquisitionSource,
+				AcquisitionMedium:   req.AcquisitionMedium,
+				AcquisitionCampaign: req.AcquisitionCampaign,
+				ReferrerHost:        req.ReferrerHost,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create session: %w", err)
+			}
+			sessionID = int64(sess.ID)
+		} else {
+			// Update session
+			now := time.Now()
+			sess, err := s.sessionRepo.Update(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
+				LastActivityAt: &now,
+				ExitPage:       &req.ExitPage,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to update session: %w", err)
+			}
+			sessionID = int64(sess.ID)
+		}
+	}
+
+	// 6. Create SiteVisitor link
+	if sessionID != 0 {
+		_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
+			UUID:      uuid.New().String(),
+			VisitorID: int64(v.ID),
+			SiteID:    int64(site.ID),
+			SessionID: sessionID,
+		})
+		if err != nil {
+			// ignore error if it exists or log it
+			s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
+		}
 	}
 
 	return toVisitorResponse(v), nil

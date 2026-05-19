@@ -3,10 +3,13 @@ package v1
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
+	devicesv1 "tracking/internal/modules/devices/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	"tracking/internal/modules/state"
+	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +24,9 @@ type Module struct {
 
 func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.Logger) *Module {
 	repo := NewRepository(client)
-	svc := NewService(repo, sitesService, logger)
+	deviceRepo := devicesv1.NewRepository(client)
+	sessionRepo := visitor_sessionsv1.NewRepository(client)
+	svc := NewService(repo, sitesService, deviceRepo, sessionRepo, logger)
 	handler := NewHandler(svc, logger)
 
 	return &Module{
@@ -34,8 +39,7 @@ func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.L
 }
 
 func (m *Module) Register(router *gin.RouterGroup) {
-	visitors := router.Group("/visitors")
-
+	visitors := router.Group("/visitor")
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
 		GetSecretKey: func(publicKey string) (string, error) {
 			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
@@ -47,5 +51,28 @@ func (m *Module) Register(router *gin.RouterGroup) {
 		NonceStore: state.NewNonceStore(state.Redis),
 	}))
 
-	visitors.POST("/", m.handler.Create)
+	// Site Context Middleware
+	visitors.Use(func(c *gin.Context) {
+		pubKey := c.GetString("publicKey")
+		if pubKey == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing public key"})
+			return
+		}
+
+		site, err := m.sitesService.GetSiteKey(c.Request.Context(), pubKey)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid site key"})
+			return
+		}
+
+		if !site.IsActive || site.IsDeleted {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Site is inactive or deleted"})
+			return
+		}
+
+		c.Set("site", site)
+		c.Next()
+	})
+
+	visitors.POST("/", m.handler.CreateVisitor)
 }

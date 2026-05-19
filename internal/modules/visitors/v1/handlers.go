@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"tracking/internal/ent"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,9 +24,9 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 	}
 }
 
-// Track godoc
-// @Summary Track a visitor
-// @Description Track a visitor on a site. Creates a new visitor if not exists, or updates last seen time.
+// CreateVisitor godoc
+// @Summary Create a visitor
+// @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.
 // @Tags visitors
 // @Accept json
 // @Produce json
@@ -35,7 +37,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/visitors [post]
-func (h *Handler) Create(c *gin.Context) {
+func (h *Handler) CreateVisitor(c *gin.Context) {
 	var req TrackVisitorRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -47,13 +49,20 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	headerPubKey := c.GetString("publicKey")
-	if headerPubKey != "" && headerPubKey != req.PublicKey {
-		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "Public key mismatch"})
+	siteObj, exists := c.Get("site")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Site info not found in context"})
 		return
 	}
 
-	res, err := h.service.TrackVisitor(c.Request.Context(), req)
+	// Use the ent.Site retrieved from the middleware context
+	site, ok := siteObj.(*ent.Site)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Invalid site info in context"})
+		return
+	}
+
+	res, err := h.service.TrackVisitor(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to track visitor", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
