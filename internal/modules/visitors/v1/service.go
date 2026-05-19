@@ -78,6 +78,9 @@ type VisitorResponse struct {
 	IsVerifiedHuman bool      `json:"is_verified_human"`
 }
 
+/*
+CreateVisitor godoc
+*/
 func (s *Service) CreateVisitor(ctx context.Context, req CreateVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()

@@ -56,6 +56,7 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	visitors.Use(middlewares.Validation())
 	visitors.Use(middlewares.Cors())
 	visitors.Use(middlewares.Metrics(m.logger))
+	visitors.Use(middlewares.RequestTracking())
 
 	visitors.POST("/", m.handler.CreateVisitor)
 }
