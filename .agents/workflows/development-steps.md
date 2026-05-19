@@ -32,14 +32,16 @@ _Objective: Write structurally aligned code._
 
 _Objective: Update the system of record. You MUST use your file writing tool for these steps._
 
-1. **Append to History:** Open `./HISTORY.md` and append a new log entry. You must explicitly save this file. Use this exact format:
+1. **Update Documentation:** incase of any change on the api the swagger documentation needs to be updated to align with the changes
+2. **Append to History:** Open `./HISTORY.md` and append a new log entry. You must explicitly save this file. Use this exact format:
    - **Timestamp:** [Insert current date/time]
-   - **Request:** [Summary of user prompt]
+   - **AffectedArea:** [Insert the affected module]
+   - **Request:** [Summary of user prompt]g
    - **Changes:** [Technical breakdown of modules/files edited]
    - **Reasoning:** [Why you chose this approach]
    - **Impact:** [How system behavior changed]
-2. **Sync Docs:** Update any relevant inline documentation, API docs, or `README.md` sections that were affected by your code changes.
-3. **Update FAQ:** If you discovered a new edge case, or if the Notion MCP lacked an answer, use your file writing tool to add a new Q/A entry to `./commands/FAQ.md`.
+3. **Sync Docs:** Update any relevant inline documentation, API docs, or `README.md` sections that were affected by your code changes.
+4. **Update FAQ:** If you discovered a new edge case, or if the Notion MCP lacked an answer, use your file writing tool to add a new Q/A entry to `./commands/FAQ.md`.
 
 ## PHASE 5: Completion Handoff
 

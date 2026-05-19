@@ -33,6 +33,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Param request body CreateSessionRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
+// @Param anonymous_id cookie string true "Anonymous ID cookie"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -48,6 +49,19 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		})
 		return
 	}
+
+	anonID, err := c.Cookie("anonymous_id")
+	if err != nil || anonID == "" {
+		h.logger.Warn("missing anonymous_id cookie")
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error: "Missing anonymous_id cookie",
+		})
+		return
+	}
+	req.AnonymousID = anonID
+
+	pubKey := c.GetString("publicKey")
+	req.PublicKey = pubKey
 
 	siteObj, exists := c.Get("site")
 	if !exists {

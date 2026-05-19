@@ -180,6 +180,14 @@ The simplest valid solution SHOULD be preferred.
 
 ---
 
+---
+
+## 11. Test Only The affected module
+
+We should not re-test every module everytime, the test commands are allowed only for the modules affected with the changes
+
+---
+
 # Implementation Decision Order
 
 The system MUST evaluate solutions in the following order:
