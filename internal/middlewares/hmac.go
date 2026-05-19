@@ -65,7 +65,6 @@ func HMAC(config HMACConfig) gin.HandlerFunc {
 		}
 
 		canonicalRequest := buildCanonicalRequest(c, timestamp, nonce, bodyBytes, config.RequireContentInSignature)
-
 		h := hmac.New(sha256.New, []byte(secretKey))
 		h.Write([]byte(canonicalRequest))
 		expectedSignature := hex.EncodeToString(h.Sum(nil))
@@ -77,7 +76,6 @@ func HMAC(config HMACConfig) gin.HandlerFunc {
 
 		c.Set("publicKey", publicKey)
 		c.Set("authenticatedAt", time.Now())
-
 		c.Next()
 	}
 }
@@ -158,25 +156,20 @@ func verifySignature(signature, expectedSignature string) bool {
 	return hmac.Equal(providedSignature, expectedSignatureBytes)
 }
 
-// buildCanonicalRequest creates the standardized string that gets signed
-// Format: METHOD\nPATH\nQUERY\nTIMESTAMP\nNONCE\n[CONTENT-TYPE\nCONTENT-LENGTH\n]BODY
 func buildCanonicalRequest(c *gin.Context, timestamp, nonce string, body []byte, includeContent bool) string {
 	var parts []string
 
-	// Core request elements (always included)
 	parts = append(parts,
 		c.Request.Method,
 		c.Request.URL.Path,
-		c.Request.URL.RawQuery, // Include query parameters
+		c.Request.URL.RawQuery,
 		timestamp,
 	)
 
-	// Include nonce if provided
 	if nonce != "" {
 		parts = append(parts, nonce)
 	}
 
-	// Optional: include content headers for additional security
 	if includeContent {
 		parts = append(parts,
 			c.GetHeader("Content-Type"),
@@ -184,13 +177,11 @@ func buildCanonicalRequest(c *gin.Context, timestamp, nonce string, body []byte,
 		)
 	}
 
-	// Add body (can be empty)
 	parts = append(parts, string(body))
 
 	return strings.Join(parts, "\n")
 }
 
-// Utility: Generate signature (for client-side reference)
 func GenerateSignature(method, path, query, timestamp, nonce string, body []byte, secretKey string) string {
 	parts := []string{method, path, query, timestamp}
 	if nonce != "" {

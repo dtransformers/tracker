@@ -97,20 +97,29 @@ type UpdateRequest struct {
 	IsActive *bool `json:"is_active"`
 }
 
-// Response represents a site in API responses.
-// Note: SecretKey is intentionally excluded for security.
 type Response struct {
-	UUID      string    `json:"uuid"`
-	Name      string    `json:"name"`
-	Domain    string    `json:"domain"`
-	TenantID  int64     `json:"tenant_id"`
-	PublicKey string    `json:"public_key"`
+	UUID      string `json:"uuid"`
+	Name      string `json:"name"`
+	Domain    string `json:"domain"`
+	TenantID  int64  `json:"tenant_id"`
+	PublicKey string `json:"public_key"`
+
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// ListResponse represents a list of sites.
+type FullSiteResponse struct {
+	UUID      string    `json:"uuid"`
+	Name      string    `json:"name"`
+	Domain    string    `json:"domain"`
+	TenantID  int64     `json:"tenant_id"`
+	PublicKey string    `json:"public_key"`
+	SecretKey string    `json:"secret_key"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
 type ListResponse struct {
 	Sites []*Response `json:"sites"`
 	Total int         `json:"total"`
@@ -175,17 +184,16 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 	return toResponse(site), nil
 }
 
-// GetSite retrieves a site by its UUID.
-func (s *Service) GetSite(ctx context.Context, siteUUID string) (*Response, error) {
+func (s *Service) GetSite(ctx context.Context, siteUUID string) (*FullSiteResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
 		return nil, fmt.Errorf("invalid UUID format: %w", err)
 	}
 
 	site, err := s.repo.GetByUUID(ctx, siteUUID)
+
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrSiteNotFound
@@ -197,10 +205,9 @@ func (s *Service) GetSite(ctx context.Context, siteUUID string) (*Response, erro
 		return nil, fmt.Errorf("failed to get site: %w", err)
 	}
 
-	return toResponse(site), nil
+	return toFullResponse(site), nil
 }
 
-// VerifySiteKey verifies if a site exists and is active for a given public key.
 func (s *Service) VerifySiteKey(ctx context.Context, publicKey string) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
@@ -542,6 +549,24 @@ func toResponse(site *ent.Site) *Response {
 		Domain:    site.Domain,
 		TenantID:  site.TenantID,
 		PublicKey: site.PublicKey,
+		IsActive:  site.IsActive,
+		CreatedAt: site.CreatedAt,
+		UpdatedAt: site.UpdatedAt,
+	}
+}
+
+func toFullResponse(site *ent.Site) *FullSiteResponse {
+	if site == nil {
+		return nil
+	}
+
+	return &FullSiteResponse{
+		UUID:      site.UUID,
+		Name:      site.Name,
+		Domain:    site.Domain,
+		TenantID:  site.TenantID,
+		PublicKey: site.PublicKey,
+		SecretKey: site.SecretKey,
 		IsActive:  site.IsActive,
 		CreatedAt: site.CreatedAt,
 		UpdatedAt: site.UpdatedAt,

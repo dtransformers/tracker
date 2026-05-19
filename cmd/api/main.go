@@ -101,7 +101,8 @@ func (app *application) setupRouter() *gin.Engine {
 	app.applyMiddlewares(router)
 
 	app.registerRoutes(router)
-
+	router.RedirectTrailingSlash = true
+	router.RedirectFixedPath = true
 	if app.cfg.App.IsDev {
 		app.setupDevTools(router)
 	}

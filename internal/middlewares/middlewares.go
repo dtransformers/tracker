@@ -12,8 +12,6 @@ import (
 )
 
 func RateLimit(RateLimitWindow time.Duration, RateLimitRequests int) gin.HandlerFunc {
-	// Create a rate limiter store (in-memory for single instance)
-	// For distributed systems, use Redis store
 	rate := limiter.Rate{
 		Period: RateLimitWindow,
 		Limit:  int64(RateLimitRequests),
@@ -27,20 +25,16 @@ func RateLimit(RateLimitWindow time.Duration, RateLimitRequests int) gin.Handler
 	return middleware
 }
 
-// metricsMiddleware tracks request metrics.
 func Metrics(logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
 
-		// Process request
 		c.Next()
 
-		// Calculate metrics
 		duration := time.Since(start)
 		status := c.Writer.Status()
 
-		// Log request
 		logger.Info("request completed",
 			"method", c.Request.Method,
 			"path", path,
@@ -49,16 +43,11 @@ func Metrics(logger *slog.Logger) gin.HandlerFunc {
 			"client_ip", c.ClientIP(),
 			"user_agent", c.Request.UserAgent(),
 		)
-
-		// You can also emit metrics to your monitoring system here
-		// metrics.RecordRequest(path, c.Request.Method, status, duration)
 	}
 }
 
-// validationMiddleware validates common request parameters.
 func Validation() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Validate content type for POST/PATCH requests
 		if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPatch {
 			contentType := c.GetHeader("Content-Type")
 			if contentType != "application/json" && contentType != "" {
@@ -74,7 +63,6 @@ func Validation() gin.HandlerFunc {
 	}
 }
 
-// corsMiddleware configures CORS settings.
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

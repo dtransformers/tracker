@@ -37,22 +37,26 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 	}
 }
 
-type TrackVisitorRequest struct {
+type CreateVisitorRequest struct {
 	// AnonymousID is extracted from cookie by the handler
 	AnonymousID string `json:"-"`
-	PublicKey   string `json:"-"`
 
-	// Device Info
+	// PublicKey is extracted from header on the middleware level
+	PublicKey string `json:"-"`
+
+	// Device Info Extracted by the tracking SDK
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
 	DeviceType      string `json:"device_type"`
 	OS              string `json:"os"`
-	AddressIP       string `json:"address_ip"`
-	Country         string `json:"country"`
-	Region          string `json:"region"`
-	City            string `json:"city"`
 	Browser         string `json:"browser"`
 	Language        string `json:"language"`
-	Timezone        string `json:"timezone"`
+
+	// Geo location information extracted from ip
+	AddressIP string `json:"address_ip"`
+	Country   string `json:"country"`
+	Region    string `json:"region"`
+	City      string `json:"city"`
+	Timezone  string `json:"timezone"`
 
 	// Session Info
 	SessionToken        string `json:"session_token"`
@@ -74,7 +78,7 @@ type VisitorResponse struct {
 	IsVerifiedHuman bool      `json:"is_verified_human"`
 }
 
-func (s *Service) CreateVisitor(ctx context.Context, req TrackVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
+func (s *Service) CreateVisitor(ctx context.Context, req CreateVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -95,7 +99,6 @@ func (s *Service) CreateVisitor(ctx context.Context, req TrackVisitorRequest, si
 		return nil, err
 	}
 
-	// 6. Create SiteVisitor link
 	if sessionID != 0 {
 		_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
 			UUID:      uuid.New().String(),
@@ -104,7 +107,6 @@ func (s *Service) CreateVisitor(ctx context.Context, req TrackVisitorRequest, si
 			SessionID: sessionID,
 		})
 		if err != nil {
-			// ignore error if it exists or log it
 			s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
 		}
 	}
@@ -112,7 +114,7 @@ func (s *Service) CreateVisitor(ctx context.Context, req TrackVisitorRequest, si
 	return toVisitorResponse(v), nil
 }
 
-func (s *Service) handleVisitor(ctx context.Context, req TrackVisitorRequest) (*ent.Visitor, error) {
+func (s *Service) handleVisitor(ctx context.Context, req CreateVisitorRequest) (*ent.Visitor, error) {
 	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
 	if err != nil {
 		if !ent.IsNotFound(err) {
@@ -138,7 +140,7 @@ func (s *Service) handleVisitor(ctx context.Context, req TrackVisitorRequest) (*
 	return v, nil
 }
 
-func (s *Service) handleDevice(ctx context.Context, req TrackVisitorRequest, visitorID int64) (*ent.Device, error) {
+func (s *Service) handleDevice(ctx context.Context, req CreateVisitorRequest, visitorID int64) (*ent.Device, error) {
 	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
 	if err != nil && !ent.IsNotFound(err) {
 		return nil, fmt.Errorf("failed to check device: %w", err)
@@ -164,7 +166,7 @@ func (s *Service) handleDevice(ctx context.Context, req TrackVisitorRequest, vis
 		}
 		return d, nil
 	}
-	
+
 	now := time.Now()
 	d, err := s.deviceRepo.Update(ctx, device.UUID, devicesv1.UpdateDeviceInput{
 		LastSeenAt: &now,
@@ -176,7 +178,7 @@ func (s *Service) handleDevice(ctx context.Context, req TrackVisitorRequest, vis
 	return d, nil
 }
 
-func (s *Service) handleSession(ctx context.Context, req TrackVisitorRequest, visitorID int64, deviceID int64) (int64, error) {
+func (s *Service) handleSession(ctx context.Context, req CreateVisitorRequest, visitorID int64, deviceID int64) (int64, error) {
 	if req.SessionToken == "" {
 		return 0, nil
 	}
@@ -204,7 +206,7 @@ func (s *Service) handleSession(ctx context.Context, req TrackVisitorRequest, vi
 		}
 		return int64(sess.ID), nil
 	}
-	
+
 	now := time.Now()
 	sess, err := s.sessionRepo.Update(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
 		LastActivityAt: &now,

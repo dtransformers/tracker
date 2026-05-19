@@ -26,7 +26,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	pubKey := "test-pub-key"
 	anonID := "anon-123"
 
-	req := visitorsv1.TrackVisitorRequest{
+	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:           pubKey,
 		AnonymousID:         anonID,
 		SessionToken:        "session-token",
@@ -83,7 +83,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 
 	pubKey := "test-pub-key"
 	anonID := "anon-123"
-	req := visitorsv1.TrackVisitorRequest{
+	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:           pubKey,
 		AnonymousID:         anonID,
 		SessionToken:        "session-token",

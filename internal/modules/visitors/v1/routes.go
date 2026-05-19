@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"log/slog"
+	"time"
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	devicesv1 "tracking/internal/modules/devices/v1"
@@ -38,7 +39,7 @@ func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.L
 }
 
 func (m *Module) Register(router *gin.RouterGroup) {
-	visitors := router.Group("/visitor")
+	visitors := router.Group("/visitors")
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
 		GetSecretKey: func(publicKey string) (string, error) {
 			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
@@ -51,6 +52,10 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	}))
 
 	visitors.Use(VerifyKeys(m.sitesService))
+	visitors.Use(middlewares.RateLimit(1*time.Minute, 600))
+	visitors.Use(middlewares.Validation())
+	visitors.Use(middlewares.Cors())
+	visitors.Use(middlewares.Metrics(m.logger))
 
 	visitors.POST("/", m.handler.CreateVisitor)
 }

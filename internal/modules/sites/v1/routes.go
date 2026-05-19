@@ -58,13 +58,9 @@ func (m *Module) registerRoutes(group *gin.RouterGroup) {
 	group.PATCH("/:uuid", m.handler.Update)
 	group.DELETE("/:uuid", m.handler.Delete)
 
-	// Special actions
 	group.POST("/:uuid/regenerate-keys", m.handler.RegenerateKeys)
 }
 
-// rateLimitMiddleware creates a rate limiting middleware using ulule/limiter.
-
-// Health returns the health status of the module.
 func (m *Module) Health() map[string]interface{} {
 	return map[string]interface{}{
 		"status":  "healthy",
@@ -72,30 +68,24 @@ func (m *Module) Health() map[string]interface{} {
 	}
 }
 
-// Shutdown performs graceful shutdown of the module.
 func (m *Module) Shutdown() error {
 	m.logger.Info("shutting down sites module")
-	// Perform any necessary cleanup
 	return nil
 }
 
-// Register is a convenience function to register the sites module with default config.
 func Register(router *gin.RouterGroup, client *ent.Client) {
 	RegisterWithLogger(router, client, slog.Default())
 }
 
-// RegisterWithLogger is a convenience function to register the sites module with a logger and default config.
 func RegisterWithLogger(router *gin.RouterGroup, client *ent.Client, logger *slog.Logger) {
 	module := NewModule(client, logger, DefaultRouterConfig())
 	module.Register(router)
 }
 
-// RegisterWithCredentials is a convenience function to register the sites module with credentials.
 func RegisterWithCredentials(router *gin.RouterGroup, client *ent.Client, rootUser, rootPass string) {
 	RegisterWithLoggerAndCredentials(router, client, slog.Default(), rootUser, rootPass)
 }
 
-// RegisterWithLoggerAndCredentials is a convenience function to register the sites module with a logger and credentials.
 func RegisterWithLoggerAndCredentials(router *gin.RouterGroup, client *ent.Client, logger *slog.Logger, rootUser, rootPass string) {
 	cfg := DefaultRouterConfig()
 	cfg.RootUsername = rootUser

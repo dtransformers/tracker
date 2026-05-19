@@ -355,7 +355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.TrackVisitorRequest"
+                            "$ref": "#/definitions/v1.CreateVisitorRequest"
                         }
                     },
                     {
@@ -484,7 +484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.TrackVisitorRequest": {
+        "v1.CreateVisitorRequest": {
             "type": "object",
             "required": [
                 "anonymous_id",

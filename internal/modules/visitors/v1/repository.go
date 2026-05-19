@@ -31,7 +31,7 @@ func NewRepository(client *ent.Client) Repository {
 
 type CreateVisitorInput struct {
 	UUID            string
-	AnonymousID      string
+	AnonymousID     string
 	PrimaryUserID   *string
 	IsBot           bool
 	IsVerifiedHuman bool

@@ -30,7 +30,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Tags visitors
 // @Accept json
 // @Produce json
-// @Param request body TrackVisitorRequest true "Track visitor request"
+// @Param request body CreateVisitorRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
 // @Success 200 {object} VisitorResponse
@@ -38,7 +38,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/visitors [post]
 func (h *Handler) CreateVisitor(c *gin.Context) {
-	var req TrackVisitorRequest
+	var req CreateVisitorRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
