@@ -18,6 +18,6 @@ func RegisterV1(router *gin.Engine, client *ent.Client, logger *slog.Logger) {
 
 	module := v1.NewModule(client, sitesService, logger)
 	module.Register(v1Group)
-	fmt.Println("Visitors module endpoints under /api/v1/visitor Are Ready To use \n")
+	fmt.Printf("Visitors module endpoints under /api/v1/visitor Are Ready To use \n")
 
 }

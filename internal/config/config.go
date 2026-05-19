@@ -66,10 +66,10 @@ type DBConfig struct {
 	Username        string
 	Password        string
 	Database        string
-	MaxOpenConns    int           "default: 10"
-	MaxIdleConns    int           "default: 5"
-	ConnMaxLifetime time.Duration "default: 30m"
-	ConnMaxIdleTime time.Duration "default: 10m"
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ConnMaxIdleTime time.Duration
 	SSLMode         string
 }
 
