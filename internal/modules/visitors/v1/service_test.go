@@ -66,7 +66,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 
-	res, err := service.TrackVisitor(context.Background(), req, mockSite)
+	res, err := service.CreateVisitor(context.Background(), req, mockSite)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -131,7 +131,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockVisitorsRepo.On("Update", mock.Anything, mockVisitor.UUID, mock.Anything).Return(updatedVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 
-	res, err := service.TrackVisitor(context.Background(), req, mockSite)
+	res, err := service.CreateVisitor(context.Background(), req, mockSite)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)

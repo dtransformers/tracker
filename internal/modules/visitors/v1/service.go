@@ -74,114 +74,25 @@ type VisitorResponse struct {
 	IsVerifiedHuman bool      `json:"is_verified_human"`
 }
 
-func (s *Service) TrackVisitor(ctx context.Context, req TrackVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
+func (s *Service) CreateVisitor(ctx context.Context, req TrackVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	s.logger.InfoContext(ctx, "tracking visitor", "anonymous_id", req.AnonymousID, "site_id", site.ID)
 
-	// 3. Check if visitor exists by anonymous ID
-	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
+	v, err := s.handleVisitor(ctx, req)
 	if err != nil {
-		if !ent.IsNotFound(err) {
-			return nil, fmt.Errorf("failed to get visitor: %w", err)
-		}
-
-		// Visitor not found, create new one
-		v, err = s.repo.Create(ctx, CreateVisitorInput{
-			UUID:        uuid.New().String(),
-			AnonymousID: req.AnonymousID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create visitor: %w", err)
-		}
-	} else {
-		// Update last seen
-		now := time.Now()
-		v, err = s.repo.Update(ctx, v.UUID, UpdateVisitorInput{
-			LastSeenAt: &now,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to update visitor: %w", err)
-		}
+		return nil, err
 	}
 
-	// 4. Handle Device
-	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, fmt.Errorf("failed to check device: %w", err)
+	device, err := s.handleDevice(ctx, req, int64(v.ID))
+	if err != nil {
+		return nil, err
 	}
 
-	if device == nil {
-		// Create new device
-		d, err := s.deviceRepo.Create(ctx, devicesv1.CreateDeviceInput{
-			UUID:            uuid.New().String(),
-			VisitorID:       int64(v.ID),
-			FingerprintHash: req.FingerprintHash,
-			DeviceType:      req.DeviceType,
-			OS:              req.OS,
-			AddressIP:       req.AddressIP,
-			Country:         req.Country,
-			Region:          req.Region,
-			City:            req.City,
-			Browser:         req.Browser,
-			Language:        req.Language,
-			Timezone:        req.Timezone,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create device: %w", err)
-		}
-		device = d
-	} else {
-		now := time.Now()
-		d, err := s.deviceRepo.Update(ctx, device.UUID, devicesv1.UpdateDeviceInput{
-			LastSeenAt: &now,
-			AddressIP:  &req.AddressIP,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to update device: %w", err)
-		}
-		device = d
-	}
-
-	// 5. Handle Session
-	var sessionID int64
-	if req.SessionToken != "" {
-		session, err := s.sessionRepo.GetBySessionToken(ctx, req.SessionToken)
-		if err != nil && !ent.IsNotFound(err) {
-			return nil, fmt.Errorf("failed to get session: %w", err)
-		}
-
-		if session == nil {
-			// Create session
-			sess, err := s.sessionRepo.Create(ctx, visitor_sessionsv1.CreateSessionInput{
-				UUID:                uuid.New().String(),
-				VisitorID:           int64(v.ID),
-				DeviceID:            int64(device.ID),
-				SessionToken:        req.SessionToken,
-				StartedAt:           time.Now(),
-				EntryPage:           req.EntryPage,
-				AcquisitionSource:   req.AcquisitionSource,
-				AcquisitionMedium:   req.AcquisitionMedium,
-				AcquisitionCampaign: req.AcquisitionCampaign,
-				ReferrerHost:        req.ReferrerHost,
-			})
-			if err != nil {
-				return nil, fmt.Errorf("failed to create session: %w", err)
-			}
-			sessionID = int64(sess.ID)
-		} else {
-			// Update session
-			now := time.Now()
-			sess, err := s.sessionRepo.Update(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
-				LastActivityAt: &now,
-				ExitPage:       &req.ExitPage,
-			})
-			if err != nil {
-				return nil, fmt.Errorf("failed to update session: %w", err)
-			}
-			sessionID = int64(sess.ID)
-		}
+	sessionID, err := s.handleSession(ctx, req, int64(v.ID), int64(device.ID))
+	if err != nil {
+		return nil, err
 	}
 
 	// 6. Create SiteVisitor link
@@ -199,6 +110,110 @@ func (s *Service) TrackVisitor(ctx context.Context, req TrackVisitorRequest, sit
 	}
 
 	return toVisitorResponse(v), nil
+}
+
+func (s *Service) handleVisitor(ctx context.Context, req TrackVisitorRequest) (*ent.Visitor, error) {
+	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
+	if err != nil {
+		if !ent.IsNotFound(err) {
+			return nil, fmt.Errorf("failed to get visitor: %w", err)
+		}
+
+		v, err = s.repo.Create(ctx, CreateVisitorInput{
+			UUID:        uuid.New().String(),
+			AnonymousID: req.AnonymousID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create visitor: %w", err)
+		}
+	} else {
+		now := time.Now()
+		v, err = s.repo.Update(ctx, v.UUID, UpdateVisitorInput{
+			LastSeenAt: &now,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to update visitor: %w", err)
+		}
+	}
+	return v, nil
+}
+
+func (s *Service) handleDevice(ctx context.Context, req TrackVisitorRequest, visitorID int64) (*ent.Device, error) {
+	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, fmt.Errorf("failed to check device: %w", err)
+	}
+
+	if device == nil {
+		d, err := s.deviceRepo.Create(ctx, devicesv1.CreateDeviceInput{
+			UUID:            uuid.New().String(),
+			VisitorID:       visitorID,
+			FingerprintHash: req.FingerprintHash,
+			DeviceType:      req.DeviceType,
+			OS:              req.OS,
+			AddressIP:       req.AddressIP,
+			Country:         req.Country,
+			Region:          req.Region,
+			City:            req.City,
+			Browser:         req.Browser,
+			Language:        req.Language,
+			Timezone:        req.Timezone,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create device: %w", err)
+		}
+		return d, nil
+	}
+	
+	now := time.Now()
+	d, err := s.deviceRepo.Update(ctx, device.UUID, devicesv1.UpdateDeviceInput{
+		LastSeenAt: &now,
+		AddressIP:  &req.AddressIP,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update device: %w", err)
+	}
+	return d, nil
+}
+
+func (s *Service) handleSession(ctx context.Context, req TrackVisitorRequest, visitorID int64, deviceID int64) (int64, error) {
+	if req.SessionToken == "" {
+		return 0, nil
+	}
+
+	session, err := s.sessionRepo.GetBySessionToken(ctx, req.SessionToken)
+	if err != nil && !ent.IsNotFound(err) {
+		return 0, fmt.Errorf("failed to get session: %w", err)
+	}
+
+	if session == nil {
+		sess, err := s.sessionRepo.Create(ctx, visitor_sessionsv1.CreateSessionInput{
+			UUID:                uuid.New().String(),
+			VisitorID:           visitorID,
+			DeviceID:            deviceID,
+			SessionToken:        req.SessionToken,
+			StartedAt:           time.Now(),
+			EntryPage:           req.EntryPage,
+			AcquisitionSource:   req.AcquisitionSource,
+			AcquisitionMedium:   req.AcquisitionMedium,
+			AcquisitionCampaign: req.AcquisitionCampaign,
+			ReferrerHost:        req.ReferrerHost,
+		})
+		if err != nil {
+			return 0, fmt.Errorf("failed to create session: %w", err)
+		}
+		return int64(sess.ID), nil
+	}
+	
+	now := time.Now()
+	sess, err := s.sessionRepo.Update(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
+		LastActivityAt: &now,
+		ExitPage:       &req.ExitPage,
+	})
+	if err != nil {
+		return 0, fmt.Errorf("failed to update session: %w", err)
+	}
+	return int64(sess.ID), nil
 }
 
 func toVisitorResponse(v *ent.Visitor) *VisitorResponse {

@@ -51,18 +51,17 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 
 	siteObj, exists := c.Get("site")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Site info not found in context"})
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
-	// Use the ent.Site retrieved from the middleware context
 	site, ok := siteObj.(*ent.Site)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Invalid site info in context"})
+	if !ok || site == nil || !site.IsActive || site.IsDeleted {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
 		return
 	}
 
-	res, err := h.service.TrackVisitor(c.Request.Context(), req, site)
+	res, err := h.service.CreateVisitor(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to track visitor", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
@@ -72,8 +71,11 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// ErrorResponse represents an error response.
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`
+	Status  int    `json:"status"`
+	Success bool   `json:"success"`
+	TraceId string `json:"trace_id"`
+	Version string `json:"version"`
 }
