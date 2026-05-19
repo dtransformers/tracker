@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	devicesv1 "tracking/internal/modules/devices/v1"
@@ -51,28 +50,7 @@ func (m *Module) Register(router *gin.RouterGroup) {
 		NonceStore: state.NewNonceStore(state.Redis),
 	}))
 
-	// Site Context Middleware
-	visitors.Use(func(c *gin.Context) {
-		pubKey := c.GetString("publicKey")
-		if pubKey == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing public key"})
-			return
-		}
-
-		site, err := m.sitesService.GetSiteKey(c.Request.Context(), pubKey)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid site key"})
-			return
-		}
-
-		if !site.IsActive || site.IsDeleted {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Site is inactive or deleted"})
-			return
-		}
-
-		c.Set("site", site)
-		c.Next()
-	})
+	visitors.Use(VerifyKeys(m.sitesService))
 
 	visitors.POST("/", m.handler.CreateVisitor)
 }
