@@ -337,7 +337,7 @@ const docTemplate = `{
         },
         "/api/v1/visitors": {
             "post": {
-                "description": "Track a visitor on a site. Creates a new visitor if not exists, or updates last seen time.",
+                "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.",
                 "consumes": [
                     "application/json"
                 ],
@@ -347,7 +347,7 @@ const docTemplate = `{
                 "tags": [
                     "visitors"
                 ],
-                "summary": "Track a visitor",
+                "summary": "Create a visitor",
                 "parameters": [
                     {
                         "description": "Track visitor request",
@@ -369,6 +369,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "HMAC Signature",
                         "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cookie must contain anonymous_id",
+                        "name": "Cookie",
                         "in": "header",
                         "required": true
                     }
@@ -416,6 +423,18 @@ const docTemplate = `{
                 },
                 "error": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },
@@ -438,6 +457,68 @@ const docTemplate = `{
                 "tenant_id": {
                     "description": "Tenant ID of the site",
                     "type": "integer"
+                }
+            }
+        },
+        "v1.CreateSessionRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash"
+            ],
+            "properties": {
+                "acquisition_campaign": {
+                    "type": "string"
+                },
+                "acquisition_medium": {
+                    "type": "string"
+                },
+                "acquisition_source": {
+                    "type": "string"
+                },
+                "address_ip": {
+                    "description": "Geo location information extracted from ip",
+                    "type": "string"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "device_type": {
+                    "type": "string"
+                },
+                "entry_page": {
+                    "type": "string"
+                },
+                "exit_page": {
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "description": "Device Info Extracted by the tracking SDK",
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "referrer_host": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "description": "Session Info",
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
                 }
             }
         },
@@ -481,25 +562,6 @@ const docTemplate = `{
                 },
                 "uuid": {
                     "type": "string"
-                }
-            }
-        },
-        "v1.CreateSessionRequest": {
-            "type": "object",
-            "required": [
-                "anonymous_id",
-                "public_key",
-                "session_id"
-            ],
-            "properties": {
-                "anonymous_id": {
-                    "type": "string"
-                },
-                "public_key": {
-                    "type": "string"
-                },
-                "session_id": {
-                    "type": "integer"
                 }
             }
         },

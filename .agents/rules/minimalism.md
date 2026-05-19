@@ -139,6 +139,7 @@ A new dependency MUST be justified.
 
 The implementation SHOULD prioritize:
 
+- Single Responsibility Principle
 - Readability
 - Predictability
 - Maintainability

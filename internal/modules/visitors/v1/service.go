@@ -38,11 +38,11 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 }
 
 type CreateSessionRequest struct {
-	// AnonymousID is extracted from cookie by the handler
-	AnonymousID string `json:"-"`
 
 	// PublicKey is extracted from header on the middleware level
 	PublicKey string `json:"-"`
+
+	AnonymousID string `json:"anonymous_id"`
 
 	// Device Info Extracted by the tracking SDK
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
@@ -88,21 +88,62 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	s.logger.InfoContext(ctx, "tracking visitor", "anonymous_id", req.AnonymousID, "site_id", site.ID)
+	s.logger.InfoContext(ctx, "tracking visitor", "site_id", site.ID)
 
-	v, err := s.handleVisitor(ctx, req)
+	v, err := s.getVisitor(ctx, req.AnonymousID)
 	if err != nil {
 		return nil, err
 	}
 
-	device, err := s.handleDevice(ctx, req, int64(v.ID))
+	if v == nil {
+		v, err = s.createVisitor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		v, err = s.updateVisitor(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	device, err := s.getDevice(ctx, req.FingerprintHash)
 	if err != nil {
 		return nil, err
 	}
 
-	sessionID, err := s.handleSession(ctx, req, int64(v.ID), int64(device.ID))
-	if err != nil {
-		return nil, err
+	if device == nil {
+		device, err = s.createDevice(ctx, req, int64(v.ID))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		device, err = s.updateDevice(ctx, device, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var sessionID int64
+	if req.SessionToken != "" {
+		session, err := s.getSession(ctx, req.SessionToken)
+		if err != nil {
+			return nil, err
+		}
+
+		if session == nil {
+			sess, err := s.createSession(ctx, req, int64(v.ID), int64(device.ID))
+			if err != nil {
+				return nil, err
+			}
+			sessionID = int64(sess.ID)
+		} else {
+			sess, err := s.updateSession(ctx, session, req)
+			if err != nil {
+				return nil, err
+			}
+			sessionID = int64(sess.ID)
+		}
 	}
 
 	if sessionID != 0 {
@@ -120,59 +161,82 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	return toVisitorResponse(v), nil
 }
 
-func (s *Service) handleVisitor(ctx context.Context, req CreateSessionRequest) (*ent.Visitor, error) {
-	v, err := s.repo.GetByAnonymousID(ctx, req.AnonymousID)
+func (s *Service) getVisitor(ctx context.Context, anonymousID string) (*ent.Visitor, error) {
+	if anonymousID == "" {
+		return nil, nil
+	}
+	v, err := s.repo.GetByAnonymousID(ctx, anonymousID)
 	if err != nil {
-		if !ent.IsNotFound(err) {
-			return nil, fmt.Errorf("failed to get visitor: %w", err)
+		if ent.IsNotFound(err) {
+			return nil, nil
 		}
-
-		v, err = s.repo.Create(ctx, CreateSessionInput{
-			UUID:        uuid.New().String(),
-			AnonymousID: req.AnonymousID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create visitor: %w", err)
-		}
-	} else {
-		now := time.Now()
-		v, err = s.repo.Update(ctx, v.UUID, UpdateVisitorInput{
-			LastSeenAt: &now,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to update visitor: %w", err)
-		}
+		return nil, fmt.Errorf("failed to get visitor: %w", err)
 	}
 	return v, nil
 }
 
-func (s *Service) handleDevice(ctx context.Context, req CreateSessionRequest, visitorID int64) (*ent.Device, error) {
-	device, err := s.deviceRepo.GetByFingerprintHash(ctx, req.FingerprintHash)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, fmt.Errorf("failed to check device: %w", err)
+func (s *Service) createVisitor(ctx context.Context, req CreateSessionRequest) (*ent.Visitor, error) {
+	anonID := req.AnonymousID
+	if anonID == "" {
+		anonID = uuid.New().String()
 	}
+	v, err := s.repo.Create(ctx, CreateSessionInput{
+		UUID:        uuid.New().String(),
+		AnonymousID: anonID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create visitor: %w", err)
+	}
+	return v, nil
+}
 
-	if device == nil {
-		d, err := s.deviceRepo.Create(ctx, devicesv1.CreateDeviceInput{
-			UUID:            uuid.New().String(),
-			VisitorID:       visitorID,
-			FingerprintHash: req.FingerprintHash,
-			DeviceType:      req.DeviceType,
-			OS:              req.OS,
-			AddressIP:       req.AddressIP,
-			Country:         req.Country,
-			Region:          req.Region,
-			City:            req.City,
-			Browser:         req.Browser,
-			Language:        req.Language,
-			Timezone:        req.Timezone,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create device: %w", err)
+func (s *Service) updateVisitor(ctx context.Context, v *ent.Visitor) (*ent.Visitor, error) {
+	now := time.Now()
+	updated, err := s.repo.Update(ctx, v.UUID, UpdateVisitorInput{
+		LastSeenAt: &now,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update visitor: %w", err)
+	}
+	return updated, nil
+}
+
+func (s *Service) getDevice(ctx context.Context, fingerprintHash string) (*ent.Device, error) {
+	if fingerprintHash == "" {
+		return nil, nil
+	}
+	device, err := s.deviceRepo.GetByFingerprintHash(ctx, fingerprintHash)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
 		}
-		return d, nil
+		return nil, fmt.Errorf("failed to get device: %w", err)
 	}
+	return device, nil
+}
 
+func (s *Service) createDevice(ctx context.Context, req CreateSessionRequest, visitorID int64) (*ent.Device, error) {
+	d, err := s.deviceRepo.Create(ctx, devicesv1.CreateDeviceInput{
+		UUID:            uuid.New().String(),
+		VisitorID:       visitorID,
+		FingerprintHash: req.FingerprintHash,
+		DeviceType:      req.DeviceType,
+		OS:              req.OS,
+		AddressIP:       req.AddressIP,
+		Country:         req.Country,
+		Region:          req.Region,
+		City:            req.City,
+		Browser:         req.Browser,
+		Language:        req.Language,
+		Timezone:        req.Timezone,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create device: %w", err)
+	}
+	return d, nil
+}
+
+func (s *Service) updateDevice(ctx context.Context, device *ent.Device, req CreateSessionRequest) (*ent.Device, error) {
 	now := time.Now()
 	d, err := s.deviceRepo.Update(ctx, device.UUID, devicesv1.UpdateDeviceInput{
 		LastSeenAt: &now,
@@ -184,44 +248,49 @@ func (s *Service) handleDevice(ctx context.Context, req CreateSessionRequest, vi
 	return d, nil
 }
 
-func (s *Service) handleSession(ctx context.Context, req CreateSessionRequest, visitorID int64, deviceID int64) (int64, error) {
-	if req.SessionToken == "" {
-		return 0, nil
+func (s *Service) getSession(ctx context.Context, sessionToken string) (*ent.VisitorSession, error) {
+	if sessionToken == "" {
+		return nil, nil
 	}
-
-	session, err := s.sessionRepo.GetBySessionToken(ctx, req.SessionToken)
-	if err != nil && !ent.IsNotFound(err) {
-		return 0, fmt.Errorf("failed to get session: %w", err)
-	}
-
-	if session == nil {
-		sess, err := s.sessionRepo.Create(ctx, visitor_sessionsv1.CreateSessionInput{
-			UUID:                uuid.New().String(),
-			VisitorID:           visitorID,
-			DeviceID:            deviceID,
-			SessionToken:        req.SessionToken,
-			StartedAt:           time.Now(),
-			EntryPage:           req.EntryPage,
-			AcquisitionSource:   req.AcquisitionSource,
-			AcquisitionMedium:   req.AcquisitionMedium,
-			AcquisitionCampaign: req.AcquisitionCampaign,
-			ReferrerHost:        req.ReferrerHost,
-		})
-		if err != nil {
-			return 0, fmt.Errorf("failed to create session: %w", err)
+	session, err := s.sessionRepo.GetBySessionToken(ctx, sessionToken)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
 		}
-		return int64(sess.ID), nil
+		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
+	return session, nil
+}
 
+func (s *Service) createSession(ctx context.Context, req CreateSessionRequest, visitorID int64, deviceID int64) (*ent.VisitorSession, error) {
+	sess, err := s.sessionRepo.Create(ctx, visitor_sessionsv1.CreateSessionInput{
+		UUID:                uuid.New().String(),
+		VisitorID:           visitorID,
+		DeviceID:            deviceID,
+		SessionToken:        req.SessionToken,
+		StartedAt:           time.Now(),
+		EntryPage:           req.EntryPage,
+		AcquisitionSource:   req.AcquisitionSource,
+		AcquisitionMedium:   req.AcquisitionMedium,
+		AcquisitionCampaign: req.AcquisitionCampaign,
+		ReferrerHost:        req.ReferrerHost,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session: %w", err)
+	}
+	return sess, nil
+}
+
+func (s *Service) updateSession(ctx context.Context, session *ent.VisitorSession, req CreateSessionRequest) (*ent.VisitorSession, error) {
 	now := time.Now()
 	sess, err := s.sessionRepo.Update(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
 		LastActivityAt: &now,
 		ExitPage:       &req.ExitPage,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to update session: %w", err)
+		return nil, fmt.Errorf("failed to update session: %w", err)
 	}
-	return int64(sess.ID), nil
+	return sess, nil
 }
 
 func toVisitorResponse(v *ent.Visitor) *VisitorResponse {

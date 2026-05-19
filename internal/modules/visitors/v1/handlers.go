@@ -26,14 +26,14 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 
 // CreateSession godoc
 // @Summary Create a visitor
-// @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.
+// @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.
 // @Tags visitors
 // @Accept json
 // @Produce json
 // @Param request body CreateSessionRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
-// @Param anonymous_id cookie string true "Anonymous ID cookie"
+// @Param Cookie header string true "Cookie must contain anonymous_id"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -50,19 +50,8 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	anonID, err := c.Cookie("anonymous_id")
-	if err != nil || anonID == "" {
-		h.logger.Warn("missing anonymous_id cookie")
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Missing anonymous_id cookie",
-		})
-		return
-	}
-	req.AnonymousID = anonID
-
 	pubKey := c.GetString("publicKey")
 	req.PublicKey = pubKey
-
 	siteObj, exists := c.Get("site")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})

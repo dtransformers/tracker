@@ -28,7 +28,7 @@ type Site struct {
 	// PublicKey holds the value of the "public_key" field.
 	PublicKey string `json:"public_key,omitempty"`
 	// SecretKey holds the value of the "secret_key" field.
-	SecretKey string `json:"secret_key,omitempty"`
+	SecretKey string `json:"-"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
 	// IsDeleted holds the value of the "is_deleted" field.

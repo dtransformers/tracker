@@ -106,7 +106,6 @@ func (r *entRepository) GetByDomain(ctx context.Context, domain string) (*ent.Si
 	return site, nil
 }
 
-// GetByPublicKey retrieves a site by its public key.
 func (r *entRepository) GetByPublicKey(ctx context.Context, publicKey string) (*ent.Site, error) {
 	site, err := r.client.Site.
 		Query().
