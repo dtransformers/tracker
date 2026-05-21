@@ -2,6 +2,8 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log/slog"
 
 	"net"
@@ -33,6 +35,10 @@ type TrackingInfo struct {
 	AcceptLanguage string            `json:"accept_language,omitempty"`
 	Host           string            `json:"host"`
 	Timestamp      time.Time         `json:"timestamp"`
+	Country        string            `json:"country,omitempty"`
+	Region         string            `json:"region,omitempty"`
+	City           string            `json:"city,omitempty"`
+	Timezone       string            `json:"timezone,omitempty"`
 }
 
 const TrackingInfoKey = "tracking_info"
@@ -45,6 +51,10 @@ func RequestTracking() gin.HandlerFunc {
 		}
 		tracking.OriginalIP = extractOriginalIP(c)
 		tracking.ForwardedIPs = extractForwardedIPs(c)
+
+		if tracking.OriginalIP != "" {
+			extractGeolocation(tracking.OriginalIP, tracking)
+		}
 
 		tracking.UserAgent = c.Request.UserAgent()
 		parseUserAgent(tracking)
@@ -103,6 +113,54 @@ func extractForwardedIPs(c *gin.Context) []string {
 	}
 
 	return ips
+}
+
+func extractGeolocation(ip string, tracking *TrackingInfo) {
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil || parsedIP.IsLoopback() || parsedIP.IsPrivate() || parsedIP.IsUnspecified() {
+		return
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return
+	}
+
+	var data struct {
+		Status     string `json:"status"`
+		Country    string `json:"country"`
+		RegionName string `json:"regionName"`
+		City       string `json:"city"`
+		Timezone   string `json:"timezone"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return
+	}
+
+	if data.Status != "success" {
+		return
+	}
+
+	tracking.Country = data.Country
+	tracking.Region = data.RegionName
+	tracking.City = data.City
+	tracking.Timezone = data.Timezone
 }
 
 func parseUserAgent(tracking *TrackingInfo) {

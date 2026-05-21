@@ -2,21 +2,18 @@ package v1
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net"
-	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/uuid"
 
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	devicesv1 "tracking/internal/modules/devices/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
-
-	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -43,28 +40,26 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 }
 
 type CreateSessionRequest struct {
-
-	// PublicKey is extracted from header on the middleware level
 	PublicKey string `json:"-"`
 
-	AnonymousID string `json:"anonymous_id"`
+	AnonymousID string `json:"anonymous_id" swaggerignore:"true"`
 
 	// Device Info Extracted by the tracking SDK
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
-	DeviceType      string `json:"device_type"`
-	OS              string `json:"os"`
-	Browser         string `json:"browser"`
-	Language        string `json:"language"`
+	DeviceType      string `json:"device_type" swaggerignore:"true"`
+	OS              string `json:"os" swaggerignore:"true"`
+	Browser         string `json:"browser" swaggerignore:"true"`
+	Language        string `json:"language" swaggerignore:"true"`
 
 	// Geo location information extracted from ip
-	AddressIP string `json:"address_ip"`
-	Country   string `json:"country"`
-	Region    string `json:"region"`
-	City      string `json:"city"`
-	Timezone  string `json:"timezone"`
+	AddressIP string `json:"address_ip" swaggerignore:"true"`
+	Country   string `json:"country" swaggerignore:"true"`
+	Region    string `json:"region" swaggerignore:"true"`
+	City      string `json:"city" swaggerignore:"true"`
+	Timezone  string `json:"timezone" swaggerignore:"true"`
 
 	// Session Info
-	SessionToken        string `json:"session_token"`
+	SessionToken        string `json:"session_token" swaggerignore:"true"`
 	EntryPage           string `json:"entry_page"`
 	ExitPage            string `json:"exit_page"`
 	AcquisitionSource   string `json:"acquisition_source"`
@@ -90,10 +85,10 @@ type CreateEventRequest struct {
 	EventProperties map[string]interface{} `json:"event_properties"`
 
 	// Geolocation fields if provided
-	Country  string `json:"country"`
-	Region   string `json:"region"`
-	City     string `json:"city"`
-	Timezone string `json:"timezone"`
+	Country  string `json:"country" swaggerignore:"true"`
+	Region   string `json:"region" swaggerignore:"true"`
+	City     string `json:"city" swaggerignore:"true"`
+	Timezone string `json:"timezone" swaggerignore:"true"`
 }
 
 type EventResponse struct {
@@ -114,10 +109,10 @@ type CreatePageViewRequest struct {
 	Referrer        string `json:"referrer"`
 
 	// Geolocation fields if provided
-	Country  string `json:"country"`
-	Region   string `json:"region"`
-	City     string `json:"city"`
-	Timezone string `json:"timezone"`
+	Country  string `json:"country" swaggerignore:"true"`
+	Region   string `json:"region" swaggerignore:"true"`
+	City     string `json:"city" swaggerignore:"true"`
+	Timezone string `json:"timezone" swaggerignore:"true"`
 }
 
 type PageViewResponse struct {
@@ -171,22 +166,18 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 			}
 		}
 		isBot = tracking.Bot
-	}
 
-	// Populate geo fields if not already provided and we have an IP
-	if req.Country == "" && req.AddressIP != "" {
-		country, region, city, timezone := s.resolveIPGeolocation(ctx, req.AddressIP)
-		if country != "" {
-			req.Country = country
+		if req.Country == "" {
+			req.Country = tracking.Country
 		}
-		if region != "" {
-			req.Region = region
+		if req.Region == "" {
+			req.Region = tracking.Region
 		}
-		if city != "" {
-			req.City = city
+		if req.City == "" {
+			req.City = tracking.City
 		}
-		if timezone != "" {
-			req.Timezone = timezone
+		if req.Timezone == "" {
+			req.Timezone = tracking.Timezone
 		}
 	}
 
@@ -426,56 +417,6 @@ func toVisitorResponse(v *ent.Visitor) *VisitorResponse {
 	}
 }
 
-func (s *Service) resolveIPGeolocation(ctx context.Context, ip string) (country, region, city, timezone string) {
-	parsedIP := net.ParseIP(ip)
-	if parsedIP == nil || parsedIP.IsLoopback() || parsedIP.IsPrivate() || parsedIP.IsUnspecified() {
-		return "", "", "", ""
-	}
-
-	client := &http.Client{
-		Timeout: 2 * time.Second,
-	}
-
-	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		s.logger.WarnContext(ctx, "failed to create geoip request", "error", err, "ip", ip)
-		return "", "", "", ""
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		s.logger.WarnContext(ctx, "geoip lookup request failed", "error", err, "ip", ip)
-		return "", "", "", ""
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		s.logger.WarnContext(ctx, "geoip lookup returned non-200 status", "status", resp.Status, "ip", ip)
-		return "", "", "", ""
-	}
-
-	var data struct {
-		Status     string `json:"status"`
-		Country    string `json:"country"`
-		RegionName string `json:"regionName"`
-		City       string `json:"city"`
-		Timezone   string `json:"timezone"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		s.logger.WarnContext(ctx, "failed to decode geoip response", "error", err, "ip", ip)
-		return "", "", "", ""
-	}
-
-	if data.Status != "success" {
-		s.logger.WarnContext(ctx, "geoip lookup API returned failure status", "data", data, "ip", ip)
-		return "", "", "", ""
-	}
-
-	return data.Country, data.RegionName, data.City, data.Timezone
-}
-
 func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateSessionRequest) (*ent.VisitorSession, error) {
 	session, err := s.getSession(ctx, sessionToken)
 	if err != nil {
@@ -555,6 +496,10 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*Eve
 		geo.OS = tracking.OS
 		geo.Browser = tracking.Browser
 		geo.Language = tracking.AcceptLanguage
+		geo.Country = tracking.Country
+		geo.Region = tracking.Region
+		geo.City = tracking.City
+		geo.Timezone = tracking.Timezone
 	}
 	if req.Country != "" {
 		geo.Country = req.Country
@@ -567,14 +512,6 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*Eve
 	}
 	if req.Timezone != "" {
 		geo.Timezone = req.Timezone
-	}
-
-	if geo.Country == "" && geo.AddressIP != "" {
-		country, region, city, timezone := s.resolveIPGeolocation(ctx, geo.AddressIP)
-		geo.Country = country
-		geo.Region = region
-		geo.City = city
-		geo.Timezone = timezone
 	}
 
 	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
@@ -628,6 +565,10 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest)
 		geo.OS = tracking.OS
 		geo.Browser = tracking.Browser
 		geo.Language = tracking.AcceptLanguage
+		geo.Country = tracking.Country
+		geo.Region = tracking.Region
+		geo.City = tracking.City
+		geo.Timezone = tracking.Timezone
 	}
 	if req.Country != "" {
 		geo.Country = req.Country
@@ -640,14 +581,6 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest)
 	}
 	if req.Timezone != "" {
 		geo.Timezone = req.Timezone
-	}
-
-	if geo.Country == "" && geo.AddressIP != "" {
-		country, region, city, timezone := s.resolveIPGeolocation(ctx, geo.AddressIP)
-		geo.Country = country
-		geo.Region = region
-		geo.City = city
-		geo.Timezone = timezone
 	}
 
 	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)

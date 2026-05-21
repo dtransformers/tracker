@@ -52,7 +52,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.ListResponse"
+                            "$ref": "#/definitions/internal_modules_sites_v1.ListResponse"
                         }
                     },
                     "500": {
@@ -87,7 +87,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateRequest"
+                            "$ref": "#/definitions/internal_modules_sites_v1.CreateRequest"
                         }
                     }
                 ],
@@ -95,7 +95,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
@@ -147,7 +147,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
@@ -245,7 +245,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.UpdateRequest"
+                            "$ref": "#/definitions/internal_modules_sites_v1.UpdateRequest"
                         }
                     }
                 ],
@@ -253,7 +253,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
@@ -311,7 +311,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
@@ -355,7 +355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateSessionRequest"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.CreateSessionRequest"
                         }
                     },
                     {
@@ -384,7 +384,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.VisitorResponse"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.VisitorResponse"
                         }
                     },
                     "400": {
@@ -422,7 +422,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateEventRequest"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.CreateEventRequest"
                         }
                     },
                     {
@@ -444,7 +444,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.EventResponse"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.EventResponse"
                         }
                     },
                     "400": {
@@ -482,7 +482,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreatePageViewRequest"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.CreatePageViewRequest"
                         }
                     },
                     {
@@ -504,7 +504,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.PageViewResponse"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.PageViewResponse"
                         }
                     },
                     "400": {
@@ -524,115 +524,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_modules_sites_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_modules_visitors_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "trace_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.CreateEventRequest": {
-            "type": "object",
-            "required": [
-                "event_name",
-                "fingerprint_hash",
-                "session_token"
-            ],
-            "properties": {
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "description": "Geolocation fields if provided",
-                    "type": "string"
-                },
-                "event_name": {
-                    "type": "string"
-                },
-                "event_properties": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "region": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                },
-                "timezone": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.CreatePageViewRequest": {
-            "type": "object",
-            "required": [
-                "fingerprint_hash",
-                "session_token",
-                "url"
-            ],
-            "properties": {
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "description": "Geolocation fields if provided",
-                    "type": "string"
-                },
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "referrer": {
-                    "type": "string"
-                },
-                "region": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                },
-                "timezone": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.CreateRequest": {
+        "internal_modules_sites_v1.CreateRequest": {
             "type": "object",
             "required": [
                 "domain",
@@ -654,105 +546,24 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.CreateSessionRequest": {
+        "internal_modules_sites_v1.ErrorResponse": {
             "type": "object",
-            "required": [
-                "fingerprint_hash"
-            ],
             "properties": {
-                "acquisition_campaign": {
+                "details": {
                     "type": "string"
                 },
-                "acquisition_medium": {
-                    "type": "string"
-                },
-                "acquisition_source": {
-                    "type": "string"
-                },
-                "address_ip": {
-                    "description": "Geo location information extracted from ip",
-                    "type": "string"
-                },
-                "anonymous_id": {
-                    "type": "string"
-                },
-                "browser": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "device_type": {
-                    "type": "string"
-                },
-                "entry_page": {
-                    "type": "string"
-                },
-                "exit_page": {
-                    "type": "string"
-                },
-                "fingerprint_hash": {
-                    "description": "Device Info Extracted by the tracking SDK",
-                    "type": "string"
-                },
-                "language": {
-                    "type": "string"
-                },
-                "os": {
-                    "type": "string"
-                },
-                "referrer_host": {
-                    "type": "string"
-                },
-                "region": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "description": "Session Info",
-                    "type": "string"
-                },
-                "timezone": {
+                "error": {
                     "type": "string"
                 }
             }
         },
-        "v1.EventResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_uuid": {
-                    "type": "string"
-                },
-                "event_name": {
-                    "type": "string"
-                },
-                "event_properties": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "session_uuid": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                },
-                "visitor_uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.ListResponse": {
+        "internal_modules_sites_v1.ListResponse": {
             "type": "object",
             "properties": {
                 "sites": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v1.Response"
+                        "$ref": "#/definitions/internal_modules_sites_v1.Response"
                     }
                 },
                 "total": {
@@ -760,36 +571,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.PageViewResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_uuid": {
-                    "type": "string"
-                },
-                "referrer": {
-                    "type": "string"
-                },
-                "session_uuid": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                },
-                "visitor_uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.Response": {
+        "internal_modules_sites_v1.Response": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -818,7 +600,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.UpdateRequest": {
+        "internal_modules_sites_v1.UpdateRequest": {
             "type": "object",
             "properties": {
                 "domain": {
@@ -839,7 +621,164 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.VisitorResponse": {
+        "internal_modules_visitors_v1.CreateEventRequest": {
+            "type": "object",
+            "required": [
+                "event_name",
+                "fingerprint_hash",
+                "session_token"
+            ],
+            "properties": {
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.CreatePageViewRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash",
+                "session_token",
+                "url"
+            ],
+            "properties": {
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.CreateSessionRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash"
+            ],
+            "properties": {
+                "acquisition_campaign": {
+                    "type": "string"
+                },
+                "acquisition_medium": {
+                    "type": "string"
+                },
+                "acquisition_source": {
+                    "type": "string"
+                },
+                "entry_page": {
+                    "type": "string"
+                },
+                "exit_page": {
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "description": "Device Info Extracted by the tracking SDK",
+                    "type": "string"
+                },
+                "referrer_host": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.EventResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_uuid": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "session_uuid": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.PageViewResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "device_uuid": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "session_uuid": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.VisitorResponse": {
             "type": "object",
             "properties": {
                 "anonymous_id": {

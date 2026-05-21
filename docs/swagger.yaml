@@ -1,79 +1,6 @@
 basePath: /
 definitions:
-  internal_modules_sites_v1.ErrorResponse:
-    properties:
-      details:
-        type: string
-      error:
-        type: string
-    type: object
-  internal_modules_visitors_v1.ErrorResponse:
-    properties:
-      details:
-        type: string
-      error:
-        type: string
-      status:
-        type: integer
-      success:
-        type: boolean
-      trace_id:
-        type: string
-      version:
-        type: string
-    type: object
-  v1.CreateEventRequest:
-    properties:
-      city:
-        type: string
-      country:
-        description: Geolocation fields if provided
-        type: string
-      event_name:
-        type: string
-      event_properties:
-        additionalProperties: true
-        type: object
-      fingerprint_hash:
-        type: string
-      region:
-        type: string
-      session_token:
-        type: string
-      timezone:
-        type: string
-    required:
-    - event_name
-    - fingerprint_hash
-    - session_token
-    type: object
-  v1.CreatePageViewRequest:
-    properties:
-      city:
-        type: string
-      country:
-        description: Geolocation fields if provided
-        type: string
-      fingerprint_hash:
-        type: string
-      referrer:
-        type: string
-      region:
-        type: string
-      session_token:
-        type: string
-      timezone:
-        type: string
-      title:
-        type: string
-      url:
-        type: string
-    required:
-    - fingerprint_hash
-    - session_token
-    - url
-    type: object
-  v1.CreateRequest:
+  internal_modules_sites_v1.CreateRequest:
     properties:
       domain:
         description: Domain of the site (required, must be unique and valid)
@@ -89,97 +16,23 @@ definitions:
     - name
     - tenant_id
     type: object
-  v1.CreateSessionRequest:
+  internal_modules_sites_v1.ErrorResponse:
     properties:
-      acquisition_campaign:
+      details:
         type: string
-      acquisition_medium:
-        type: string
-      acquisition_source:
-        type: string
-      address_ip:
-        description: Geo location information extracted from ip
-        type: string
-      anonymous_id:
-        type: string
-      browser:
-        type: string
-      city:
-        type: string
-      country:
-        type: string
-      device_type:
-        type: string
-      entry_page:
-        type: string
-      exit_page:
-        type: string
-      fingerprint_hash:
-        description: Device Info Extracted by the tracking SDK
-        type: string
-      language:
-        type: string
-      os:
-        type: string
-      referrer_host:
-        type: string
-      region:
-        type: string
-      session_token:
-        description: Session Info
-        type: string
-      timezone:
-        type: string
-    required:
-    - fingerprint_hash
-    type: object
-  v1.EventResponse:
-    properties:
-      created_at:
-        type: string
-      device_uuid:
-        type: string
-      event_name:
-        type: string
-      event_properties:
-        additionalProperties: true
-        type: object
-      session_uuid:
-        type: string
-      uuid:
-        type: string
-      visitor_uuid:
+      error:
         type: string
     type: object
-  v1.ListResponse:
+  internal_modules_sites_v1.ListResponse:
     properties:
       sites:
         items:
-          $ref: '#/definitions/v1.Response'
+          $ref: '#/definitions/internal_modules_sites_v1.Response'
         type: array
       total:
         type: integer
     type: object
-  v1.PageViewResponse:
-    properties:
-      created_at:
-        type: string
-      device_uuid:
-        type: string
-      referrer:
-        type: string
-      session_uuid:
-        type: string
-      title:
-        type: string
-      url:
-        type: string
-      uuid:
-        type: string
-      visitor_uuid:
-        type: string
-    type: object
-  v1.Response:
+  internal_modules_sites_v1.Response:
     properties:
       created_at:
         type: string
@@ -198,7 +51,7 @@ definitions:
       uuid:
         type: string
     type: object
-  v1.UpdateRequest:
+  internal_modules_sites_v1.UpdateRequest:
     properties:
       domain:
         description: Optional new domain for the site
@@ -213,7 +66,112 @@ definitions:
         description: Optional new tenant ID
         type: integer
     type: object
-  v1.VisitorResponse:
+  internal_modules_visitors_v1.CreateEventRequest:
+    properties:
+      event_name:
+        type: string
+      event_properties:
+        additionalProperties: true
+        type: object
+      fingerprint_hash:
+        type: string
+      session_token:
+        type: string
+    required:
+    - event_name
+    - fingerprint_hash
+    - session_token
+    type: object
+  internal_modules_visitors_v1.CreatePageViewRequest:
+    properties:
+      fingerprint_hash:
+        type: string
+      referrer:
+        type: string
+      session_token:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    required:
+    - fingerprint_hash
+    - session_token
+    - url
+    type: object
+  internal_modules_visitors_v1.CreateSessionRequest:
+    properties:
+      acquisition_campaign:
+        type: string
+      acquisition_medium:
+        type: string
+      acquisition_source:
+        type: string
+      entry_page:
+        type: string
+      exit_page:
+        type: string
+      fingerprint_hash:
+        description: Device Info Extracted by the tracking SDK
+        type: string
+      referrer_host:
+        type: string
+    required:
+    - fingerprint_hash
+    type: object
+  internal_modules_visitors_v1.ErrorResponse:
+    properties:
+      details:
+        type: string
+      error:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+      trace_id:
+        type: string
+      version:
+        type: string
+    type: object
+  internal_modules_visitors_v1.EventResponse:
+    properties:
+      created_at:
+        type: string
+      device_uuid:
+        type: string
+      event_name:
+        type: string
+      event_properties:
+        additionalProperties: true
+        type: object
+      session_uuid:
+        type: string
+      uuid:
+        type: string
+      visitor_uuid:
+        type: string
+    type: object
+  internal_modules_visitors_v1.PageViewResponse:
+    properties:
+      created_at:
+        type: string
+      device_uuid:
+        type: string
+      referrer:
+        type: string
+      session_uuid:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+      uuid:
+        type: string
+      visitor_uuid:
+        type: string
+    type: object
+  internal_modules_visitors_v1.VisitorResponse:
     properties:
       anonymous_id:
         type: string
@@ -259,7 +217,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.ListResponse'
+            $ref: '#/definitions/internal_modules_sites_v1.ListResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -280,14 +238,14 @@ paths:
         name: site
         required: true
         schema:
-          $ref: '#/definitions/v1.CreateRequest'
+          $ref: '#/definitions/internal_modules_sites_v1.CreateRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/v1.Response'
+            $ref: '#/definitions/internal_modules_sites_v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -348,7 +306,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.Response'
+            $ref: '#/definitions/internal_modules_sites_v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -381,14 +339,14 @@ paths:
         name: site
         required: true
         schema:
-          $ref: '#/definitions/v1.UpdateRequest'
+          $ref: '#/definitions/internal_modules_sites_v1.UpdateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.Response'
+            $ref: '#/definitions/internal_modules_sites_v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -425,7 +383,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.Response'
+            $ref: '#/definitions/internal_modules_sites_v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -455,7 +413,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.CreateSessionRequest'
+          $ref: '#/definitions/internal_modules_visitors_v1.CreateSessionRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -477,7 +435,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.VisitorResponse'
+            $ref: '#/definitions/internal_modules_visitors_v1.VisitorResponse'
         "400":
           description: Bad Request
           schema:
@@ -500,7 +458,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.CreateEventRequest'
+          $ref: '#/definitions/internal_modules_visitors_v1.CreateEventRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -517,7 +475,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.EventResponse'
+            $ref: '#/definitions/internal_modules_visitors_v1.EventResponse'
         "400":
           description: Bad Request
           schema:
@@ -540,7 +498,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.CreatePageViewRequest'
+          $ref: '#/definitions/internal_modules_visitors_v1.CreatePageViewRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -557,7 +515,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.PageViewResponse'
+            $ref: '#/definitions/internal_modules_visitors_v1.PageViewResponse'
         "400":
           description: Bad Request
           schema:
