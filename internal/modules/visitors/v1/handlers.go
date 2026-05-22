@@ -33,6 +33,8 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Param request body CreateSessionRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
+// @Param X-Timestamp header string true "Request Timestamp"
+// @Param X-Nonce header string true "Request Nonce"
 // @Param Cookie header string true "Cookie must contain anonymous_id"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} ErrorResponse
@@ -81,6 +83,8 @@ func (h *Handler) CreateSession(c *gin.Context) {
 // @Param request body CreateEventRequest true "Create event request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
+// @Param X-Timestamp header string true "Request Timestamp"
+// @Param X-Nonce header string true "Request Nonce"
 // @Success 200 {object} EventResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -128,6 +132,8 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Param request body CreatePageViewRequest true "Create page view request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
+// @Param X-Timestamp header string true "Request Timestamp"
+// @Param X-Nonce header string true "Request Nonce"
 // @Success 200 {object} PageViewResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

@@ -154,7 +154,6 @@ func IsConflict(err error) bool {
 		return false
 	}
 
-	// Check if it's a ConflictError or wrapped ConflictError
 	target := &ConflictError{}
 	return errors.As(err, &target)
 }

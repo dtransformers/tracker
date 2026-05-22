@@ -27,6 +27,7 @@ import (
 	"tracking/docs"
 	"tracking/internal/config"
 	"tracking/internal/database"
+	"tracking/internal/middlewares"
 	"tracking/internal/modules/health"
 	"tracking/internal/modules/sites"
 	"tracking/internal/modules/state"
@@ -112,10 +113,16 @@ func (app *application) setupRouter() *gin.Engine {
 }
 
 func (app *application) applyMiddlewares(router *gin.Engine) {
+	router.Use(middlewares.Cors())
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
 		SkipPaths: []string{"/health"},
 	}))
 	router.Use(gin.Recovery())
+
+	// Handle OPTIONS correctly when routes don't match or no OPTIONS defined
+	router.NoRoute(middlewares.Cors(), func(c *gin.Context) {
+		c.JSON(404, gin.H{"error": "route not found"})
+	})
 }
 
 func (app *application) registerRoutes(router *gin.Engine) {

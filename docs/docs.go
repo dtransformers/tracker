@@ -52,7 +52,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ListResponse"
+                            "$ref": "#/definitions/v1.ListResponse"
                         }
                     },
                     "500": {
@@ -87,7 +87,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.CreateRequest"
+                            "$ref": "#/definitions/v1.CreateRequest"
                         }
                     }
                 ],
@@ -95,7 +95,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
@@ -147,7 +147,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
@@ -245,7 +245,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.UpdateRequest"
+                            "$ref": "#/definitions/v1.UpdateRequest"
                         }
                     }
                 ],
@@ -253,7 +253,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
@@ -311,7 +311,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
+                            "$ref": "#/definitions/v1.Response"
                         }
                     },
                     "400": {
@@ -355,7 +355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.CreateSessionRequest"
+                            "$ref": "#/definitions/v1.CreateSessionRequest"
                         }
                     },
                     {
@@ -374,6 +374,20 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Request Timestamp",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Cookie must contain anonymous_id",
                         "name": "Cookie",
                         "in": "header",
@@ -384,7 +398,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.VisitorResponse"
+                            "$ref": "#/definitions/v1.VisitorResponse"
                         }
                     },
                     "400": {
@@ -422,7 +436,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.CreateEventRequest"
+                            "$ref": "#/definitions/v1.CreateEventRequest"
                         }
                     },
                     {
@@ -438,13 +452,27 @@ const docTemplate = `{
                         "name": "X-Signature",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Timestamp",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.EventResponse"
+                            "$ref": "#/definitions/v1.EventResponse"
                         }
                     },
                     "400": {
@@ -482,7 +510,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.CreatePageViewRequest"
+                            "$ref": "#/definitions/v1.CreatePageViewRequest"
                         }
                     },
                     {
@@ -498,13 +526,27 @@ const docTemplate = `{
                         "name": "X-Signature",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Timestamp",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.PageViewResponse"
+                            "$ref": "#/definitions/v1.PageViewResponse"
                         }
                     },
                     "400": {
@@ -524,28 +566,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_modules_sites_v1.CreateRequest": {
-            "type": "object",
-            "required": [
-                "domain",
-                "name",
-                "tenant_id"
-            ],
-            "properties": {
-                "domain": {
-                    "description": "Domain of the site (required, must be unique and valid)",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name of the site (required, 1-255 characters)",
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "description": "Tenant ID of the site",
-                    "type": "integer"
-                }
-            }
-        },
         "internal_modules_sites_v1.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -557,71 +577,30 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_sites_v1.ListResponse": {
+        "internal_modules_visitors_v1.ErrorResponse": {
             "type": "object",
             "properties": {
-                "sites": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/internal_modules_sites_v1.Response"
-                    }
+                "details": {
+                    "type": "string"
                 },
-                "total": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "integer"
-                }
-            }
-        },
-        "internal_modules_sites_v1.Response": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
                 },
-                "domain": {
-                    "type": "string"
-                },
-                "is_active": {
+                "success": {
                     "type": "boolean"
                 },
-                "name": {
+                "trace_id": {
                     "type": "string"
                 },
-                "public_key": {
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
+                "version": {
                     "type": "string"
                 }
             }
         },
-        "internal_modules_sites_v1.UpdateRequest": {
-            "type": "object",
-            "properties": {
-                "domain": {
-                    "description": "Optional new domain for the site",
-                    "type": "string"
-                },
-                "is_active": {
-                    "description": "Optional active status",
-                    "type": "boolean"
-                },
-                "name": {
-                    "description": "Optional new name for the site",
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "description": "Optional new tenant ID",
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_modules_visitors_v1.CreateEventRequest": {
+        "v1.CreateEventRequest": {
             "type": "object",
             "required": [
                 "event_name",
@@ -644,7 +623,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_visitors_v1.CreatePageViewRequest": {
+        "v1.CreatePageViewRequest": {
             "type": "object",
             "required": [
                 "fingerprint_hash",
@@ -669,7 +648,29 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_visitors_v1.CreateSessionRequest": {
+        "v1.CreateRequest": {
+            "type": "object",
+            "required": [
+                "domain",
+                "name",
+                "tenant_id"
+            ],
+            "properties": {
+                "domain": {
+                    "description": "Domain of the site (required, must be unique and valid)",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the site (required, 1-255 characters)",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID of the site",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.CreateSessionRequest": {
             "type": "object",
             "required": [
                 "fingerprint_hash"
@@ -699,30 +700,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_visitors_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "trace_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_modules_visitors_v1.EventResponse": {
+        "v1.EventResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -749,7 +727,21 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_visitors_v1.PageViewResponse": {
+        "v1.ListResponse": {
+            "type": "object",
+            "properties": {
+                "sites": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Response"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.PageViewResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -778,7 +770,57 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_visitors_v1.VisitorResponse": {
+        "v1.Response": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "description": "Optional new domain for the site",
+                    "type": "string"
+                },
+                "is_active": {
+                    "description": "Optional active status",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Optional new name for the site",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Optional new tenant ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.VisitorResponse": {
             "type": "object",
             "properties": {
                 "anonymous_id": {

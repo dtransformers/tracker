@@ -1,21 +1,5 @@
 basePath: /
 definitions:
-  internal_modules_sites_v1.CreateRequest:
-    properties:
-      domain:
-        description: Domain of the site (required, must be unique and valid)
-        type: string
-      name:
-        description: Name of the site (required, 1-255 characters)
-        type: string
-      tenant_id:
-        description: Tenant ID of the site
-        type: integer
-    required:
-    - domain
-    - name
-    - tenant_id
-    type: object
   internal_modules_sites_v1.ErrorResponse:
     properties:
       details:
@@ -23,50 +7,22 @@ definitions:
       error:
         type: string
     type: object
-  internal_modules_sites_v1.ListResponse:
+  internal_modules_visitors_v1.ErrorResponse:
     properties:
-      sites:
-        items:
-          $ref: '#/definitions/internal_modules_sites_v1.Response'
-        type: array
-      total:
+      details:
+        type: string
+      error:
+        type: string
+      status:
         type: integer
-    type: object
-  internal_modules_sites_v1.Response:
-    properties:
-      created_at:
-        type: string
-      domain:
-        type: string
-      is_active:
+      success:
         type: boolean
-      name:
+      trace_id:
         type: string
-      public_key:
-        type: string
-      tenant_id:
-        type: integer
-      updated_at:
-        type: string
-      uuid:
+      version:
         type: string
     type: object
-  internal_modules_sites_v1.UpdateRequest:
-    properties:
-      domain:
-        description: Optional new domain for the site
-        type: string
-      is_active:
-        description: Optional active status
-        type: boolean
-      name:
-        description: Optional new name for the site
-        type: string
-      tenant_id:
-        description: Optional new tenant ID
-        type: integer
-    type: object
-  internal_modules_visitors_v1.CreateEventRequest:
+  v1.CreateEventRequest:
     properties:
       event_name:
         type: string
@@ -82,7 +38,7 @@ definitions:
     - fingerprint_hash
     - session_token
     type: object
-  internal_modules_visitors_v1.CreatePageViewRequest:
+  v1.CreatePageViewRequest:
     properties:
       fingerprint_hash:
         type: string
@@ -99,7 +55,23 @@ definitions:
     - session_token
     - url
     type: object
-  internal_modules_visitors_v1.CreateSessionRequest:
+  v1.CreateRequest:
+    properties:
+      domain:
+        description: Domain of the site (required, must be unique and valid)
+        type: string
+      name:
+        description: Name of the site (required, 1-255 characters)
+        type: string
+      tenant_id:
+        description: Tenant ID of the site
+        type: integer
+    required:
+    - domain
+    - name
+    - tenant_id
+    type: object
+  v1.CreateSessionRequest:
     properties:
       acquisition_campaign:
         type: string
@@ -119,22 +91,7 @@ definitions:
     required:
     - fingerprint_hash
     type: object
-  internal_modules_visitors_v1.ErrorResponse:
-    properties:
-      details:
-        type: string
-      error:
-        type: string
-      status:
-        type: integer
-      success:
-        type: boolean
-      trace_id:
-        type: string
-      version:
-        type: string
-    type: object
-  internal_modules_visitors_v1.EventResponse:
+  v1.EventResponse:
     properties:
       created_at:
         type: string
@@ -152,7 +109,16 @@ definitions:
       visitor_uuid:
         type: string
     type: object
-  internal_modules_visitors_v1.PageViewResponse:
+  v1.ListResponse:
+    properties:
+      sites:
+        items:
+          $ref: '#/definitions/v1.Response'
+        type: array
+      total:
+        type: integer
+    type: object
+  v1.PageViewResponse:
     properties:
       created_at:
         type: string
@@ -171,7 +137,41 @@ definitions:
       visitor_uuid:
         type: string
     type: object
-  internal_modules_visitors_v1.VisitorResponse:
+  v1.Response:
+    properties:
+      created_at:
+        type: string
+      domain:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      public_key:
+        type: string
+      tenant_id:
+        type: integer
+      updated_at:
+        type: string
+      uuid:
+        type: string
+    type: object
+  v1.UpdateRequest:
+    properties:
+      domain:
+        description: Optional new domain for the site
+        type: string
+      is_active:
+        description: Optional active status
+        type: boolean
+      name:
+        description: Optional new name for the site
+        type: string
+      tenant_id:
+        description: Optional new tenant ID
+        type: integer
+    type: object
+  v1.VisitorResponse:
     properties:
       anonymous_id:
         type: string
@@ -217,7 +217,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.ListResponse'
+            $ref: '#/definitions/v1.ListResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -238,14 +238,14 @@ paths:
         name: site
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_sites_v1.CreateRequest'
+          $ref: '#/definitions/v1.CreateRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -306,7 +306,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -339,14 +339,14 @@ paths:
         name: site
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_sites_v1.UpdateRequest'
+          $ref: '#/definitions/v1.UpdateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -383,7 +383,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
@@ -413,7 +413,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_visitors_v1.CreateSessionRequest'
+          $ref: '#/definitions/v1.CreateSessionRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -422,6 +422,16 @@ paths:
       - description: HMAC Signature
         in: header
         name: X-Signature
+        required: true
+        type: string
+      - description: Request Timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
         required: true
         type: string
       - description: Cookie must contain anonymous_id
@@ -435,7 +445,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.VisitorResponse'
+            $ref: '#/definitions/v1.VisitorResponse'
         "400":
           description: Bad Request
           schema:
@@ -458,7 +468,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_visitors_v1.CreateEventRequest'
+          $ref: '#/definitions/v1.CreateEventRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -469,13 +479,23 @@ paths:
         name: X-Signature
         required: true
         type: string
+      - description: Request Timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.EventResponse'
+            $ref: '#/definitions/v1.EventResponse'
         "400":
           description: Bad Request
           schema:
@@ -498,7 +518,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_visitors_v1.CreatePageViewRequest'
+          $ref: '#/definitions/v1.CreatePageViewRequest'
       - description: Public API Key
         in: header
         name: X-API-Key
@@ -509,13 +529,23 @@ paths:
         name: X-Signature
         required: true
         type: string
+      - description: Request Timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.PageViewResponse'
+            $ref: '#/definitions/v1.PageViewResponse'
         "400":
           description: Bad Request
           schema:
