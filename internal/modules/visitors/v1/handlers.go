@@ -1,12 +1,15 @@
 package v1
 
 import (
+	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"tracking/internal/ent"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type Handler struct {
@@ -47,7 +50,7 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		h.logger.Warn("invalid request body", "error", err)
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
-			Details: err.Error(),
+			Details: formatBindError(err),
 		})
 		return
 	}
@@ -70,6 +73,9 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
+
+	c.SetCookie("session_id", res.SessionID, 3600*24*365, "/", "", false, true)
+	c.SetCookie("visitor_uuid", res.UUID, 3600*24*365, "/", "", false, true)
 
 	c.JSON(http.StatusOK, res)
 }
@@ -96,7 +102,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		h.logger.Warn("invalid request body", "error", err)
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
-			Details: err.Error(),
+			Details: formatBindError(err),
 		})
 		return
 	}
@@ -145,7 +151,7 @@ func (h *Handler) CreatePageView(c *gin.Context) {
 		h.logger.Warn("invalid request body", "error", err)
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
-			Details: err.Error(),
+			Details: formatBindError(err),
 		})
 		return
 	}
@@ -172,7 +178,6 @@ func (h *Handler) CreatePageView(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`
@@ -180,4 +185,27 @@ type ErrorResponse struct {
 	Success bool   `json:"success"`
 	TraceId string `json:"trace_id"`
 	Version string `json:"version"`
+}
+
+func formatBindError(err error) string {
+	if err == nil {
+		return "invalid request body"
+	}
+
+	if typeErr, ok := err.(*json.UnmarshalTypeError); ok {
+		return fmt.Sprintf("Invalid data type for field: %s", typeErr.Field)
+	}
+
+	if _, ok := err.(*json.SyntaxError); ok {
+		return "Malformed JSON payload"
+	}
+
+	if validationErrs, ok := err.(validator.ValidationErrors); ok {
+		if len(validationErrs) > 0 {
+			firstErr := validationErrs[0]
+			return fmt.Sprintf("Validation failed on field: %s", firstErr.Field())
+		}
+	}
+
+	return "The provided payload format is invalid or contains mismatched data types."
 }

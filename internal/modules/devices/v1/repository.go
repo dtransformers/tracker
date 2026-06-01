@@ -41,8 +41,8 @@ type CreateDeviceInput struct {
 	Browser         string
 	Language        string
 	Timezone        string
-	ScreenWidth     string
-	ScreenHeight    string
+	ScreenWidth     int
+	ScreenHeight    int
 }
 
 type UpdateDeviceInput struct {

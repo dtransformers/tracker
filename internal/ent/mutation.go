@@ -60,8 +60,10 @@ type DeviceMutation struct {
 	browser          *string
 	language         *string
 	timezone         *string
-	screen_width     *string
-	screen_height    *string
+	screen_width     *int
+	addscreen_width  *int
+	screen_height    *int
+	addscreen_height *int
 	first_seen_at    *time.Time
 	last_seen_at     *time.Time
 	clearedFields    map[string]struct{}
@@ -738,12 +740,13 @@ func (m *DeviceMutation) ResetTimezone() {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (m *DeviceMutation) SetScreenWidth(s string) {
-	m.screen_width = &s
+func (m *DeviceMutation) SetScreenWidth(i int) {
+	m.screen_width = &i
+	m.addscreen_width = nil
 }
 
 // ScreenWidth returns the value of the "screen_width" field in the mutation.
-func (m *DeviceMutation) ScreenWidth() (r string, exists bool) {
+func (m *DeviceMutation) ScreenWidth() (r int, exists bool) {
 	v := m.screen_width
 	if v == nil {
 		return
@@ -754,7 +757,7 @@ func (m *DeviceMutation) ScreenWidth() (r string, exists bool) {
 // OldScreenWidth returns the old "screen_width" field's value of the Device entity.
 // If the Device object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v string, err error) {
+func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScreenWidth is only allowed on UpdateOne operations")
 	}
@@ -768,9 +771,28 @@ func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v string, err erro
 	return oldValue.ScreenWidth, nil
 }
 
+// AddScreenWidth adds i to the "screen_width" field.
+func (m *DeviceMutation) AddScreenWidth(i int) {
+	if m.addscreen_width != nil {
+		*m.addscreen_width += i
+	} else {
+		m.addscreen_width = &i
+	}
+}
+
+// AddedScreenWidth returns the value that was added to the "screen_width" field in this mutation.
+func (m *DeviceMutation) AddedScreenWidth() (r int, exists bool) {
+	v := m.addscreen_width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ClearScreenWidth clears the value of the "screen_width" field.
 func (m *DeviceMutation) ClearScreenWidth() {
 	m.screen_width = nil
+	m.addscreen_width = nil
 	m.clearedFields[device.FieldScreenWidth] = struct{}{}
 }
 
@@ -783,16 +805,18 @@ func (m *DeviceMutation) ScreenWidthCleared() bool {
 // ResetScreenWidth resets all changes to the "screen_width" field.
 func (m *DeviceMutation) ResetScreenWidth() {
 	m.screen_width = nil
+	m.addscreen_width = nil
 	delete(m.clearedFields, device.FieldScreenWidth)
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (m *DeviceMutation) SetScreenHeight(s string) {
-	m.screen_height = &s
+func (m *DeviceMutation) SetScreenHeight(i int) {
+	m.screen_height = &i
+	m.addscreen_height = nil
 }
 
 // ScreenHeight returns the value of the "screen_height" field in the mutation.
-func (m *DeviceMutation) ScreenHeight() (r string, exists bool) {
+func (m *DeviceMutation) ScreenHeight() (r int, exists bool) {
 	v := m.screen_height
 	if v == nil {
 		return
@@ -803,7 +827,7 @@ func (m *DeviceMutation) ScreenHeight() (r string, exists bool) {
 // OldScreenHeight returns the old "screen_height" field's value of the Device entity.
 // If the Device object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v string, err error) {
+func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScreenHeight is only allowed on UpdateOne operations")
 	}
@@ -817,9 +841,28 @@ func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v string, err err
 	return oldValue.ScreenHeight, nil
 }
 
+// AddScreenHeight adds i to the "screen_height" field.
+func (m *DeviceMutation) AddScreenHeight(i int) {
+	if m.addscreen_height != nil {
+		*m.addscreen_height += i
+	} else {
+		m.addscreen_height = &i
+	}
+}
+
+// AddedScreenHeight returns the value that was added to the "screen_height" field in this mutation.
+func (m *DeviceMutation) AddedScreenHeight() (r int, exists bool) {
+	v := m.addscreen_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ClearScreenHeight clears the value of the "screen_height" field.
 func (m *DeviceMutation) ClearScreenHeight() {
 	m.screen_height = nil
+	m.addscreen_height = nil
 	m.clearedFields[device.FieldScreenHeight] = struct{}{}
 }
 
@@ -832,6 +875,7 @@ func (m *DeviceMutation) ScreenHeightCleared() bool {
 // ResetScreenHeight resets all changes to the "screen_height" field.
 func (m *DeviceMutation) ResetScreenHeight() {
 	m.screen_height = nil
+	m.addscreen_height = nil
 	delete(m.clearedFields, device.FieldScreenHeight)
 }
 
@@ -1165,14 +1209,14 @@ func (m *DeviceMutation) SetField(name string, value ent.Value) error {
 		m.SetTimezone(v)
 		return nil
 	case device.FieldScreenWidth:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetScreenWidth(v)
 		return nil
 	case device.FieldScreenHeight:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1203,6 +1247,12 @@ func (m *DeviceMutation) AddedFields() []string {
 	if m.addvisitor_id != nil {
 		fields = append(fields, device.FieldVisitorID)
 	}
+	if m.addscreen_width != nil {
+		fields = append(fields, device.FieldScreenWidth)
+	}
+	if m.addscreen_height != nil {
+		fields = append(fields, device.FieldScreenHeight)
+	}
 	return fields
 }
 
@@ -1213,6 +1263,10 @@ func (m *DeviceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case device.FieldVisitorID:
 		return m.AddedVisitorID()
+	case device.FieldScreenWidth:
+		return m.AddedScreenWidth()
+	case device.FieldScreenHeight:
+		return m.AddedScreenHeight()
 	}
 	return nil, false
 }
@@ -1228,6 +1282,20 @@ func (m *DeviceMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddVisitorID(v)
+		return nil
+	case device.FieldScreenWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScreenWidth(v)
+		return nil
+	case device.FieldScreenHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScreenHeight(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Device numeric field %s", name)

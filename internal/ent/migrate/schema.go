@@ -23,8 +23,8 @@ var (
 		{Name: "browser", Type: field.TypeString, Nullable: true},
 		{Name: "language", Type: field.TypeString, Nullable: true},
 		{Name: "timezone", Type: field.TypeString, Nullable: true},
-		{Name: "screen_width", Type: field.TypeString, Nullable: true},
-		{Name: "screen_height", Type: field.TypeString, Nullable: true},
+		{Name: "screen_width", Type: field.TypeInt, Nullable: true},
+		{Name: "screen_height", Type: field.TypeInt, Nullable: true},
 		{Name: "first_seen_at", Type: field.TypeTime},
 		{Name: "last_seen_at", Type: field.TypeTime},
 	}

@@ -50,10 +50,10 @@ func (Device) Fields() []ent.Field {
 		field.String("timezone").
 			Optional(),
 
-		field.String("screen_width").
+		field.Int("screen_width").
 			Optional(),
 
-		field.String("screen_height").
+		field.Int("screen_height").
 			Optional(),
 
 		field.Time("first_seen_at").

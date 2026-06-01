@@ -115,12 +115,12 @@ func Timezone(v string) predicate.Device {
 }
 
 // ScreenWidth applies equality check predicate on the "screen_width" field. It's identical to ScreenWidthEQ.
-func ScreenWidth(v string) predicate.Device {
+func ScreenWidth(v int) predicate.Device {
 	return predicate.Device(sql.FieldEQ(FieldScreenWidth, v))
 }
 
 // ScreenHeight applies equality check predicate on the "screen_height" field. It's identical to ScreenHeightEQ.
-func ScreenHeight(v string) predicate.Device {
+func ScreenHeight(v int) predicate.Device {
 	return predicate.Device(sql.FieldEQ(FieldScreenHeight, v))
 }
 
@@ -980,58 +980,43 @@ func TimezoneContainsFold(v string) predicate.Device {
 }
 
 // ScreenWidthEQ applies the EQ predicate on the "screen_width" field.
-func ScreenWidthEQ(v string) predicate.Device {
+func ScreenWidthEQ(v int) predicate.Device {
 	return predicate.Device(sql.FieldEQ(FieldScreenWidth, v))
 }
 
 // ScreenWidthNEQ applies the NEQ predicate on the "screen_width" field.
-func ScreenWidthNEQ(v string) predicate.Device {
+func ScreenWidthNEQ(v int) predicate.Device {
 	return predicate.Device(sql.FieldNEQ(FieldScreenWidth, v))
 }
 
 // ScreenWidthIn applies the In predicate on the "screen_width" field.
-func ScreenWidthIn(vs ...string) predicate.Device {
+func ScreenWidthIn(vs ...int) predicate.Device {
 	return predicate.Device(sql.FieldIn(FieldScreenWidth, vs...))
 }
 
 // ScreenWidthNotIn applies the NotIn predicate on the "screen_width" field.
-func ScreenWidthNotIn(vs ...string) predicate.Device {
+func ScreenWidthNotIn(vs ...int) predicate.Device {
 	return predicate.Device(sql.FieldNotIn(FieldScreenWidth, vs...))
 }
 
 // ScreenWidthGT applies the GT predicate on the "screen_width" field.
-func ScreenWidthGT(v string) predicate.Device {
+func ScreenWidthGT(v int) predicate.Device {
 	return predicate.Device(sql.FieldGT(FieldScreenWidth, v))
 }
 
 // ScreenWidthGTE applies the GTE predicate on the "screen_width" field.
-func ScreenWidthGTE(v string) predicate.Device {
+func ScreenWidthGTE(v int) predicate.Device {
 	return predicate.Device(sql.FieldGTE(FieldScreenWidth, v))
 }
 
 // ScreenWidthLT applies the LT predicate on the "screen_width" field.
-func ScreenWidthLT(v string) predicate.Device {
+func ScreenWidthLT(v int) predicate.Device {
 	return predicate.Device(sql.FieldLT(FieldScreenWidth, v))
 }
 
 // ScreenWidthLTE applies the LTE predicate on the "screen_width" field.
-func ScreenWidthLTE(v string) predicate.Device {
+func ScreenWidthLTE(v int) predicate.Device {
 	return predicate.Device(sql.FieldLTE(FieldScreenWidth, v))
-}
-
-// ScreenWidthContains applies the Contains predicate on the "screen_width" field.
-func ScreenWidthContains(v string) predicate.Device {
-	return predicate.Device(sql.FieldContains(FieldScreenWidth, v))
-}
-
-// ScreenWidthHasPrefix applies the HasPrefix predicate on the "screen_width" field.
-func ScreenWidthHasPrefix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasPrefix(FieldScreenWidth, v))
-}
-
-// ScreenWidthHasSuffix applies the HasSuffix predicate on the "screen_width" field.
-func ScreenWidthHasSuffix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasSuffix(FieldScreenWidth, v))
 }
 
 // ScreenWidthIsNil applies the IsNil predicate on the "screen_width" field.
@@ -1044,69 +1029,44 @@ func ScreenWidthNotNil() predicate.Device {
 	return predicate.Device(sql.FieldNotNull(FieldScreenWidth))
 }
 
-// ScreenWidthEqualFold applies the EqualFold predicate on the "screen_width" field.
-func ScreenWidthEqualFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldEqualFold(FieldScreenWidth, v))
-}
-
-// ScreenWidthContainsFold applies the ContainsFold predicate on the "screen_width" field.
-func ScreenWidthContainsFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldContainsFold(FieldScreenWidth, v))
-}
-
 // ScreenHeightEQ applies the EQ predicate on the "screen_height" field.
-func ScreenHeightEQ(v string) predicate.Device {
+func ScreenHeightEQ(v int) predicate.Device {
 	return predicate.Device(sql.FieldEQ(FieldScreenHeight, v))
 }
 
 // ScreenHeightNEQ applies the NEQ predicate on the "screen_height" field.
-func ScreenHeightNEQ(v string) predicate.Device {
+func ScreenHeightNEQ(v int) predicate.Device {
 	return predicate.Device(sql.FieldNEQ(FieldScreenHeight, v))
 }
 
 // ScreenHeightIn applies the In predicate on the "screen_height" field.
-func ScreenHeightIn(vs ...string) predicate.Device {
+func ScreenHeightIn(vs ...int) predicate.Device {
 	return predicate.Device(sql.FieldIn(FieldScreenHeight, vs...))
 }
 
 // ScreenHeightNotIn applies the NotIn predicate on the "screen_height" field.
-func ScreenHeightNotIn(vs ...string) predicate.Device {
+func ScreenHeightNotIn(vs ...int) predicate.Device {
 	return predicate.Device(sql.FieldNotIn(FieldScreenHeight, vs...))
 }
 
 // ScreenHeightGT applies the GT predicate on the "screen_height" field.
-func ScreenHeightGT(v string) predicate.Device {
+func ScreenHeightGT(v int) predicate.Device {
 	return predicate.Device(sql.FieldGT(FieldScreenHeight, v))
 }
 
 // ScreenHeightGTE applies the GTE predicate on the "screen_height" field.
-func ScreenHeightGTE(v string) predicate.Device {
+func ScreenHeightGTE(v int) predicate.Device {
 	return predicate.Device(sql.FieldGTE(FieldScreenHeight, v))
 }
 
 // ScreenHeightLT applies the LT predicate on the "screen_height" field.
-func ScreenHeightLT(v string) predicate.Device {
+func ScreenHeightLT(v int) predicate.Device {
 	return predicate.Device(sql.FieldLT(FieldScreenHeight, v))
 }
 
 // ScreenHeightLTE applies the LTE predicate on the "screen_height" field.
-func ScreenHeightLTE(v string) predicate.Device {
+func ScreenHeightLTE(v int) predicate.Device {
 	return predicate.Device(sql.FieldLTE(FieldScreenHeight, v))
-}
-
-// ScreenHeightContains applies the Contains predicate on the "screen_height" field.
-func ScreenHeightContains(v string) predicate.Device {
-	return predicate.Device(sql.FieldContains(FieldScreenHeight, v))
-}
-
-// ScreenHeightHasPrefix applies the HasPrefix predicate on the "screen_height" field.
-func ScreenHeightHasPrefix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasPrefix(FieldScreenHeight, v))
-}
-
-// ScreenHeightHasSuffix applies the HasSuffix predicate on the "screen_height" field.
-func ScreenHeightHasSuffix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasSuffix(FieldScreenHeight, v))
 }
 
 // ScreenHeightIsNil applies the IsNil predicate on the "screen_height" field.
@@ -1117,16 +1077,6 @@ func ScreenHeightIsNil() predicate.Device {
 // ScreenHeightNotNil applies the NotNil predicate on the "screen_height" field.
 func ScreenHeightNotNil() predicate.Device {
 	return predicate.Device(sql.FieldNotNull(FieldScreenHeight))
-}
-
-// ScreenHeightEqualFold applies the EqualFold predicate on the "screen_height" field.
-func ScreenHeightEqualFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldEqualFold(FieldScreenHeight, v))
-}
-
-// ScreenHeightContainsFold applies the ContainsFold predicate on the "screen_height" field.
-func ScreenHeightContainsFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldContainsFold(FieldScreenHeight, v))
 }
 
 // FirstSeenAtEQ applies the EQ predicate on the "first_seen_at" field.

@@ -258,16 +258,23 @@ func (_u *DeviceUpdate) ClearTimezone() *DeviceUpdate {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (_u *DeviceUpdate) SetScreenWidth(v string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetScreenWidth(v int) *DeviceUpdate {
+	_u.mutation.ResetScreenWidth()
 	_u.mutation.SetScreenWidth(v)
 	return _u
 }
 
 // SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableScreenWidth(v *string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetNillableScreenWidth(v *int) *DeviceUpdate {
 	if v != nil {
 		_u.SetScreenWidth(*v)
 	}
+	return _u
+}
+
+// AddScreenWidth adds value to the "screen_width" field.
+func (_u *DeviceUpdate) AddScreenWidth(v int) *DeviceUpdate {
+	_u.mutation.AddScreenWidth(v)
 	return _u
 }
 
@@ -278,16 +285,23 @@ func (_u *DeviceUpdate) ClearScreenWidth() *DeviceUpdate {
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (_u *DeviceUpdate) SetScreenHeight(v string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetScreenHeight(v int) *DeviceUpdate {
+	_u.mutation.ResetScreenHeight()
 	_u.mutation.SetScreenHeight(v)
 	return _u
 }
 
 // SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableScreenHeight(v *string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetNillableScreenHeight(v *int) *DeviceUpdate {
 	if v != nil {
 		_u.SetScreenHeight(*v)
 	}
+	return _u
+}
+
+// AddScreenHeight adds value to the "screen_height" field.
+func (_u *DeviceUpdate) AddScreenHeight(v int) *DeviceUpdate {
+	_u.mutation.AddScreenHeight(v)
 	return _u
 }
 
@@ -456,16 +470,22 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
 	}
 	if value, ok := _u.mutation.ScreenWidth(); ok {
-		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_spec.SetField(device.FieldScreenWidth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenWidth(); ok {
+		_spec.AddField(device.FieldScreenWidth, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenWidthCleared() {
-		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+		_spec.ClearField(device.FieldScreenWidth, field.TypeInt)
 	}
 	if value, ok := _u.mutation.ScreenHeight(); ok {
-		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_spec.SetField(device.FieldScreenHeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenHeight(); ok {
+		_spec.AddField(device.FieldScreenHeight, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenHeightCleared() {
-		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
+		_spec.ClearField(device.FieldScreenHeight, field.TypeInt)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)
@@ -723,16 +743,23 @@ func (_u *DeviceUpdateOne) ClearTimezone() *DeviceUpdateOne {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (_u *DeviceUpdateOne) SetScreenWidth(v string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetScreenWidth(v int) *DeviceUpdateOne {
+	_u.mutation.ResetScreenWidth()
 	_u.mutation.SetScreenWidth(v)
 	return _u
 }
 
 // SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableScreenWidth(v *string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetNillableScreenWidth(v *int) *DeviceUpdateOne {
 	if v != nil {
 		_u.SetScreenWidth(*v)
 	}
+	return _u
+}
+
+// AddScreenWidth adds value to the "screen_width" field.
+func (_u *DeviceUpdateOne) AddScreenWidth(v int) *DeviceUpdateOne {
+	_u.mutation.AddScreenWidth(v)
 	return _u
 }
 
@@ -743,16 +770,23 @@ func (_u *DeviceUpdateOne) ClearScreenWidth() *DeviceUpdateOne {
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (_u *DeviceUpdateOne) SetScreenHeight(v string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetScreenHeight(v int) *DeviceUpdateOne {
+	_u.mutation.ResetScreenHeight()
 	_u.mutation.SetScreenHeight(v)
 	return _u
 }
 
 // SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableScreenHeight(v *string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetNillableScreenHeight(v *int) *DeviceUpdateOne {
 	if v != nil {
 		_u.SetScreenHeight(*v)
 	}
+	return _u
+}
+
+// AddScreenHeight adds value to the "screen_height" field.
+func (_u *DeviceUpdateOne) AddScreenHeight(v int) *DeviceUpdateOne {
+	_u.mutation.AddScreenHeight(v)
 	return _u
 }
 
@@ -951,16 +985,22 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
 	}
 	if value, ok := _u.mutation.ScreenWidth(); ok {
-		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_spec.SetField(device.FieldScreenWidth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenWidth(); ok {
+		_spec.AddField(device.FieldScreenWidth, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenWidthCleared() {
-		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+		_spec.ClearField(device.FieldScreenWidth, field.TypeInt)
 	}
 	if value, ok := _u.mutation.ScreenHeight(); ok {
-		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_spec.SetField(device.FieldScreenHeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenHeight(); ok {
+		_spec.AddField(device.FieldScreenHeight, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenHeightCleared() {
-		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
+		_spec.ClearField(device.FieldScreenHeight, field.TypeInt)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)

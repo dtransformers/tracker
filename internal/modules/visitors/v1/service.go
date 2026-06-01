@@ -44,14 +44,13 @@ type CreateSessionRequest struct {
 
 	AnonymousID string `json:"anonymous_id" swaggerignore:"true"`
 
-	// Device Info Extracted by the tracking SDK
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
 	DeviceType      string `json:"device_type" swaggerignore:"true"`
 	OS              string `json:"os" swaggerignore:"true"`
 	Browser         string `json:"browser" swaggerignore:"true"`
 	Language        string `json:"language" swaggerignore:"true"`
-	ScreenWidth     string `json:"screen_width" swaggerignore:"true"`
-	ScreenHeight    string `json:"screen_height" swaggerignore:"true"`
+	ScreenWidth     int `json:"screen_width" swaggerignore:"true"`
+	ScreenHeight    int `json:"screen_height" swaggerignore:"true"`
 
 	// Geo location information extracted from ip
 	AddressIP string `json:"address_ip" swaggerignore:"true"`
@@ -72,6 +71,7 @@ type CreateSessionRequest struct {
 
 type VisitorResponse struct {
 	UUID            string    `json:"uuid"`
+	SessionID       string    `json:"session_id"`
 	AnonymousID     string    `json:"anonymous_id"`
 	PrimaryUserID   *string   `json:"primary_user_id,omitempty"`
 	FirstSeenAt     time.Time `json:"first_seen_at"`
@@ -230,6 +230,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	}
 
 	var sessionID int64
+	var sessionToken string
 	if isNewDevice || req.SessionToken != "" {
 		if req.SessionToken == "" {
 			req.SessionToken = uuid.New().String()
@@ -246,12 +247,14 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 				return nil, err
 			}
 			sessionID = int64(sess.ID)
+			sessionToken = sess.SessionToken
 		} else {
 			sess, err := s.updateSession(ctx, session, req)
 			if err != nil {
 				return nil, err
 			}
 			sessionID = int64(sess.ID)
+			sessionToken = sess.SessionToken
 		}
 	}
 
@@ -267,7 +270,12 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		}
 	}
 
-	return toVisitorResponse(v), nil
+	res := toVisitorResponse(v)
+	if sessionToken != "" {
+		res.SessionID = sessionToken
+	}
+
+	return res, nil
 }
 
 func (s *Service) getVisitor(ctx context.Context, anonymousID string) (*ent.Visitor, error) {
