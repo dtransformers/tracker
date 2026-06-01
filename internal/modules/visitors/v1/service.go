@@ -49,8 +49,8 @@ type CreateSessionRequest struct {
 	OS              string `json:"os" swaggerignore:"true"`
 	Browser         string `json:"browser" swaggerignore:"true"`
 	Language        string `json:"language" swaggerignore:"true"`
-	ScreenWidth     int `json:"screen_width" swaggerignore:"true"`
-	ScreenHeight    int `json:"screen_height" swaggerignore:"true"`
+	ScreenWidth     int    `json:"screen_width" swaggerignore:"true"`
+	ScreenHeight    int    `json:"screen_height" swaggerignore:"true"`
 
 	// Geo location information extracted from ip
 	AddressIP string `json:"address_ip" swaggerignore:"true"`
@@ -142,8 +142,8 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 	var isBot bool
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		originalIP = tracking.OriginalIP
-		if tracking.Cookies != nil && tracking.Cookies["anonymous_id"] != "" {
-			req.AnonymousID = tracking.Cookies["anonymous_id"]
+		if tracking.Cookies != nil && tracking.Cookies["visitor_uuid"] != "" {
+			req.AnonymousID = tracking.Cookies["visitor_uuid"]
 		}
 		req.DeviceType = tracking.DeviceType
 		if req.OS == "" {
