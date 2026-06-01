@@ -60,6 +60,8 @@ type DeviceMutation struct {
 	browser          *string
 	language         *string
 	timezone         *string
+	screen_width     *string
+	screen_height    *string
 	first_seen_at    *time.Time
 	last_seen_at     *time.Time
 	clearedFields    map[string]struct{}
@@ -735,6 +737,104 @@ func (m *DeviceMutation) ResetTimezone() {
 	delete(m.clearedFields, device.FieldTimezone)
 }
 
+// SetScreenWidth sets the "screen_width" field.
+func (m *DeviceMutation) SetScreenWidth(s string) {
+	m.screen_width = &s
+}
+
+// ScreenWidth returns the value of the "screen_width" field in the mutation.
+func (m *DeviceMutation) ScreenWidth() (r string, exists bool) {
+	v := m.screen_width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScreenWidth returns the old "screen_width" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScreenWidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScreenWidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScreenWidth: %w", err)
+	}
+	return oldValue.ScreenWidth, nil
+}
+
+// ClearScreenWidth clears the value of the "screen_width" field.
+func (m *DeviceMutation) ClearScreenWidth() {
+	m.screen_width = nil
+	m.clearedFields[device.FieldScreenWidth] = struct{}{}
+}
+
+// ScreenWidthCleared returns if the "screen_width" field was cleared in this mutation.
+func (m *DeviceMutation) ScreenWidthCleared() bool {
+	_, ok := m.clearedFields[device.FieldScreenWidth]
+	return ok
+}
+
+// ResetScreenWidth resets all changes to the "screen_width" field.
+func (m *DeviceMutation) ResetScreenWidth() {
+	m.screen_width = nil
+	delete(m.clearedFields, device.FieldScreenWidth)
+}
+
+// SetScreenHeight sets the "screen_height" field.
+func (m *DeviceMutation) SetScreenHeight(s string) {
+	m.screen_height = &s
+}
+
+// ScreenHeight returns the value of the "screen_height" field in the mutation.
+func (m *DeviceMutation) ScreenHeight() (r string, exists bool) {
+	v := m.screen_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScreenHeight returns the old "screen_height" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScreenHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScreenHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScreenHeight: %w", err)
+	}
+	return oldValue.ScreenHeight, nil
+}
+
+// ClearScreenHeight clears the value of the "screen_height" field.
+func (m *DeviceMutation) ClearScreenHeight() {
+	m.screen_height = nil
+	m.clearedFields[device.FieldScreenHeight] = struct{}{}
+}
+
+// ScreenHeightCleared returns if the "screen_height" field was cleared in this mutation.
+func (m *DeviceMutation) ScreenHeightCleared() bool {
+	_, ok := m.clearedFields[device.FieldScreenHeight]
+	return ok
+}
+
+// ResetScreenHeight resets all changes to the "screen_height" field.
+func (m *DeviceMutation) ResetScreenHeight() {
+	m.screen_height = nil
+	delete(m.clearedFields, device.FieldScreenHeight)
+}
+
 // SetFirstSeenAt sets the "first_seen_at" field.
 func (m *DeviceMutation) SetFirstSeenAt(t time.Time) {
 	m.first_seen_at = &t
@@ -841,7 +941,7 @@ func (m *DeviceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DeviceMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 16)
 	if m.uuid != nil {
 		fields = append(fields, device.FieldUUID)
 	}
@@ -877,6 +977,12 @@ func (m *DeviceMutation) Fields() []string {
 	}
 	if m.timezone != nil {
 		fields = append(fields, device.FieldTimezone)
+	}
+	if m.screen_width != nil {
+		fields = append(fields, device.FieldScreenWidth)
+	}
+	if m.screen_height != nil {
+		fields = append(fields, device.FieldScreenHeight)
 	}
 	if m.first_seen_at != nil {
 		fields = append(fields, device.FieldFirstSeenAt)
@@ -916,6 +1022,10 @@ func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
 		return m.Language()
 	case device.FieldTimezone:
 		return m.Timezone()
+	case device.FieldScreenWidth:
+		return m.ScreenWidth()
+	case device.FieldScreenHeight:
+		return m.ScreenHeight()
 	case device.FieldFirstSeenAt:
 		return m.FirstSeenAt()
 	case device.FieldLastSeenAt:
@@ -953,6 +1063,10 @@ func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldLanguage(ctx)
 	case device.FieldTimezone:
 		return m.OldTimezone(ctx)
+	case device.FieldScreenWidth:
+		return m.OldScreenWidth(ctx)
+	case device.FieldScreenHeight:
+		return m.OldScreenHeight(ctx)
 	case device.FieldFirstSeenAt:
 		return m.OldFirstSeenAt(ctx)
 	case device.FieldLastSeenAt:
@@ -1050,6 +1164,20 @@ func (m *DeviceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTimezone(v)
 		return nil
+	case device.FieldScreenWidth:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScreenWidth(v)
+		return nil
+	case device.FieldScreenHeight:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScreenHeight(v)
+		return nil
 	case device.FieldFirstSeenAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -1136,6 +1264,12 @@ func (m *DeviceMutation) ClearedFields() []string {
 	if m.FieldCleared(device.FieldTimezone) {
 		fields = append(fields, device.FieldTimezone)
 	}
+	if m.FieldCleared(device.FieldScreenWidth) {
+		fields = append(fields, device.FieldScreenWidth)
+	}
+	if m.FieldCleared(device.FieldScreenHeight) {
+		fields = append(fields, device.FieldScreenHeight)
+	}
 	return fields
 }
 
@@ -1176,6 +1310,12 @@ func (m *DeviceMutation) ClearField(name string) error {
 		return nil
 	case device.FieldTimezone:
 		m.ClearTimezone()
+		return nil
+	case device.FieldScreenWidth:
+		m.ClearScreenWidth()
+		return nil
+	case device.FieldScreenHeight:
+		m.ClearScreenHeight()
 		return nil
 	}
 	return fmt.Errorf("unknown Device nullable field %s", name)
@@ -1220,6 +1360,12 @@ func (m *DeviceMutation) ResetField(name string) error {
 		return nil
 	case device.FieldTimezone:
 		m.ResetTimezone()
+		return nil
+	case device.FieldScreenWidth:
+		m.ResetScreenWidth()
+		return nil
+	case device.FieldScreenHeight:
+		m.ResetScreenHeight()
 		return nil
 	case device.FieldFirstSeenAt:
 		m.ResetFirstSeenAt()

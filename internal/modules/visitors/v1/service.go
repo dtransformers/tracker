@@ -50,6 +50,8 @@ type CreateSessionRequest struct {
 	OS              string `json:"os" swaggerignore:"true"`
 	Browser         string `json:"browser" swaggerignore:"true"`
 	Language        string `json:"language" swaggerignore:"true"`
+	ScreenWidth     string `json:"screen_width" swaggerignore:"true"`
+	ScreenHeight    string `json:"screen_height" swaggerignore:"true"`
 
 	// Geo location information extracted from ip
 	AddressIP string `json:"address_ip" swaggerignore:"true"`
@@ -338,6 +340,8 @@ func (s *Service) createDevice(ctx context.Context, req CreateSessionRequest, vi
 		Browser:         req.Browser,
 		Language:        req.Language,
 		Timezone:        req.Timezone,
+		ScreenWidth:     req.ScreenWidth,
+		ScreenHeight:    req.ScreenHeight,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create device: %w", err)

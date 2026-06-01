@@ -41,6 +41,8 @@ type CreateDeviceInput struct {
 	Browser         string
 	Language        string
 	Timezone        string
+	ScreenWidth     string
+	ScreenHeight    string
 }
 
 type UpdateDeviceInput struct {
@@ -62,7 +64,9 @@ func (r *entRepository) Create(ctx context.Context, input CreateDeviceInput) (*e
 		SetCity(input.City).
 		SetBrowser(input.Browser).
 		SetLanguage(input.Language).
-		SetTimezone(input.Timezone)
+		SetTimezone(input.Timezone).
+		SetScreenWidth(input.ScreenWidth).
+		SetScreenHeight(input.ScreenHeight)
 
 	d, err := query.Save(ctx)
 	if err != nil {

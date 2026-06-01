@@ -34,11 +34,11 @@ func init() {
 	// device.FingerprintHashValidator is a validator for the "fingerprint_hash" field. It is called by the builders before save.
 	device.FingerprintHashValidator = deviceDescFingerprintHash.Validators[0].(func(string) error)
 	// deviceDescFirstSeenAt is the schema descriptor for first_seen_at field.
-	deviceDescFirstSeenAt := deviceFields[12].Descriptor()
+	deviceDescFirstSeenAt := deviceFields[14].Descriptor()
 	// device.DefaultFirstSeenAt holds the default value on creation for the first_seen_at field.
 	device.DefaultFirstSeenAt = deviceDescFirstSeenAt.Default.(func() time.Time)
 	// deviceDescLastSeenAt is the schema descriptor for last_seen_at field.
-	deviceDescLastSeenAt := deviceFields[13].Descriptor()
+	deviceDescLastSeenAt := deviceFields[15].Descriptor()
 	// device.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	device.DefaultLastSeenAt = deviceDescLastSeenAt.Default.(func() time.Time)
 	pageviewFields := schemas.PageView{}.Fields()

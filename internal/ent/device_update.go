@@ -257,6 +257,46 @@ func (_u *DeviceUpdate) ClearTimezone() *DeviceUpdate {
 	return _u
 }
 
+// SetScreenWidth sets the "screen_width" field.
+func (_u *DeviceUpdate) SetScreenWidth(v string) *DeviceUpdate {
+	_u.mutation.SetScreenWidth(v)
+	return _u
+}
+
+// SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableScreenWidth(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetScreenWidth(*v)
+	}
+	return _u
+}
+
+// ClearScreenWidth clears the value of the "screen_width" field.
+func (_u *DeviceUpdate) ClearScreenWidth() *DeviceUpdate {
+	_u.mutation.ClearScreenWidth()
+	return _u
+}
+
+// SetScreenHeight sets the "screen_height" field.
+func (_u *DeviceUpdate) SetScreenHeight(v string) *DeviceUpdate {
+	_u.mutation.SetScreenHeight(v)
+	return _u
+}
+
+// SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableScreenHeight(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetScreenHeight(*v)
+	}
+	return _u
+}
+
+// ClearScreenHeight clears the value of the "screen_height" field.
+func (_u *DeviceUpdate) ClearScreenHeight() *DeviceUpdate {
+	_u.mutation.ClearScreenHeight()
+	return _u
+}
+
 // SetFirstSeenAt sets the "first_seen_at" field.
 func (_u *DeviceUpdate) SetFirstSeenAt(v time.Time) *DeviceUpdate {
 	_u.mutation.SetFirstSeenAt(v)
@@ -414,6 +454,18 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TimezoneCleared() {
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
+	}
+	if value, ok := _u.mutation.ScreenWidth(); ok {
+		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+	}
+	if _u.mutation.ScreenWidthCleared() {
+		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+	}
+	if value, ok := _u.mutation.ScreenHeight(); ok {
+		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+	}
+	if _u.mutation.ScreenHeightCleared() {
+		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)
@@ -670,6 +722,46 @@ func (_u *DeviceUpdateOne) ClearTimezone() *DeviceUpdateOne {
 	return _u
 }
 
+// SetScreenWidth sets the "screen_width" field.
+func (_u *DeviceUpdateOne) SetScreenWidth(v string) *DeviceUpdateOne {
+	_u.mutation.SetScreenWidth(v)
+	return _u
+}
+
+// SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableScreenWidth(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetScreenWidth(*v)
+	}
+	return _u
+}
+
+// ClearScreenWidth clears the value of the "screen_width" field.
+func (_u *DeviceUpdateOne) ClearScreenWidth() *DeviceUpdateOne {
+	_u.mutation.ClearScreenWidth()
+	return _u
+}
+
+// SetScreenHeight sets the "screen_height" field.
+func (_u *DeviceUpdateOne) SetScreenHeight(v string) *DeviceUpdateOne {
+	_u.mutation.SetScreenHeight(v)
+	return _u
+}
+
+// SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableScreenHeight(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetScreenHeight(*v)
+	}
+	return _u
+}
+
+// ClearScreenHeight clears the value of the "screen_height" field.
+func (_u *DeviceUpdateOne) ClearScreenHeight() *DeviceUpdateOne {
+	_u.mutation.ClearScreenHeight()
+	return _u
+}
+
 // SetFirstSeenAt sets the "first_seen_at" field.
 func (_u *DeviceUpdateOne) SetFirstSeenAt(v time.Time) *DeviceUpdateOne {
 	_u.mutation.SetFirstSeenAt(v)
@@ -857,6 +949,18 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 	}
 	if _u.mutation.TimezoneCleared() {
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
+	}
+	if value, ok := _u.mutation.ScreenWidth(); ok {
+		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+	}
+	if _u.mutation.ScreenWidthCleared() {
+		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+	}
+	if value, ok := _u.mutation.ScreenHeight(); ok {
+		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+	}
+	if _u.mutation.ScreenHeightCleared() {
+		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)

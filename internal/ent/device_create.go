@@ -164,6 +164,34 @@ func (_c *DeviceCreate) SetNillableTimezone(v *string) *DeviceCreate {
 	return _c
 }
 
+// SetScreenWidth sets the "screen_width" field.
+func (_c *DeviceCreate) SetScreenWidth(v string) *DeviceCreate {
+	_c.mutation.SetScreenWidth(v)
+	return _c
+}
+
+// SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
+func (_c *DeviceCreate) SetNillableScreenWidth(v *string) *DeviceCreate {
+	if v != nil {
+		_c.SetScreenWidth(*v)
+	}
+	return _c
+}
+
+// SetScreenHeight sets the "screen_height" field.
+func (_c *DeviceCreate) SetScreenHeight(v string) *DeviceCreate {
+	_c.mutation.SetScreenHeight(v)
+	return _c
+}
+
+// SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
+func (_c *DeviceCreate) SetNillableScreenHeight(v *string) *DeviceCreate {
+	if v != nil {
+		_c.SetScreenHeight(*v)
+	}
+	return _c
+}
+
 // SetFirstSeenAt sets the "first_seen_at" field.
 func (_c *DeviceCreate) SetFirstSeenAt(v time.Time) *DeviceCreate {
 	_c.mutation.SetFirstSeenAt(v)
@@ -342,6 +370,14 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)
 		_node.Timezone = value
+	}
+	if value, ok := _c.mutation.ScreenWidth(); ok {
+		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_node.ScreenWidth = value
+	}
+	if value, ok := _c.mutation.ScreenHeight(); ok {
+		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_node.ScreenHeight = value
 	}
 	if value, ok := _c.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)

@@ -37,6 +37,10 @@ const (
 	FieldLanguage = "language"
 	// FieldTimezone holds the string denoting the timezone field in the database.
 	FieldTimezone = "timezone"
+	// FieldScreenWidth holds the string denoting the screen_width field in the database.
+	FieldScreenWidth = "screen_width"
+	// FieldScreenHeight holds the string denoting the screen_height field in the database.
+	FieldScreenHeight = "screen_height"
 	// FieldFirstSeenAt holds the string denoting the first_seen_at field in the database.
 	FieldFirstSeenAt = "first_seen_at"
 	// FieldLastSeenAt holds the string denoting the last_seen_at field in the database.
@@ -60,6 +64,8 @@ var Columns = []string{
 	FieldBrowser,
 	FieldLanguage,
 	FieldTimezone,
+	FieldScreenWidth,
+	FieldScreenHeight,
 	FieldFirstSeenAt,
 	FieldLastSeenAt,
 }
@@ -153,6 +159,16 @@ func ByLanguage(opts ...sql.OrderTermOption) OrderOption {
 // ByTimezone orders the results by the timezone field.
 func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTimezone, opts...).ToFunc()
+}
+
+// ByScreenWidth orders the results by the screen_width field.
+func ByScreenWidth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScreenWidth, opts...).ToFunc()
+}
+
+// ByScreenHeight orders the results by the screen_height field.
+func ByScreenHeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScreenHeight, opts...).ToFunc()
 }
 
 // ByFirstSeenAt orders the results by the first_seen_at field.

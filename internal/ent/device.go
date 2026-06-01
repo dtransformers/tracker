@@ -41,6 +41,10 @@ type Device struct {
 	Language string `json:"language,omitempty"`
 	// Timezone holds the value of the "timezone" field.
 	Timezone string `json:"timezone,omitempty"`
+	// ScreenWidth holds the value of the "screen_width" field.
+	ScreenWidth string `json:"screen_width,omitempty"`
+	// ScreenHeight holds the value of the "screen_height" field.
+	ScreenHeight string `json:"screen_height,omitempty"`
 	// FirstSeenAt holds the value of the "first_seen_at" field.
 	FirstSeenAt time.Time `json:"first_seen_at,omitempty"`
 	// LastSeenAt holds the value of the "last_seen_at" field.
@@ -55,7 +59,7 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case device.FieldID, device.FieldVisitorID:
 			values[i] = new(sql.NullInt64)
-		case device.FieldUUID, device.FieldFingerprintHash, device.FieldDeviceType, device.FieldOs, device.FieldAddressIP, device.FieldCountry, device.FieldRegion, device.FieldCity, device.FieldBrowser, device.FieldLanguage, device.FieldTimezone:
+		case device.FieldUUID, device.FieldFingerprintHash, device.FieldDeviceType, device.FieldOs, device.FieldAddressIP, device.FieldCountry, device.FieldRegion, device.FieldCity, device.FieldBrowser, device.FieldLanguage, device.FieldTimezone, device.FieldScreenWidth, device.FieldScreenHeight:
 			values[i] = new(sql.NullString)
 		case device.FieldFirstSeenAt, device.FieldLastSeenAt:
 			values[i] = new(sql.NullTime)
@@ -152,6 +156,18 @@ func (_m *Device) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Timezone = value.String
 			}
+		case device.FieldScreenWidth:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field screen_width", values[i])
+			} else if value.Valid {
+				_m.ScreenWidth = value.String
+			}
+		case device.FieldScreenHeight:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field screen_height", values[i])
+			} else if value.Valid {
+				_m.ScreenHeight = value.String
+			}
 		case device.FieldFirstSeenAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field first_seen_at", values[i])
@@ -235,6 +251,12 @@ func (_m *Device) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("timezone=")
 	builder.WriteString(_m.Timezone)
+	builder.WriteString(", ")
+	builder.WriteString("screen_width=")
+	builder.WriteString(_m.ScreenWidth)
+	builder.WriteString(", ")
+	builder.WriteString("screen_height=")
+	builder.WriteString(_m.ScreenHeight)
 	builder.WriteString(", ")
 	builder.WriteString("first_seen_at=")
 	builder.WriteString(_m.FirstSeenAt.Format(time.ANSIC))
