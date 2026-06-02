@@ -136,6 +136,12 @@ func (_c *DeviceCreate) SetNillableBrowser(v *string) *DeviceCreate {
 	return _c
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (_c *DeviceCreate) SetBrowserVersion(v string) *DeviceCreate {
+	_c.mutation.SetBrowserVersion(v)
+	return _c
+}
+
 // SetLanguage sets the "language" field.
 func (_c *DeviceCreate) SetLanguage(v string) *DeviceCreate {
 	_c.mutation.SetLanguage(v)
@@ -146,6 +152,20 @@ func (_c *DeviceCreate) SetLanguage(v string) *DeviceCreate {
 func (_c *DeviceCreate) SetNillableLanguage(v *string) *DeviceCreate {
 	if v != nil {
 		_c.SetLanguage(*v)
+	}
+	return _c
+}
+
+// SetIsp sets the "isp" field.
+func (_c *DeviceCreate) SetIsp(v string) *DeviceCreate {
+	_c.mutation.SetIsp(v)
+	return _c
+}
+
+// SetNillableIsp sets the "isp" field if the given value is not nil.
+func (_c *DeviceCreate) SetNillableIsp(v *string) *DeviceCreate {
+	if v != nil {
+		_c.SetIsp(*v)
 	}
 	return _c
 }
@@ -165,13 +185,13 @@ func (_c *DeviceCreate) SetNillableTimezone(v *string) *DeviceCreate {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (_c *DeviceCreate) SetScreenWidth(v string) *DeviceCreate {
+func (_c *DeviceCreate) SetScreenWidth(v int) *DeviceCreate {
 	_c.mutation.SetScreenWidth(v)
 	return _c
 }
 
 // SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
-func (_c *DeviceCreate) SetNillableScreenWidth(v *string) *DeviceCreate {
+func (_c *DeviceCreate) SetNillableScreenWidth(v *int) *DeviceCreate {
 	if v != nil {
 		_c.SetScreenWidth(*v)
 	}
@@ -179,13 +199,13 @@ func (_c *DeviceCreate) SetNillableScreenWidth(v *string) *DeviceCreate {
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (_c *DeviceCreate) SetScreenHeight(v string) *DeviceCreate {
+func (_c *DeviceCreate) SetScreenHeight(v int) *DeviceCreate {
 	_c.mutation.SetScreenHeight(v)
 	return _c
 }
 
 // SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
-func (_c *DeviceCreate) SetNillableScreenHeight(v *string) *DeviceCreate {
+func (_c *DeviceCreate) SetNillableScreenHeight(v *int) *DeviceCreate {
 	if v != nil {
 		_c.SetScreenHeight(*v)
 	}
@@ -291,6 +311,14 @@ func (_c *DeviceCreate) check() error {
 			return &ValidationError{Name: "fingerprint_hash", err: fmt.Errorf(`ent: validator failed for field "Device.fingerprint_hash": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.BrowserVersion(); !ok {
+		return &ValidationError{Name: "browser_version", err: errors.New(`ent: missing required field "Device.browser_version"`)}
+	}
+	if v, ok := _c.mutation.BrowserVersion(); ok {
+		if err := device.BrowserVersionValidator(v); err != nil {
+			return &ValidationError{Name: "browser_version", err: fmt.Errorf(`ent: validator failed for field "Device.browser_version": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.FirstSeenAt(); !ok {
 		return &ValidationError{Name: "first_seen_at", err: errors.New(`ent: missing required field "Device.first_seen_at"`)}
 	}
@@ -363,20 +391,28 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		_spec.SetField(device.FieldBrowser, field.TypeString, value)
 		_node.Browser = value
 	}
+	if value, ok := _c.mutation.BrowserVersion(); ok {
+		_spec.SetField(device.FieldBrowserVersion, field.TypeString, value)
+		_node.BrowserVersion = value
+	}
 	if value, ok := _c.mutation.Language(); ok {
 		_spec.SetField(device.FieldLanguage, field.TypeString, value)
 		_node.Language = value
+	}
+	if value, ok := _c.mutation.Isp(); ok {
+		_spec.SetField(device.FieldIsp, field.TypeString, value)
+		_node.Isp = value
 	}
 	if value, ok := _c.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)
 		_node.Timezone = value
 	}
 	if value, ok := _c.mutation.ScreenWidth(); ok {
-		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_spec.SetField(device.FieldScreenWidth, field.TypeInt, value)
 		_node.ScreenWidth = value
 	}
 	if value, ok := _c.mutation.ScreenHeight(); ok {
-		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_spec.SetField(device.FieldScreenHeight, field.TypeInt, value)
 		_node.ScreenHeight = value
 	}
 	if value, ok := _c.mutation.FirstSeenAt(); ok {

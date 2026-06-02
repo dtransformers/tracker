@@ -35,6 +35,7 @@ type DeviceResponse struct {
 	Region          string    `json:"region"`
 	City            string    `json:"city"`
 	Browser         string    `json:"browser"`
+	BrowserVersion  string    `json:"browser_version"`
 	Language        string    `json:"language"`
 	Timezone        string    `json:"timezone"`
 	FirstSeenAt     time.Time `json:"first_seen_at"`

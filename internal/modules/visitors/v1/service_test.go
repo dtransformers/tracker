@@ -9,11 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"tracking/internal/config"
 	"tracking/internal/ent"
+	consentsv1 "tracking/internal/modules/consents/v1"
+	consentsMocks "tracking/internal/modules/consents/v1/mocks"
 	devicesv1 "tracking/internal/modules/devices/v1"
 	devicesMocks "tracking/internal/modules/devices/v1/mocks"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	sitesMocks "tracking/internal/modules/sites/v1/mocks"
+	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 	visitor_sessionsMocks "tracking/internal/modules/visitor_sessions/v1/mocks"
 	visitorsv1 "tracking/internal/modules/visitors/v1"
 	visitorsMocks "tracking/internal/modules/visitors/v1/mocks"
@@ -26,14 +30,16 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"
 	anonID := "anon-123"
 
-	req := visitorsv1.CreateSessionRequest{
+	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:           pubKey,
-		AnonymousID:         anonID,
 		SessionToken:        "session-token",
 		DeviceType:          "desktop",
 		OS:                  "linux",
@@ -79,7 +85,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 		SessionToken: "session-token",
 	}
 
-	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{})
+	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
 	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 
@@ -88,15 +94,16 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(nil, &ent.NotFoundError{})
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
+	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
 	res, err := service.CreateSession(context.Background(), req, mockSite)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, anonID, res.AnonymousID)
 	mockVisitorsRepo.AssertExpectations(t)
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)
+	mockConsentsRepo.AssertExpectations(t)
 }
 
 func TestTrackVisitor_ExistingVisitor(t *testing.T) {
@@ -106,13 +113,15 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"
 	anonID := "anon-123"
-	req := visitorsv1.CreateSessionRequest{
+	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:           pubKey,
-		AnonymousID:         anonID,
 		SessionToken:        "session-token",
 		DeviceType:          "desktop",
 		OS:                  "linux",
@@ -169,7 +178,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 
 	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("Update", mock.Anything, mockVisitor.UUID, mock.Anything).Return(updatedVisitor, nil)
-	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
+	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil).Maybe()
 
 	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, "fingerprint-hash").Return(mockDevice, nil)
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
@@ -181,10 +190,10 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, anonID, res.AnonymousID)
 	mockVisitorsRepo.AssertExpectations(t)
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)
+	mockConsentsRepo.AssertExpectations(t)
 }
 
 func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
@@ -194,14 +203,16 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"
 	anonID := "anon-123"
 
-	req := visitorsv1.CreateSessionRequest{
+	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:       pubKey,
-		AnonymousID:     anonID,
 		AddressIP:       "127.0.0.1",
 		FingerprintHash: "fingerprint-hash",
 	}
@@ -232,7 +243,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 		SessionToken: "session-token",
 	}
 
-	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{})
+	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
 	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 
@@ -243,6 +254,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
+	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
 	res, err := service.CreateSession(context.Background(), req, mockSite)
 
@@ -251,6 +263,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	mockVisitorsRepo.AssertExpectations(t)
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)
+	mockConsentsRepo.AssertExpectations(t)
 }
 
 func TestCreateEvent_ExistingSession(t *testing.T) {
@@ -260,7 +273,10 @@ func TestCreateEvent_ExistingSession(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	sessionToken := "sess-123"
 	fingerprint := "fp-123"
@@ -303,7 +319,7 @@ func TestCreateEvent_ExistingSession(t *testing.T) {
 		EventProperties: map[string]interface{}{"button": "blue"},
 	}
 
-	res, err := service.CreateEvent(context.Background(), req)
+	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -321,7 +337,10 @@ func TestCreatePageView_ExistingSession(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	sessionToken := "sess-123"
 	fingerprint := "fp-123"
@@ -366,7 +385,7 @@ func TestCreatePageView_ExistingSession(t *testing.T) {
 		Referrer:        "https://google.com",
 	}
 
-	res, err := service.CreatePageView(context.Background(), req)
+	res, err := service.CreatePageView(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -384,7 +403,10 @@ func TestCreateEvent_NewSession(t *testing.T) {
 	mockVisitorsRepo := new(visitorsMocks.MockRepository)
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, mockSessionsRepo, nil)
+	mockConsentsRepo := new(consentsMocks.MockRepository)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	sessionToken := "new-sess-123"
 	fingerprint := "new-fp-123"
@@ -427,6 +449,8 @@ func TestCreateEvent_NewSession(t *testing.T) {
 	// 5. createSession
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, sessionToken).Return(nil, &ent.NotFoundError{}).Once()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil).Once()
+	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil).Once()
+	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil).Once()
 
 	// Later when generating response
 	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil).Once()
@@ -439,7 +463,7 @@ func TestCreateEvent_NewSession(t *testing.T) {
 		EventName:       "page_load",
 	}
 
-	res, err := service.CreateEvent(context.Background(), req)
+	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -448,4 +472,3 @@ func TestCreateEvent_NewSession(t *testing.T) {
 	assert.Equal(t, "new-visitor-uuid", res.VisitorUUID)
 	assert.Equal(t, "new-device-uuid", res.DeviceUUID)
 }
-

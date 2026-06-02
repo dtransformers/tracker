@@ -58,10 +58,14 @@ type DeviceMutation struct {
 	region           *string
 	city             *string
 	browser          *string
+	browser_version  *string
 	language         *string
+	isp              *string
 	timezone         *string
-	screen_width     *string
-	screen_height    *string
+	screen_width     *int
+	addscreen_width  *int
+	screen_height    *int
+	addscreen_height *int
 	first_seen_at    *time.Time
 	last_seen_at     *time.Time
 	clearedFields    map[string]struct{}
@@ -639,6 +643,42 @@ func (m *DeviceMutation) ResetBrowser() {
 	delete(m.clearedFields, device.FieldBrowser)
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (m *DeviceMutation) SetBrowserVersion(s string) {
+	m.browser_version = &s
+}
+
+// BrowserVersion returns the value of the "browser_version" field in the mutation.
+func (m *DeviceMutation) BrowserVersion() (r string, exists bool) {
+	v := m.browser_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowserVersion returns the old "browser_version" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldBrowserVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowserVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowserVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowserVersion: %w", err)
+	}
+	return oldValue.BrowserVersion, nil
+}
+
+// ResetBrowserVersion resets all changes to the "browser_version" field.
+func (m *DeviceMutation) ResetBrowserVersion() {
+	m.browser_version = nil
+}
+
 // SetLanguage sets the "language" field.
 func (m *DeviceMutation) SetLanguage(s string) {
 	m.language = &s
@@ -686,6 +726,55 @@ func (m *DeviceMutation) LanguageCleared() bool {
 func (m *DeviceMutation) ResetLanguage() {
 	m.language = nil
 	delete(m.clearedFields, device.FieldLanguage)
+}
+
+// SetIsp sets the "isp" field.
+func (m *DeviceMutation) SetIsp(s string) {
+	m.isp = &s
+}
+
+// Isp returns the value of the "isp" field in the mutation.
+func (m *DeviceMutation) Isp() (r string, exists bool) {
+	v := m.isp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsp returns the old "isp" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldIsp(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsp: %w", err)
+	}
+	return oldValue.Isp, nil
+}
+
+// ClearIsp clears the value of the "isp" field.
+func (m *DeviceMutation) ClearIsp() {
+	m.isp = nil
+	m.clearedFields[device.FieldIsp] = struct{}{}
+}
+
+// IspCleared returns if the "isp" field was cleared in this mutation.
+func (m *DeviceMutation) IspCleared() bool {
+	_, ok := m.clearedFields[device.FieldIsp]
+	return ok
+}
+
+// ResetIsp resets all changes to the "isp" field.
+func (m *DeviceMutation) ResetIsp() {
+	m.isp = nil
+	delete(m.clearedFields, device.FieldIsp)
 }
 
 // SetTimezone sets the "timezone" field.
@@ -738,12 +827,13 @@ func (m *DeviceMutation) ResetTimezone() {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (m *DeviceMutation) SetScreenWidth(s string) {
-	m.screen_width = &s
+func (m *DeviceMutation) SetScreenWidth(i int) {
+	m.screen_width = &i
+	m.addscreen_width = nil
 }
 
 // ScreenWidth returns the value of the "screen_width" field in the mutation.
-func (m *DeviceMutation) ScreenWidth() (r string, exists bool) {
+func (m *DeviceMutation) ScreenWidth() (r int, exists bool) {
 	v := m.screen_width
 	if v == nil {
 		return
@@ -754,7 +844,7 @@ func (m *DeviceMutation) ScreenWidth() (r string, exists bool) {
 // OldScreenWidth returns the old "screen_width" field's value of the Device entity.
 // If the Device object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v string, err error) {
+func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScreenWidth is only allowed on UpdateOne operations")
 	}
@@ -768,9 +858,28 @@ func (m *DeviceMutation) OldScreenWidth(ctx context.Context) (v string, err erro
 	return oldValue.ScreenWidth, nil
 }
 
+// AddScreenWidth adds i to the "screen_width" field.
+func (m *DeviceMutation) AddScreenWidth(i int) {
+	if m.addscreen_width != nil {
+		*m.addscreen_width += i
+	} else {
+		m.addscreen_width = &i
+	}
+}
+
+// AddedScreenWidth returns the value that was added to the "screen_width" field in this mutation.
+func (m *DeviceMutation) AddedScreenWidth() (r int, exists bool) {
+	v := m.addscreen_width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ClearScreenWidth clears the value of the "screen_width" field.
 func (m *DeviceMutation) ClearScreenWidth() {
 	m.screen_width = nil
+	m.addscreen_width = nil
 	m.clearedFields[device.FieldScreenWidth] = struct{}{}
 }
 
@@ -783,16 +892,18 @@ func (m *DeviceMutation) ScreenWidthCleared() bool {
 // ResetScreenWidth resets all changes to the "screen_width" field.
 func (m *DeviceMutation) ResetScreenWidth() {
 	m.screen_width = nil
+	m.addscreen_width = nil
 	delete(m.clearedFields, device.FieldScreenWidth)
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (m *DeviceMutation) SetScreenHeight(s string) {
-	m.screen_height = &s
+func (m *DeviceMutation) SetScreenHeight(i int) {
+	m.screen_height = &i
+	m.addscreen_height = nil
 }
 
 // ScreenHeight returns the value of the "screen_height" field in the mutation.
-func (m *DeviceMutation) ScreenHeight() (r string, exists bool) {
+func (m *DeviceMutation) ScreenHeight() (r int, exists bool) {
 	v := m.screen_height
 	if v == nil {
 		return
@@ -803,7 +914,7 @@ func (m *DeviceMutation) ScreenHeight() (r string, exists bool) {
 // OldScreenHeight returns the old "screen_height" field's value of the Device entity.
 // If the Device object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v string, err error) {
+func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScreenHeight is only allowed on UpdateOne operations")
 	}
@@ -817,9 +928,28 @@ func (m *DeviceMutation) OldScreenHeight(ctx context.Context) (v string, err err
 	return oldValue.ScreenHeight, nil
 }
 
+// AddScreenHeight adds i to the "screen_height" field.
+func (m *DeviceMutation) AddScreenHeight(i int) {
+	if m.addscreen_height != nil {
+		*m.addscreen_height += i
+	} else {
+		m.addscreen_height = &i
+	}
+}
+
+// AddedScreenHeight returns the value that was added to the "screen_height" field in this mutation.
+func (m *DeviceMutation) AddedScreenHeight() (r int, exists bool) {
+	v := m.addscreen_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ClearScreenHeight clears the value of the "screen_height" field.
 func (m *DeviceMutation) ClearScreenHeight() {
 	m.screen_height = nil
+	m.addscreen_height = nil
 	m.clearedFields[device.FieldScreenHeight] = struct{}{}
 }
 
@@ -832,6 +962,7 @@ func (m *DeviceMutation) ScreenHeightCleared() bool {
 // ResetScreenHeight resets all changes to the "screen_height" field.
 func (m *DeviceMutation) ResetScreenHeight() {
 	m.screen_height = nil
+	m.addscreen_height = nil
 	delete(m.clearedFields, device.FieldScreenHeight)
 }
 
@@ -941,7 +1072,7 @@ func (m *DeviceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DeviceMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 18)
 	if m.uuid != nil {
 		fields = append(fields, device.FieldUUID)
 	}
@@ -972,8 +1103,14 @@ func (m *DeviceMutation) Fields() []string {
 	if m.browser != nil {
 		fields = append(fields, device.FieldBrowser)
 	}
+	if m.browser_version != nil {
+		fields = append(fields, device.FieldBrowserVersion)
+	}
 	if m.language != nil {
 		fields = append(fields, device.FieldLanguage)
+	}
+	if m.isp != nil {
+		fields = append(fields, device.FieldIsp)
 	}
 	if m.timezone != nil {
 		fields = append(fields, device.FieldTimezone)
@@ -1018,8 +1155,12 @@ func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
 		return m.City()
 	case device.FieldBrowser:
 		return m.Browser()
+	case device.FieldBrowserVersion:
+		return m.BrowserVersion()
 	case device.FieldLanguage:
 		return m.Language()
+	case device.FieldIsp:
+		return m.Isp()
 	case device.FieldTimezone:
 		return m.Timezone()
 	case device.FieldScreenWidth:
@@ -1059,8 +1200,12 @@ func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCity(ctx)
 	case device.FieldBrowser:
 		return m.OldBrowser(ctx)
+	case device.FieldBrowserVersion:
+		return m.OldBrowserVersion(ctx)
 	case device.FieldLanguage:
 		return m.OldLanguage(ctx)
+	case device.FieldIsp:
+		return m.OldIsp(ctx)
 	case device.FieldTimezone:
 		return m.OldTimezone(ctx)
 	case device.FieldScreenWidth:
@@ -1150,12 +1295,26 @@ func (m *DeviceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBrowser(v)
 		return nil
+	case device.FieldBrowserVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowserVersion(v)
+		return nil
 	case device.FieldLanguage:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLanguage(v)
+		return nil
+	case device.FieldIsp:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsp(v)
 		return nil
 	case device.FieldTimezone:
 		v, ok := value.(string)
@@ -1165,14 +1324,14 @@ func (m *DeviceMutation) SetField(name string, value ent.Value) error {
 		m.SetTimezone(v)
 		return nil
 	case device.FieldScreenWidth:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetScreenWidth(v)
 		return nil
 	case device.FieldScreenHeight:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1203,6 +1362,12 @@ func (m *DeviceMutation) AddedFields() []string {
 	if m.addvisitor_id != nil {
 		fields = append(fields, device.FieldVisitorID)
 	}
+	if m.addscreen_width != nil {
+		fields = append(fields, device.FieldScreenWidth)
+	}
+	if m.addscreen_height != nil {
+		fields = append(fields, device.FieldScreenHeight)
+	}
 	return fields
 }
 
@@ -1213,6 +1378,10 @@ func (m *DeviceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case device.FieldVisitorID:
 		return m.AddedVisitorID()
+	case device.FieldScreenWidth:
+		return m.AddedScreenWidth()
+	case device.FieldScreenHeight:
+		return m.AddedScreenHeight()
 	}
 	return nil, false
 }
@@ -1228,6 +1397,20 @@ func (m *DeviceMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddVisitorID(v)
+		return nil
+	case device.FieldScreenWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScreenWidth(v)
+		return nil
+	case device.FieldScreenHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScreenHeight(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Device numeric field %s", name)
@@ -1260,6 +1443,9 @@ func (m *DeviceMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(device.FieldLanguage) {
 		fields = append(fields, device.FieldLanguage)
+	}
+	if m.FieldCleared(device.FieldIsp) {
+		fields = append(fields, device.FieldIsp)
 	}
 	if m.FieldCleared(device.FieldTimezone) {
 		fields = append(fields, device.FieldTimezone)
@@ -1308,6 +1494,9 @@ func (m *DeviceMutation) ClearField(name string) error {
 	case device.FieldLanguage:
 		m.ClearLanguage()
 		return nil
+	case device.FieldIsp:
+		m.ClearIsp()
+		return nil
 	case device.FieldTimezone:
 		m.ClearTimezone()
 		return nil
@@ -1355,8 +1544,14 @@ func (m *DeviceMutation) ResetField(name string) error {
 	case device.FieldBrowser:
 		m.ResetBrowser()
 		return nil
+	case device.FieldBrowserVersion:
+		m.ResetBrowserVersion()
+		return nil
 	case device.FieldLanguage:
 		m.ResetLanguage()
+		return nil
+	case device.FieldIsp:
+		m.ResetIsp()
 		return nil
 	case device.FieldTimezone:
 		m.ResetTimezone()
@@ -6218,12 +6413,16 @@ type VisitorSessionMutation struct {
 	session_token        *string
 	started_at           *time.Time
 	ended_at             *time.Time
+	is_active            *bool
 	last_activity_at     *time.Time
 	entry_page           *string
 	exit_page            *string
 	acquisition_source   *string
 	acquisition_medium   *string
 	acquisition_campaign *string
+	campaign_term        *string
+	campaign_content     *string
+	campaign_id          *string
 	referrer_host        *string
 	created_at           *time.Time
 	clearedFields        map[string]struct{}
@@ -6599,6 +6798,42 @@ func (m *VisitorSessionMutation) ResetEndedAt() {
 	delete(m.clearedFields, visitorsession.FieldEndedAt)
 }
 
+// SetIsActive sets the "is_active" field.
+func (m *VisitorSessionMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *VisitorSessionMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *VisitorSessionMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
 // SetLastActivityAt sets the "last_activity_at" field.
 func (m *VisitorSessionMutation) SetLastActivityAt(t time.Time) {
 	m.last_activity_at = &t
@@ -6880,6 +7115,153 @@ func (m *VisitorSessionMutation) ResetAcquisitionCampaign() {
 	delete(m.clearedFields, visitorsession.FieldAcquisitionCampaign)
 }
 
+// SetCampaignTerm sets the "campaign_term" field.
+func (m *VisitorSessionMutation) SetCampaignTerm(s string) {
+	m.campaign_term = &s
+}
+
+// CampaignTerm returns the value of the "campaign_term" field in the mutation.
+func (m *VisitorSessionMutation) CampaignTerm() (r string, exists bool) {
+	v := m.campaign_term
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCampaignTerm returns the old "campaign_term" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldCampaignTerm(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCampaignTerm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCampaignTerm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCampaignTerm: %w", err)
+	}
+	return oldValue.CampaignTerm, nil
+}
+
+// ClearCampaignTerm clears the value of the "campaign_term" field.
+func (m *VisitorSessionMutation) ClearCampaignTerm() {
+	m.campaign_term = nil
+	m.clearedFields[visitorsession.FieldCampaignTerm] = struct{}{}
+}
+
+// CampaignTermCleared returns if the "campaign_term" field was cleared in this mutation.
+func (m *VisitorSessionMutation) CampaignTermCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldCampaignTerm]
+	return ok
+}
+
+// ResetCampaignTerm resets all changes to the "campaign_term" field.
+func (m *VisitorSessionMutation) ResetCampaignTerm() {
+	m.campaign_term = nil
+	delete(m.clearedFields, visitorsession.FieldCampaignTerm)
+}
+
+// SetCampaignContent sets the "campaign_content" field.
+func (m *VisitorSessionMutation) SetCampaignContent(s string) {
+	m.campaign_content = &s
+}
+
+// CampaignContent returns the value of the "campaign_content" field in the mutation.
+func (m *VisitorSessionMutation) CampaignContent() (r string, exists bool) {
+	v := m.campaign_content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCampaignContent returns the old "campaign_content" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldCampaignContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCampaignContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCampaignContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCampaignContent: %w", err)
+	}
+	return oldValue.CampaignContent, nil
+}
+
+// ClearCampaignContent clears the value of the "campaign_content" field.
+func (m *VisitorSessionMutation) ClearCampaignContent() {
+	m.campaign_content = nil
+	m.clearedFields[visitorsession.FieldCampaignContent] = struct{}{}
+}
+
+// CampaignContentCleared returns if the "campaign_content" field was cleared in this mutation.
+func (m *VisitorSessionMutation) CampaignContentCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldCampaignContent]
+	return ok
+}
+
+// ResetCampaignContent resets all changes to the "campaign_content" field.
+func (m *VisitorSessionMutation) ResetCampaignContent() {
+	m.campaign_content = nil
+	delete(m.clearedFields, visitorsession.FieldCampaignContent)
+}
+
+// SetCampaignID sets the "campaign_id" field.
+func (m *VisitorSessionMutation) SetCampaignID(s string) {
+	m.campaign_id = &s
+}
+
+// CampaignID returns the value of the "campaign_id" field in the mutation.
+func (m *VisitorSessionMutation) CampaignID() (r string, exists bool) {
+	v := m.campaign_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCampaignID returns the old "campaign_id" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldCampaignID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCampaignID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCampaignID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCampaignID: %w", err)
+	}
+	return oldValue.CampaignID, nil
+}
+
+// ClearCampaignID clears the value of the "campaign_id" field.
+func (m *VisitorSessionMutation) ClearCampaignID() {
+	m.campaign_id = nil
+	m.clearedFields[visitorsession.FieldCampaignID] = struct{}{}
+}
+
+// CampaignIDCleared returns if the "campaign_id" field was cleared in this mutation.
+func (m *VisitorSessionMutation) CampaignIDCleared() bool {
+	_, ok := m.clearedFields[visitorsession.FieldCampaignID]
+	return ok
+}
+
+// ResetCampaignID resets all changes to the "campaign_id" field.
+func (m *VisitorSessionMutation) ResetCampaignID() {
+	m.campaign_id = nil
+	delete(m.clearedFields, visitorsession.FieldCampaignID)
+}
+
 // SetReferrerHost sets the "referrer_host" field.
 func (m *VisitorSessionMutation) SetReferrerHost(s string) {
 	m.referrer_host = &s
@@ -6999,7 +7381,7 @@ func (m *VisitorSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VisitorSessionMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 18)
 	if m.uuid != nil {
 		fields = append(fields, visitorsession.FieldUUID)
 	}
@@ -7018,6 +7400,9 @@ func (m *VisitorSessionMutation) Fields() []string {
 	if m.ended_at != nil {
 		fields = append(fields, visitorsession.FieldEndedAt)
 	}
+	if m.is_active != nil {
+		fields = append(fields, visitorsession.FieldIsActive)
+	}
 	if m.last_activity_at != nil {
 		fields = append(fields, visitorsession.FieldLastActivityAt)
 	}
@@ -7035,6 +7420,15 @@ func (m *VisitorSessionMutation) Fields() []string {
 	}
 	if m.acquisition_campaign != nil {
 		fields = append(fields, visitorsession.FieldAcquisitionCampaign)
+	}
+	if m.campaign_term != nil {
+		fields = append(fields, visitorsession.FieldCampaignTerm)
+	}
+	if m.campaign_content != nil {
+		fields = append(fields, visitorsession.FieldCampaignContent)
+	}
+	if m.campaign_id != nil {
+		fields = append(fields, visitorsession.FieldCampaignID)
 	}
 	if m.referrer_host != nil {
 		fields = append(fields, visitorsession.FieldReferrerHost)
@@ -7062,6 +7456,8 @@ func (m *VisitorSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.StartedAt()
 	case visitorsession.FieldEndedAt:
 		return m.EndedAt()
+	case visitorsession.FieldIsActive:
+		return m.IsActive()
 	case visitorsession.FieldLastActivityAt:
 		return m.LastActivityAt()
 	case visitorsession.FieldEntryPage:
@@ -7074,6 +7470,12 @@ func (m *VisitorSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.AcquisitionMedium()
 	case visitorsession.FieldAcquisitionCampaign:
 		return m.AcquisitionCampaign()
+	case visitorsession.FieldCampaignTerm:
+		return m.CampaignTerm()
+	case visitorsession.FieldCampaignContent:
+		return m.CampaignContent()
+	case visitorsession.FieldCampaignID:
+		return m.CampaignID()
 	case visitorsession.FieldReferrerHost:
 		return m.ReferrerHost()
 	case visitorsession.FieldCreatedAt:
@@ -7099,6 +7501,8 @@ func (m *VisitorSessionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldStartedAt(ctx)
 	case visitorsession.FieldEndedAt:
 		return m.OldEndedAt(ctx)
+	case visitorsession.FieldIsActive:
+		return m.OldIsActive(ctx)
 	case visitorsession.FieldLastActivityAt:
 		return m.OldLastActivityAt(ctx)
 	case visitorsession.FieldEntryPage:
@@ -7111,6 +7515,12 @@ func (m *VisitorSessionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldAcquisitionMedium(ctx)
 	case visitorsession.FieldAcquisitionCampaign:
 		return m.OldAcquisitionCampaign(ctx)
+	case visitorsession.FieldCampaignTerm:
+		return m.OldCampaignTerm(ctx)
+	case visitorsession.FieldCampaignContent:
+		return m.OldCampaignContent(ctx)
+	case visitorsession.FieldCampaignID:
+		return m.OldCampaignID(ctx)
 	case visitorsession.FieldReferrerHost:
 		return m.OldReferrerHost(ctx)
 	case visitorsession.FieldCreatedAt:
@@ -7166,6 +7576,13 @@ func (m *VisitorSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEndedAt(v)
 		return nil
+	case visitorsession.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
+		return nil
 	case visitorsession.FieldLastActivityAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -7207,6 +7624,27 @@ func (m *VisitorSessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAcquisitionCampaign(v)
+		return nil
+	case visitorsession.FieldCampaignTerm:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCampaignTerm(v)
+		return nil
+	case visitorsession.FieldCampaignContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCampaignContent(v)
+		return nil
+	case visitorsession.FieldCampaignID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCampaignID(v)
 		return nil
 	case visitorsession.FieldReferrerHost:
 		v, ok := value.(string)
@@ -7297,6 +7735,15 @@ func (m *VisitorSessionMutation) ClearedFields() []string {
 	if m.FieldCleared(visitorsession.FieldAcquisitionCampaign) {
 		fields = append(fields, visitorsession.FieldAcquisitionCampaign)
 	}
+	if m.FieldCleared(visitorsession.FieldCampaignTerm) {
+		fields = append(fields, visitorsession.FieldCampaignTerm)
+	}
+	if m.FieldCleared(visitorsession.FieldCampaignContent) {
+		fields = append(fields, visitorsession.FieldCampaignContent)
+	}
+	if m.FieldCleared(visitorsession.FieldCampaignID) {
+		fields = append(fields, visitorsession.FieldCampaignID)
+	}
 	if m.FieldCleared(visitorsession.FieldReferrerHost) {
 		fields = append(fields, visitorsession.FieldReferrerHost)
 	}
@@ -7332,6 +7779,15 @@ func (m *VisitorSessionMutation) ClearField(name string) error {
 	case visitorsession.FieldAcquisitionCampaign:
 		m.ClearAcquisitionCampaign()
 		return nil
+	case visitorsession.FieldCampaignTerm:
+		m.ClearCampaignTerm()
+		return nil
+	case visitorsession.FieldCampaignContent:
+		m.ClearCampaignContent()
+		return nil
+	case visitorsession.FieldCampaignID:
+		m.ClearCampaignID()
+		return nil
 	case visitorsession.FieldReferrerHost:
 		m.ClearReferrerHost()
 		return nil
@@ -7361,6 +7817,9 @@ func (m *VisitorSessionMutation) ResetField(name string) error {
 	case visitorsession.FieldEndedAt:
 		m.ResetEndedAt()
 		return nil
+	case visitorsession.FieldIsActive:
+		m.ResetIsActive()
+		return nil
 	case visitorsession.FieldLastActivityAt:
 		m.ResetLastActivityAt()
 		return nil
@@ -7378,6 +7837,15 @@ func (m *VisitorSessionMutation) ResetField(name string) error {
 		return nil
 	case visitorsession.FieldAcquisitionCampaign:
 		m.ResetAcquisitionCampaign()
+		return nil
+	case visitorsession.FieldCampaignTerm:
+		m.ResetCampaignTerm()
+		return nil
+	case visitorsession.FieldCampaignContent:
+		m.ResetCampaignContent()
+		return nil
+	case visitorsession.FieldCampaignID:
+		m.ResetCampaignID()
 		return nil
 	case visitorsession.FieldReferrerHost:
 		m.ResetReferrerHost()

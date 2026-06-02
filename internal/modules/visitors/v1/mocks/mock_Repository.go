@@ -572,6 +572,92 @@ func (_c *MockRepository_GetByUUID_Call) RunAndReturn(run func(ctx context.Conte
 	return _c
 }
 
+// SetVisitorConsent provides a mock function for the type MockRepository
+func (_mock *MockRepository) SetVisitorConsent(ctx context.Context, visitorID int64, siteID int64, consentType string, status string) (*ent.VisitorConsent, error) {
+	ret := _mock.Called(ctx, visitorID, siteID, consentType, status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetVisitorConsent")
+	}
+
+	var r0 *ent.VisitorConsent
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, string, string) (*ent.VisitorConsent, error)); ok {
+		return returnFunc(ctx, visitorID, siteID, consentType, status)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, string, string) *ent.VisitorConsent); ok {
+		r0 = returnFunc(ctx, visitorID, siteID, consentType, status)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.VisitorConsent)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64, string, string) error); ok {
+		r1 = returnFunc(ctx, visitorID, siteID, consentType, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_SetVisitorConsent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetVisitorConsent'
+type MockRepository_SetVisitorConsent_Call struct {
+	*mock.Call
+}
+
+// SetVisitorConsent is a helper method to define mock.On call
+//   - ctx context.Context
+//   - visitorID int64
+//   - siteID int64
+//   - consentType string
+//   - status string
+func (_e *MockRepository_Expecter) SetVisitorConsent(ctx interface{}, visitorID interface{}, siteID interface{}, consentType interface{}, status interface{}) *MockRepository_SetVisitorConsent_Call {
+	return &MockRepository_SetVisitorConsent_Call{Call: _e.mock.On("SetVisitorConsent", ctx, visitorID, siteID, consentType, status)}
+}
+
+func (_c *MockRepository_SetVisitorConsent_Call) Run(run func(ctx context.Context, visitorID int64, siteID int64, consentType string, status string)) *MockRepository_SetVisitorConsent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_SetVisitorConsent_Call) Return(visitorConsent *ent.VisitorConsent, err error) *MockRepository_SetVisitorConsent_Call {
+	_c.Call.Return(visitorConsent, err)
+	return _c
+}
+
+func (_c *MockRepository_SetVisitorConsent_Call) RunAndReturn(run func(ctx context.Context, visitorID int64, siteID int64, consentType string, status string) (*ent.VisitorConsent, error)) *MockRepository_SetVisitorConsent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockRepository
 func (_mock *MockRepository) Update(ctx context.Context, uuid string, input v1.UpdateVisitorInput) (*ent.Visitor, error) {
 	ret := _mock.Called(ctx, uuid, input)

@@ -33,8 +33,12 @@ const (
 	FieldCity = "city"
 	// FieldBrowser holds the string denoting the browser field in the database.
 	FieldBrowser = "browser"
+	// FieldBrowserVersion holds the string denoting the browser_version field in the database.
+	FieldBrowserVersion = "browser_version"
 	// FieldLanguage holds the string denoting the language field in the database.
 	FieldLanguage = "language"
+	// FieldIsp holds the string denoting the isp field in the database.
+	FieldIsp = "isp"
 	// FieldTimezone holds the string denoting the timezone field in the database.
 	FieldTimezone = "timezone"
 	// FieldScreenWidth holds the string denoting the screen_width field in the database.
@@ -62,7 +66,9 @@ var Columns = []string{
 	FieldRegion,
 	FieldCity,
 	FieldBrowser,
+	FieldBrowserVersion,
 	FieldLanguage,
+	FieldIsp,
 	FieldTimezone,
 	FieldScreenWidth,
 	FieldScreenHeight,
@@ -87,6 +93,8 @@ var (
 	VisitorIDValidator func(int64) error
 	// FingerprintHashValidator is a validator for the "fingerprint_hash" field. It is called by the builders before save.
 	FingerprintHashValidator func(string) error
+	// BrowserVersionValidator is a validator for the "browser_version" field. It is called by the builders before save.
+	BrowserVersionValidator func(string) error
 	// DefaultFirstSeenAt holds the default value on creation for the "first_seen_at" field.
 	DefaultFirstSeenAt func() time.Time
 	// DefaultLastSeenAt holds the default value on creation for the "last_seen_at" field.
@@ -151,9 +159,19 @@ func ByBrowser(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBrowser, opts...).ToFunc()
 }
 
+// ByBrowserVersion orders the results by the browser_version field.
+func ByBrowserVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBrowserVersion, opts...).ToFunc()
+}
+
 // ByLanguage orders the results by the language field.
 func ByLanguage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLanguage, opts...).ToFunc()
+}
+
+// ByIsp orders the results by the isp field.
+func ByIsp(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsp, opts...).ToFunc()
 }
 
 // ByTimezone orders the results by the timezone field.

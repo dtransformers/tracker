@@ -217,6 +217,20 @@ func (_u *DeviceUpdate) ClearBrowser() *DeviceUpdate {
 	return _u
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (_u *DeviceUpdate) SetBrowserVersion(v string) *DeviceUpdate {
+	_u.mutation.SetBrowserVersion(v)
+	return _u
+}
+
+// SetNillableBrowserVersion sets the "browser_version" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableBrowserVersion(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetBrowserVersion(*v)
+	}
+	return _u
+}
+
 // SetLanguage sets the "language" field.
 func (_u *DeviceUpdate) SetLanguage(v string) *DeviceUpdate {
 	_u.mutation.SetLanguage(v)
@@ -234,6 +248,26 @@ func (_u *DeviceUpdate) SetNillableLanguage(v *string) *DeviceUpdate {
 // ClearLanguage clears the value of the "language" field.
 func (_u *DeviceUpdate) ClearLanguage() *DeviceUpdate {
 	_u.mutation.ClearLanguage()
+	return _u
+}
+
+// SetIsp sets the "isp" field.
+func (_u *DeviceUpdate) SetIsp(v string) *DeviceUpdate {
+	_u.mutation.SetIsp(v)
+	return _u
+}
+
+// SetNillableIsp sets the "isp" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableIsp(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetIsp(*v)
+	}
+	return _u
+}
+
+// ClearIsp clears the value of the "isp" field.
+func (_u *DeviceUpdate) ClearIsp() *DeviceUpdate {
+	_u.mutation.ClearIsp()
 	return _u
 }
 
@@ -258,16 +292,23 @@ func (_u *DeviceUpdate) ClearTimezone() *DeviceUpdate {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (_u *DeviceUpdate) SetScreenWidth(v string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetScreenWidth(v int) *DeviceUpdate {
+	_u.mutation.ResetScreenWidth()
 	_u.mutation.SetScreenWidth(v)
 	return _u
 }
 
 // SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableScreenWidth(v *string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetNillableScreenWidth(v *int) *DeviceUpdate {
 	if v != nil {
 		_u.SetScreenWidth(*v)
 	}
+	return _u
+}
+
+// AddScreenWidth adds value to the "screen_width" field.
+func (_u *DeviceUpdate) AddScreenWidth(v int) *DeviceUpdate {
+	_u.mutation.AddScreenWidth(v)
 	return _u
 }
 
@@ -278,16 +319,23 @@ func (_u *DeviceUpdate) ClearScreenWidth() *DeviceUpdate {
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (_u *DeviceUpdate) SetScreenHeight(v string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetScreenHeight(v int) *DeviceUpdate {
+	_u.mutation.ResetScreenHeight()
 	_u.mutation.SetScreenHeight(v)
 	return _u
 }
 
 // SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableScreenHeight(v *string) *DeviceUpdate {
+func (_u *DeviceUpdate) SetNillableScreenHeight(v *int) *DeviceUpdate {
 	if v != nil {
 		_u.SetScreenHeight(*v)
 	}
+	return _u
+}
+
+// AddScreenHeight adds value to the "screen_height" field.
+func (_u *DeviceUpdate) AddScreenHeight(v int) *DeviceUpdate {
+	_u.mutation.AddScreenHeight(v)
 	return _u
 }
 
@@ -374,6 +422,11 @@ func (_u *DeviceUpdate) check() error {
 			return &ValidationError{Name: "fingerprint_hash", err: fmt.Errorf(`ent: validator failed for field "Device.fingerprint_hash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BrowserVersion(); ok {
+		if err := device.BrowserVersionValidator(v); err != nil {
+			return &ValidationError{Name: "browser_version", err: fmt.Errorf(`ent: validator failed for field "Device.browser_version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -443,11 +496,20 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.BrowserCleared() {
 		_spec.ClearField(device.FieldBrowser, field.TypeString)
 	}
+	if value, ok := _u.mutation.BrowserVersion(); ok {
+		_spec.SetField(device.FieldBrowserVersion, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Language(); ok {
 		_spec.SetField(device.FieldLanguage, field.TypeString, value)
 	}
 	if _u.mutation.LanguageCleared() {
 		_spec.ClearField(device.FieldLanguage, field.TypeString)
+	}
+	if value, ok := _u.mutation.Isp(); ok {
+		_spec.SetField(device.FieldIsp, field.TypeString, value)
+	}
+	if _u.mutation.IspCleared() {
+		_spec.ClearField(device.FieldIsp, field.TypeString)
 	}
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)
@@ -456,16 +518,22 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
 	}
 	if value, ok := _u.mutation.ScreenWidth(); ok {
-		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_spec.SetField(device.FieldScreenWidth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenWidth(); ok {
+		_spec.AddField(device.FieldScreenWidth, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenWidthCleared() {
-		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+		_spec.ClearField(device.FieldScreenWidth, field.TypeInt)
 	}
 	if value, ok := _u.mutation.ScreenHeight(); ok {
-		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_spec.SetField(device.FieldScreenHeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenHeight(); ok {
+		_spec.AddField(device.FieldScreenHeight, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenHeightCleared() {
-		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
+		_spec.ClearField(device.FieldScreenHeight, field.TypeInt)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)
@@ -682,6 +750,20 @@ func (_u *DeviceUpdateOne) ClearBrowser() *DeviceUpdateOne {
 	return _u
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (_u *DeviceUpdateOne) SetBrowserVersion(v string) *DeviceUpdateOne {
+	_u.mutation.SetBrowserVersion(v)
+	return _u
+}
+
+// SetNillableBrowserVersion sets the "browser_version" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableBrowserVersion(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetBrowserVersion(*v)
+	}
+	return _u
+}
+
 // SetLanguage sets the "language" field.
 func (_u *DeviceUpdateOne) SetLanguage(v string) *DeviceUpdateOne {
 	_u.mutation.SetLanguage(v)
@@ -699,6 +781,26 @@ func (_u *DeviceUpdateOne) SetNillableLanguage(v *string) *DeviceUpdateOne {
 // ClearLanguage clears the value of the "language" field.
 func (_u *DeviceUpdateOne) ClearLanguage() *DeviceUpdateOne {
 	_u.mutation.ClearLanguage()
+	return _u
+}
+
+// SetIsp sets the "isp" field.
+func (_u *DeviceUpdateOne) SetIsp(v string) *DeviceUpdateOne {
+	_u.mutation.SetIsp(v)
+	return _u
+}
+
+// SetNillableIsp sets the "isp" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableIsp(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetIsp(*v)
+	}
+	return _u
+}
+
+// ClearIsp clears the value of the "isp" field.
+func (_u *DeviceUpdateOne) ClearIsp() *DeviceUpdateOne {
+	_u.mutation.ClearIsp()
 	return _u
 }
 
@@ -723,16 +825,23 @@ func (_u *DeviceUpdateOne) ClearTimezone() *DeviceUpdateOne {
 }
 
 // SetScreenWidth sets the "screen_width" field.
-func (_u *DeviceUpdateOne) SetScreenWidth(v string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetScreenWidth(v int) *DeviceUpdateOne {
+	_u.mutation.ResetScreenWidth()
 	_u.mutation.SetScreenWidth(v)
 	return _u
 }
 
 // SetNillableScreenWidth sets the "screen_width" field if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableScreenWidth(v *string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetNillableScreenWidth(v *int) *DeviceUpdateOne {
 	if v != nil {
 		_u.SetScreenWidth(*v)
 	}
+	return _u
+}
+
+// AddScreenWidth adds value to the "screen_width" field.
+func (_u *DeviceUpdateOne) AddScreenWidth(v int) *DeviceUpdateOne {
+	_u.mutation.AddScreenWidth(v)
 	return _u
 }
 
@@ -743,16 +852,23 @@ func (_u *DeviceUpdateOne) ClearScreenWidth() *DeviceUpdateOne {
 }
 
 // SetScreenHeight sets the "screen_height" field.
-func (_u *DeviceUpdateOne) SetScreenHeight(v string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetScreenHeight(v int) *DeviceUpdateOne {
+	_u.mutation.ResetScreenHeight()
 	_u.mutation.SetScreenHeight(v)
 	return _u
 }
 
 // SetNillableScreenHeight sets the "screen_height" field if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableScreenHeight(v *string) *DeviceUpdateOne {
+func (_u *DeviceUpdateOne) SetNillableScreenHeight(v *int) *DeviceUpdateOne {
 	if v != nil {
 		_u.SetScreenHeight(*v)
 	}
+	return _u
+}
+
+// AddScreenHeight adds value to the "screen_height" field.
+func (_u *DeviceUpdateOne) AddScreenHeight(v int) *DeviceUpdateOne {
+	_u.mutation.AddScreenHeight(v)
 	return _u
 }
 
@@ -852,6 +968,11 @@ func (_u *DeviceUpdateOne) check() error {
 			return &ValidationError{Name: "fingerprint_hash", err: fmt.Errorf(`ent: validator failed for field "Device.fingerprint_hash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BrowserVersion(); ok {
+		if err := device.BrowserVersionValidator(v); err != nil {
+			return &ValidationError{Name: "browser_version", err: fmt.Errorf(`ent: validator failed for field "Device.browser_version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -938,11 +1059,20 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 	if _u.mutation.BrowserCleared() {
 		_spec.ClearField(device.FieldBrowser, field.TypeString)
 	}
+	if value, ok := _u.mutation.BrowserVersion(); ok {
+		_spec.SetField(device.FieldBrowserVersion, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Language(); ok {
 		_spec.SetField(device.FieldLanguage, field.TypeString, value)
 	}
 	if _u.mutation.LanguageCleared() {
 		_spec.ClearField(device.FieldLanguage, field.TypeString)
+	}
+	if value, ok := _u.mutation.Isp(); ok {
+		_spec.SetField(device.FieldIsp, field.TypeString, value)
+	}
+	if _u.mutation.IspCleared() {
+		_spec.ClearField(device.FieldIsp, field.TypeString)
 	}
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)
@@ -951,16 +1081,22 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		_spec.ClearField(device.FieldTimezone, field.TypeString)
 	}
 	if value, ok := _u.mutation.ScreenWidth(); ok {
-		_spec.SetField(device.FieldScreenWidth, field.TypeString, value)
+		_spec.SetField(device.FieldScreenWidth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenWidth(); ok {
+		_spec.AddField(device.FieldScreenWidth, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenWidthCleared() {
-		_spec.ClearField(device.FieldScreenWidth, field.TypeString)
+		_spec.ClearField(device.FieldScreenWidth, field.TypeInt)
 	}
 	if value, ok := _u.mutation.ScreenHeight(); ok {
-		_spec.SetField(device.FieldScreenHeight, field.TypeString, value)
+		_spec.SetField(device.FieldScreenHeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScreenHeight(); ok {
+		_spec.AddField(device.FieldScreenHeight, field.TypeInt, value)
 	}
 	if _u.mutation.ScreenHeightCleared() {
-		_spec.ClearField(device.FieldScreenHeight, field.TypeString)
+		_spec.ClearField(device.FieldScreenHeight, field.TypeInt)
 	}
 	if value, ok := _u.mutation.FirstSeenAt(); ok {
 		_spec.SetField(device.FieldFirstSeenAt, field.TypeTime, value)

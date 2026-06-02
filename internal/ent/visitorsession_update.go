@@ -132,6 +132,20 @@ func (_u *VisitorSessionUpdate) ClearEndedAt() *VisitorSessionUpdate {
 	return _u
 }
 
+// SetIsActive sets the "is_active" field.
+func (_u *VisitorSessionUpdate) SetIsActive(v bool) *VisitorSessionUpdate {
+	_u.mutation.SetIsActive(v)
+	return _u
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (_u *VisitorSessionUpdate) SetNillableIsActive(v *bool) *VisitorSessionUpdate {
+	if v != nil {
+		_u.SetIsActive(*v)
+	}
+	return _u
+}
+
 // SetLastActivityAt sets the "last_activity_at" field.
 func (_u *VisitorSessionUpdate) SetLastActivityAt(v time.Time) *VisitorSessionUpdate {
 	_u.mutation.SetLastActivityAt(v)
@@ -243,6 +257,66 @@ func (_u *VisitorSessionUpdate) SetNillableAcquisitionCampaign(v *string) *Visit
 // ClearAcquisitionCampaign clears the value of the "acquisition_campaign" field.
 func (_u *VisitorSessionUpdate) ClearAcquisitionCampaign() *VisitorSessionUpdate {
 	_u.mutation.ClearAcquisitionCampaign()
+	return _u
+}
+
+// SetCampaignTerm sets the "campaign_term" field.
+func (_u *VisitorSessionUpdate) SetCampaignTerm(v string) *VisitorSessionUpdate {
+	_u.mutation.SetCampaignTerm(v)
+	return _u
+}
+
+// SetNillableCampaignTerm sets the "campaign_term" field if the given value is not nil.
+func (_u *VisitorSessionUpdate) SetNillableCampaignTerm(v *string) *VisitorSessionUpdate {
+	if v != nil {
+		_u.SetCampaignTerm(*v)
+	}
+	return _u
+}
+
+// ClearCampaignTerm clears the value of the "campaign_term" field.
+func (_u *VisitorSessionUpdate) ClearCampaignTerm() *VisitorSessionUpdate {
+	_u.mutation.ClearCampaignTerm()
+	return _u
+}
+
+// SetCampaignContent sets the "campaign_content" field.
+func (_u *VisitorSessionUpdate) SetCampaignContent(v string) *VisitorSessionUpdate {
+	_u.mutation.SetCampaignContent(v)
+	return _u
+}
+
+// SetNillableCampaignContent sets the "campaign_content" field if the given value is not nil.
+func (_u *VisitorSessionUpdate) SetNillableCampaignContent(v *string) *VisitorSessionUpdate {
+	if v != nil {
+		_u.SetCampaignContent(*v)
+	}
+	return _u
+}
+
+// ClearCampaignContent clears the value of the "campaign_content" field.
+func (_u *VisitorSessionUpdate) ClearCampaignContent() *VisitorSessionUpdate {
+	_u.mutation.ClearCampaignContent()
+	return _u
+}
+
+// SetCampaignID sets the "campaign_id" field.
+func (_u *VisitorSessionUpdate) SetCampaignID(v string) *VisitorSessionUpdate {
+	_u.mutation.SetCampaignID(v)
+	return _u
+}
+
+// SetNillableCampaignID sets the "campaign_id" field if the given value is not nil.
+func (_u *VisitorSessionUpdate) SetNillableCampaignID(v *string) *VisitorSessionUpdate {
+	if v != nil {
+		_u.SetCampaignID(*v)
+	}
+	return _u
+}
+
+// ClearCampaignID clears the value of the "campaign_id" field.
+func (_u *VisitorSessionUpdate) ClearCampaignID() *VisitorSessionUpdate {
+	_u.mutation.ClearCampaignID()
 	return _u
 }
 
@@ -376,6 +450,9 @@ func (_u *VisitorSessionUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.EndedAtCleared() {
 		_spec.ClearField(visitorsession.FieldEndedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.IsActive(); ok {
+		_spec.SetField(visitorsession.FieldIsActive, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.LastActivityAt(); ok {
 		_spec.SetField(visitorsession.FieldLastActivityAt, field.TypeTime, value)
 	}
@@ -408,6 +485,24 @@ func (_u *VisitorSessionUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.AcquisitionCampaignCleared() {
 		_spec.ClearField(visitorsession.FieldAcquisitionCampaign, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignTerm(); ok {
+		_spec.SetField(visitorsession.FieldCampaignTerm, field.TypeString, value)
+	}
+	if _u.mutation.CampaignTermCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignTerm, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignContent(); ok {
+		_spec.SetField(visitorsession.FieldCampaignContent, field.TypeString, value)
+	}
+	if _u.mutation.CampaignContentCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignContent, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignID(); ok {
+		_spec.SetField(visitorsession.FieldCampaignID, field.TypeString, value)
+	}
+	if _u.mutation.CampaignIDCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignID, field.TypeString)
 	}
 	if value, ok := _u.mutation.ReferrerHost(); ok {
 		_spec.SetField(visitorsession.FieldReferrerHost, field.TypeString, value)
@@ -542,6 +637,20 @@ func (_u *VisitorSessionUpdateOne) ClearEndedAt() *VisitorSessionUpdateOne {
 	return _u
 }
 
+// SetIsActive sets the "is_active" field.
+func (_u *VisitorSessionUpdateOne) SetIsActive(v bool) *VisitorSessionUpdateOne {
+	_u.mutation.SetIsActive(v)
+	return _u
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (_u *VisitorSessionUpdateOne) SetNillableIsActive(v *bool) *VisitorSessionUpdateOne {
+	if v != nil {
+		_u.SetIsActive(*v)
+	}
+	return _u
+}
+
 // SetLastActivityAt sets the "last_activity_at" field.
 func (_u *VisitorSessionUpdateOne) SetLastActivityAt(v time.Time) *VisitorSessionUpdateOne {
 	_u.mutation.SetLastActivityAt(v)
@@ -653,6 +762,66 @@ func (_u *VisitorSessionUpdateOne) SetNillableAcquisitionCampaign(v *string) *Vi
 // ClearAcquisitionCampaign clears the value of the "acquisition_campaign" field.
 func (_u *VisitorSessionUpdateOne) ClearAcquisitionCampaign() *VisitorSessionUpdateOne {
 	_u.mutation.ClearAcquisitionCampaign()
+	return _u
+}
+
+// SetCampaignTerm sets the "campaign_term" field.
+func (_u *VisitorSessionUpdateOne) SetCampaignTerm(v string) *VisitorSessionUpdateOne {
+	_u.mutation.SetCampaignTerm(v)
+	return _u
+}
+
+// SetNillableCampaignTerm sets the "campaign_term" field if the given value is not nil.
+func (_u *VisitorSessionUpdateOne) SetNillableCampaignTerm(v *string) *VisitorSessionUpdateOne {
+	if v != nil {
+		_u.SetCampaignTerm(*v)
+	}
+	return _u
+}
+
+// ClearCampaignTerm clears the value of the "campaign_term" field.
+func (_u *VisitorSessionUpdateOne) ClearCampaignTerm() *VisitorSessionUpdateOne {
+	_u.mutation.ClearCampaignTerm()
+	return _u
+}
+
+// SetCampaignContent sets the "campaign_content" field.
+func (_u *VisitorSessionUpdateOne) SetCampaignContent(v string) *VisitorSessionUpdateOne {
+	_u.mutation.SetCampaignContent(v)
+	return _u
+}
+
+// SetNillableCampaignContent sets the "campaign_content" field if the given value is not nil.
+func (_u *VisitorSessionUpdateOne) SetNillableCampaignContent(v *string) *VisitorSessionUpdateOne {
+	if v != nil {
+		_u.SetCampaignContent(*v)
+	}
+	return _u
+}
+
+// ClearCampaignContent clears the value of the "campaign_content" field.
+func (_u *VisitorSessionUpdateOne) ClearCampaignContent() *VisitorSessionUpdateOne {
+	_u.mutation.ClearCampaignContent()
+	return _u
+}
+
+// SetCampaignID sets the "campaign_id" field.
+func (_u *VisitorSessionUpdateOne) SetCampaignID(v string) *VisitorSessionUpdateOne {
+	_u.mutation.SetCampaignID(v)
+	return _u
+}
+
+// SetNillableCampaignID sets the "campaign_id" field if the given value is not nil.
+func (_u *VisitorSessionUpdateOne) SetNillableCampaignID(v *string) *VisitorSessionUpdateOne {
+	if v != nil {
+		_u.SetCampaignID(*v)
+	}
+	return _u
+}
+
+// ClearCampaignID clears the value of the "campaign_id" field.
+func (_u *VisitorSessionUpdateOne) ClearCampaignID() *VisitorSessionUpdateOne {
+	_u.mutation.ClearCampaignID()
 	return _u
 }
 
@@ -816,6 +985,9 @@ func (_u *VisitorSessionUpdateOne) sqlSave(ctx context.Context) (_node *VisitorS
 	if _u.mutation.EndedAtCleared() {
 		_spec.ClearField(visitorsession.FieldEndedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.IsActive(); ok {
+		_spec.SetField(visitorsession.FieldIsActive, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.LastActivityAt(); ok {
 		_spec.SetField(visitorsession.FieldLastActivityAt, field.TypeTime, value)
 	}
@@ -848,6 +1020,24 @@ func (_u *VisitorSessionUpdateOne) sqlSave(ctx context.Context) (_node *VisitorS
 	}
 	if _u.mutation.AcquisitionCampaignCleared() {
 		_spec.ClearField(visitorsession.FieldAcquisitionCampaign, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignTerm(); ok {
+		_spec.SetField(visitorsession.FieldCampaignTerm, field.TypeString, value)
+	}
+	if _u.mutation.CampaignTermCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignTerm, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignContent(); ok {
+		_spec.SetField(visitorsession.FieldCampaignContent, field.TypeString, value)
+	}
+	if _u.mutation.CampaignContentCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignContent, field.TypeString)
+	}
+	if value, ok := _u.mutation.CampaignID(); ok {
+		_spec.SetField(visitorsession.FieldCampaignID, field.TypeString, value)
+	}
+	if _u.mutation.CampaignIDCleared() {
+		_spec.ClearField(visitorsession.FieldCampaignID, field.TypeString)
 	}
 	if value, ok := _u.mutation.ReferrerHost(); ok {
 		_spec.SetField(visitorsession.FieldReferrerHost, field.TypeString, value)

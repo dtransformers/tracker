@@ -72,6 +72,20 @@ func (_c *VisitorSessionCreate) SetNillableEndedAt(v *time.Time) *VisitorSession
 	return _c
 }
 
+// SetIsActive sets the "is_active" field.
+func (_c *VisitorSessionCreate) SetIsActive(v bool) *VisitorSessionCreate {
+	_c.mutation.SetIsActive(v)
+	return _c
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (_c *VisitorSessionCreate) SetNillableIsActive(v *bool) *VisitorSessionCreate {
+	if v != nil {
+		_c.SetIsActive(*v)
+	}
+	return _c
+}
+
 // SetLastActivityAt sets the "last_activity_at" field.
 func (_c *VisitorSessionCreate) SetLastActivityAt(v time.Time) *VisitorSessionCreate {
 	_c.mutation.SetLastActivityAt(v)
@@ -156,6 +170,48 @@ func (_c *VisitorSessionCreate) SetNillableAcquisitionCampaign(v *string) *Visit
 	return _c
 }
 
+// SetCampaignTerm sets the "campaign_term" field.
+func (_c *VisitorSessionCreate) SetCampaignTerm(v string) *VisitorSessionCreate {
+	_c.mutation.SetCampaignTerm(v)
+	return _c
+}
+
+// SetNillableCampaignTerm sets the "campaign_term" field if the given value is not nil.
+func (_c *VisitorSessionCreate) SetNillableCampaignTerm(v *string) *VisitorSessionCreate {
+	if v != nil {
+		_c.SetCampaignTerm(*v)
+	}
+	return _c
+}
+
+// SetCampaignContent sets the "campaign_content" field.
+func (_c *VisitorSessionCreate) SetCampaignContent(v string) *VisitorSessionCreate {
+	_c.mutation.SetCampaignContent(v)
+	return _c
+}
+
+// SetNillableCampaignContent sets the "campaign_content" field if the given value is not nil.
+func (_c *VisitorSessionCreate) SetNillableCampaignContent(v *string) *VisitorSessionCreate {
+	if v != nil {
+		_c.SetCampaignContent(*v)
+	}
+	return _c
+}
+
+// SetCampaignID sets the "campaign_id" field.
+func (_c *VisitorSessionCreate) SetCampaignID(v string) *VisitorSessionCreate {
+	_c.mutation.SetCampaignID(v)
+	return _c
+}
+
+// SetNillableCampaignID sets the "campaign_id" field if the given value is not nil.
+func (_c *VisitorSessionCreate) SetNillableCampaignID(v *string) *VisitorSessionCreate {
+	if v != nil {
+		_c.SetCampaignID(*v)
+	}
+	return _c
+}
+
 // SetReferrerHost sets the "referrer_host" field.
 func (_c *VisitorSessionCreate) SetReferrerHost(v string) *VisitorSessionCreate {
 	_c.mutation.SetReferrerHost(v)
@@ -223,6 +279,10 @@ func (_c *VisitorSessionCreate) defaults() {
 		v := visitorsession.DefaultStartedAt()
 		_c.mutation.SetStartedAt(v)
 	}
+	if _, ok := _c.mutation.IsActive(); !ok {
+		v := visitorsession.DefaultIsActive
+		_c.mutation.SetIsActive(v)
+	}
 	if _, ok := _c.mutation.LastActivityAt(); !ok {
 		v := visitorsession.DefaultLastActivityAt()
 		_c.mutation.SetLastActivityAt(v)
@@ -269,6 +329,9 @@ func (_c *VisitorSessionCreate) check() error {
 	}
 	if _, ok := _c.mutation.StartedAt(); !ok {
 		return &ValidationError{Name: "started_at", err: errors.New(`ent: missing required field "VisitorSession.started_at"`)}
+	}
+	if _, ok := _c.mutation.IsActive(); !ok {
+		return &ValidationError{Name: "is_active", err: errors.New(`ent: missing required field "VisitorSession.is_active"`)}
 	}
 	if _, ok := _c.mutation.LastActivityAt(); !ok {
 		return &ValidationError{Name: "last_activity_at", err: errors.New(`ent: missing required field "VisitorSession.last_activity_at"`)}
@@ -326,6 +389,10 @@ func (_c *VisitorSessionCreate) createSpec() (*VisitorSession, *sqlgraph.CreateS
 		_spec.SetField(visitorsession.FieldEndedAt, field.TypeTime, value)
 		_node.EndedAt = &value
 	}
+	if value, ok := _c.mutation.IsActive(); ok {
+		_spec.SetField(visitorsession.FieldIsActive, field.TypeBool, value)
+		_node.IsActive = value
+	}
 	if value, ok := _c.mutation.LastActivityAt(); ok {
 		_spec.SetField(visitorsession.FieldLastActivityAt, field.TypeTime, value)
 		_node.LastActivityAt = value
@@ -349,6 +416,18 @@ func (_c *VisitorSessionCreate) createSpec() (*VisitorSession, *sqlgraph.CreateS
 	if value, ok := _c.mutation.AcquisitionCampaign(); ok {
 		_spec.SetField(visitorsession.FieldAcquisitionCampaign, field.TypeString, value)
 		_node.AcquisitionCampaign = value
+	}
+	if value, ok := _c.mutation.CampaignTerm(); ok {
+		_spec.SetField(visitorsession.FieldCampaignTerm, field.TypeString, value)
+		_node.CampaignTerm = value
+	}
+	if value, ok := _c.mutation.CampaignContent(); ok {
+		_spec.SetField(visitorsession.FieldCampaignContent, field.TypeString, value)
+		_node.CampaignContent = value
+	}
+	if value, ok := _c.mutation.CampaignID(); ok {
+		_spec.SetField(visitorsession.FieldCampaignID, field.TypeString, value)
+		_node.CampaignID = value
 	}
 	if value, ok := _c.mutation.ReferrerHost(); ok {
 		_spec.SetField(visitorsession.FieldReferrerHost, field.TypeString, value)

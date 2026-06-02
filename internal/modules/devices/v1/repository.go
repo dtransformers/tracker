@@ -11,6 +11,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, input CreateDeviceInput) (*ent.Device, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.Device, error)
+	GetByID(ctx context.Context, id int) (*ent.Device, error)
 	GetByVisitorID(ctx context.Context, visitorID int64) ([]*ent.Device, error)
 	GetByFingerprintHash(ctx context.Context, hash string) (*ent.Device, error)
 	Update(ctx context.Context, uuid string, input UpdateDeviceInput) (*ent.Device, error)
@@ -39,10 +40,12 @@ type CreateDeviceInput struct {
 	Region          string
 	City            string
 	Browser         string
+	BrowserVersion  string
 	Language        string
 	Timezone        string
-	ScreenWidth     string
-	ScreenHeight    string
+	ISP             string
+	ScreenWidth     int
+	ScreenHeight    int
 }
 
 type UpdateDeviceInput struct {
@@ -63,8 +66,10 @@ func (r *entRepository) Create(ctx context.Context, input CreateDeviceInput) (*e
 		SetRegion(input.Region).
 		SetCity(input.City).
 		SetBrowser(input.Browser).
+		SetBrowserVersion(input.BrowserVersion).
 		SetLanguage(input.Language).
 		SetTimezone(input.Timezone).
+		SetIsp(input.ISP).
 		SetScreenWidth(input.ScreenWidth).
 		SetScreenHeight(input.ScreenHeight)
 
@@ -84,6 +89,22 @@ func (r *entRepository) GetByUUID(ctx context.Context, uuid string) (*ent.Device
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get device by uuid: %w", err)
+	}
+
+	return d, nil
+}
+
+func (r *entRepository) GetByID(ctx context.Context, id int) (*ent.Device, error) {
+	d, err := r.client.Device.
+		Query().
+		Where(device.ID(id)).
+		Only(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get device by id: %w", err)
 	}
 
 	return d, nil

@@ -31,6 +31,9 @@ import (
 	"tracking/internal/modules/health"
 	"tracking/internal/modules/sites"
 	"tracking/internal/modules/state"
+	"tracking/internal/modules/visitor_sessions"
+	"tracking/internal/modules/consents"
+	"tracking/internal/modules/events"
 	"tracking/internal/modules/visitors"
 	"tracking/internal/server"
 
@@ -129,7 +132,12 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	app.registerHealthRoutes(router)
 
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
-	visitors.RegisterV1(router, app.db.Client, slog.Default())
+
+	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
+	consentsSvc := consents.RegisterV1(router, app.db.Client, sessionSvc, slog.Default())
+	visitorsSvc := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsSvc, slog.Default(), app.cfg.App)
+	events.RegisterV1(router, app.db.Client, visitorsSvc, slog.Default())
+
 	app.registerSwaggerRoutes(router)
 }
 

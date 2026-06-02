@@ -33,12 +33,16 @@ func init() {
 	deviceDescFingerprintHash := deviceFields[2].Descriptor()
 	// device.FingerprintHashValidator is a validator for the "fingerprint_hash" field. It is called by the builders before save.
 	device.FingerprintHashValidator = deviceDescFingerprintHash.Validators[0].(func(string) error)
+	// deviceDescBrowserVersion is the schema descriptor for browser_version field.
+	deviceDescBrowserVersion := deviceFields[10].Descriptor()
+	// device.BrowserVersionValidator is a validator for the "browser_version" field. It is called by the builders before save.
+	device.BrowserVersionValidator = deviceDescBrowserVersion.Validators[0].(func(string) error)
 	// deviceDescFirstSeenAt is the schema descriptor for first_seen_at field.
-	deviceDescFirstSeenAt := deviceFields[14].Descriptor()
+	deviceDescFirstSeenAt := deviceFields[16].Descriptor()
 	// device.DefaultFirstSeenAt holds the default value on creation for the first_seen_at field.
 	device.DefaultFirstSeenAt = deviceDescFirstSeenAt.Default.(func() time.Time)
 	// deviceDescLastSeenAt is the schema descriptor for last_seen_at field.
-	deviceDescLastSeenAt := deviceFields[15].Descriptor()
+	deviceDescLastSeenAt := deviceFields[17].Descriptor()
 	// device.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	device.DefaultLastSeenAt = deviceDescLastSeenAt.Default.(func() time.Time)
 	pageviewFields := schemas.PageView{}.Fields()
@@ -209,12 +213,16 @@ func init() {
 	visitorsessionDescStartedAt := visitorsessionFields[4].Descriptor()
 	// visitorsession.DefaultStartedAt holds the default value on creation for the started_at field.
 	visitorsession.DefaultStartedAt = visitorsessionDescStartedAt.Default.(func() time.Time)
+	// visitorsessionDescIsActive is the schema descriptor for is_active field.
+	visitorsessionDescIsActive := visitorsessionFields[6].Descriptor()
+	// visitorsession.DefaultIsActive holds the default value on creation for the is_active field.
+	visitorsession.DefaultIsActive = visitorsessionDescIsActive.Default.(bool)
 	// visitorsessionDescLastActivityAt is the schema descriptor for last_activity_at field.
-	visitorsessionDescLastActivityAt := visitorsessionFields[6].Descriptor()
+	visitorsessionDescLastActivityAt := visitorsessionFields[7].Descriptor()
 	// visitorsession.DefaultLastActivityAt holds the default value on creation for the last_activity_at field.
 	visitorsession.DefaultLastActivityAt = visitorsessionDescLastActivityAt.Default.(func() time.Time)
 	// visitorsessionDescCreatedAt is the schema descriptor for created_at field.
-	visitorsessionDescCreatedAt := visitorsessionFields[13].Descriptor()
+	visitorsessionDescCreatedAt := visitorsessionFields[17].Descriptor()
 	// visitorsession.DefaultCreatedAt holds the default value on creation for the created_at field.
 	visitorsession.DefaultCreatedAt = visitorsessionDescCreatedAt.Default.(func() time.Time)
 }

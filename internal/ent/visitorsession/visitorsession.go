@@ -25,6 +25,8 @@ const (
 	FieldStartedAt = "started_at"
 	// FieldEndedAt holds the string denoting the ended_at field in the database.
 	FieldEndedAt = "ended_at"
+	// FieldIsActive holds the string denoting the is_active field in the database.
+	FieldIsActive = "is_active"
 	// FieldLastActivityAt holds the string denoting the last_activity_at field in the database.
 	FieldLastActivityAt = "last_activity_at"
 	// FieldEntryPage holds the string denoting the entry_page field in the database.
@@ -37,6 +39,12 @@ const (
 	FieldAcquisitionMedium = "acquisition_medium"
 	// FieldAcquisitionCampaign holds the string denoting the acquisition_campaign field in the database.
 	FieldAcquisitionCampaign = "acquisition_campaign"
+	// FieldCampaignTerm holds the string denoting the campaign_term field in the database.
+	FieldCampaignTerm = "campaign_term"
+	// FieldCampaignContent holds the string denoting the campaign_content field in the database.
+	FieldCampaignContent = "campaign_content"
+	// FieldCampaignID holds the string denoting the campaign_id field in the database.
+	FieldCampaignID = "campaign_id"
 	// FieldReferrerHost holds the string denoting the referrer_host field in the database.
 	FieldReferrerHost = "referrer_host"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -54,12 +62,16 @@ var Columns = []string{
 	FieldSessionToken,
 	FieldStartedAt,
 	FieldEndedAt,
+	FieldIsActive,
 	FieldLastActivityAt,
 	FieldEntryPage,
 	FieldExitPage,
 	FieldAcquisitionSource,
 	FieldAcquisitionMedium,
 	FieldAcquisitionCampaign,
+	FieldCampaignTerm,
+	FieldCampaignContent,
+	FieldCampaignID,
 	FieldReferrerHost,
 	FieldCreatedAt,
 }
@@ -85,6 +97,8 @@ var (
 	SessionTokenValidator func(string) error
 	// DefaultStartedAt holds the default value on creation for the "started_at" field.
 	DefaultStartedAt func() time.Time
+	// DefaultIsActive holds the default value on creation for the "is_active" field.
+	DefaultIsActive bool
 	// DefaultLastActivityAt holds the default value on creation for the "last_activity_at" field.
 	DefaultLastActivityAt func() time.Time
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -129,6 +143,11 @@ func ByEndedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEndedAt, opts...).ToFunc()
 }
 
+// ByIsActive orders the results by the is_active field.
+func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
+}
+
 // ByLastActivityAt orders the results by the last_activity_at field.
 func ByLastActivityAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastActivityAt, opts...).ToFunc()
@@ -157,6 +176,21 @@ func ByAcquisitionMedium(opts ...sql.OrderTermOption) OrderOption {
 // ByAcquisitionCampaign orders the results by the acquisition_campaign field.
 func ByAcquisitionCampaign(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAcquisitionCampaign, opts...).ToFunc()
+}
+
+// ByCampaignTerm orders the results by the campaign_term field.
+func ByCampaignTerm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCampaignTerm, opts...).ToFunc()
+}
+
+// ByCampaignContent orders the results by the campaign_content field.
+func ByCampaignContent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCampaignContent, opts...).ToFunc()
+}
+
+// ByCampaignID orders the results by the campaign_id field.
+func ByCampaignID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCampaignID, opts...).ToFunc()
 }
 
 // ByReferrerHost orders the results by the referrer_host field.

@@ -54,10 +54,12 @@ type TLSConfig struct {
 	KeyFile  string
 }
 type AppConfig struct {
-	Host    string
-	Port    int
-	RunMode RunMode
-	IsDev   bool
+	Host              string
+	Port              int
+	RunMode           RunMode
+	IsDev             bool
+	SessionExpiration int
+	VisitorExpiration int
 }
 
 type DBConfig struct {
@@ -164,11 +166,15 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		runMode = "development"
 	}
 	isDev := runMode == "development"
+	SessionExpiration := 1 * 60 // 30 * 60;
+	VisitorExpiration := 3600 * 24 * 365
 	return AppConfig{
-		Host:    mustString(env, "APP_HOST"),
-		Port:    port,
-		RunMode: RunMode(runMode),
-		IsDev:   isDev,
+		Host:              mustString(env, "APP_HOST"),
+		Port:              port,
+		RunMode:           RunMode(runMode),
+		IsDev:             isDev,
+		SessionExpiration: SessionExpiration,
+		VisitorExpiration: VisitorExpiration,
 	}
 }
 
