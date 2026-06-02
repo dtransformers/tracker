@@ -9,15 +9,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"tracking/internal/config"
 	"tracking/internal/ent"
+	consentsv1 "tracking/internal/modules/consents/v1"
+	consentsMocks "tracking/internal/modules/consents/v1/mocks"
 	devicesv1 "tracking/internal/modules/devices/v1"
 	devicesMocks "tracking/internal/modules/devices/v1/mocks"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	sitesMocks "tracking/internal/modules/sites/v1/mocks"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 	visitor_sessionsMocks "tracking/internal/modules/visitor_sessions/v1/mocks"
-	consentsv1 "tracking/internal/modules/consents/v1"
-	consentsMocks "tracking/internal/modules/consents/v1/mocks"
 	visitorsv1 "tracking/internal/modules/visitors/v1"
 	visitorsMocks "tracking/internal/modules/visitors/v1/mocks"
 )
@@ -30,7 +31,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
@@ -114,7 +115,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
@@ -205,7 +206,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
@@ -275,7 +276,7 @@ func TestCreateEvent_ExistingSession(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
@@ -339,7 +340,7 @@ func TestCreatePageView_ExistingSession(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
@@ -405,7 +406,7 @@ func TestCreateEvent_NewSession(t *testing.T) {
 	mockDevicesRepo := new(devicesMocks.MockRepository)
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil)
+	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
 	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 

@@ -133,9 +133,9 @@ func (app *application) registerRoutes(router *gin.Engine) {
 
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
 
-	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default())
+	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
 	consentsSvc := consents.RegisterV1(router, app.db.Client, sessionSvc, slog.Default())
-	visitorsSvc := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsSvc, slog.Default())
+	visitorsSvc := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsSvc, slog.Default(), app.cfg.App)
 	events.RegisterV1(router, app.db.Client, visitorsSvc, slog.Default())
 
 	app.registerSwaggerRoutes(router)

@@ -29,7 +29,7 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-	type CreateDeviceInput struct {
+type CreateDeviceInput struct {
 	UUID            string
 	VisitorID       int64
 	FingerprintHash string
@@ -43,6 +43,7 @@ func NewRepository(client *ent.Client) Repository {
 	BrowserVersion  string
 	Language        string
 	Timezone        string
+	ISP             string
 	ScreenWidth     int
 	ScreenHeight    int
 }
@@ -65,8 +66,10 @@ func (r *entRepository) Create(ctx context.Context, input CreateDeviceInput) (*e
 		SetRegion(input.Region).
 		SetCity(input.City).
 		SetBrowser(input.Browser).
+		SetBrowserVersion(input.BrowserVersion).
 		SetLanguage(input.Language).
 		SetTimezone(input.Timezone).
+		SetIsp(input.ISP).
 		SetScreenWidth(input.ScreenWidth).
 		SetScreenHeight(input.ScreenHeight)
 

@@ -45,9 +45,12 @@ func (Device) Fields() []ent.Field {
 			Optional(),
 
 		field.String("browser_version").
-			Optional(),
+			NotEmpty(),
 
 		field.String("language").
+			Optional(),
+
+		field.String("isp").
 			Optional(),
 
 		field.String("timezone").

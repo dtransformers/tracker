@@ -217,6 +217,20 @@ func (_u *DeviceUpdate) ClearBrowser() *DeviceUpdate {
 	return _u
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (_u *DeviceUpdate) SetBrowserVersion(v string) *DeviceUpdate {
+	_u.mutation.SetBrowserVersion(v)
+	return _u
+}
+
+// SetNillableBrowserVersion sets the "browser_version" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableBrowserVersion(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetBrowserVersion(*v)
+	}
+	return _u
+}
+
 // SetLanguage sets the "language" field.
 func (_u *DeviceUpdate) SetLanguage(v string) *DeviceUpdate {
 	_u.mutation.SetLanguage(v)
@@ -234,6 +248,26 @@ func (_u *DeviceUpdate) SetNillableLanguage(v *string) *DeviceUpdate {
 // ClearLanguage clears the value of the "language" field.
 func (_u *DeviceUpdate) ClearLanguage() *DeviceUpdate {
 	_u.mutation.ClearLanguage()
+	return _u
+}
+
+// SetIsp sets the "isp" field.
+func (_u *DeviceUpdate) SetIsp(v string) *DeviceUpdate {
+	_u.mutation.SetIsp(v)
+	return _u
+}
+
+// SetNillableIsp sets the "isp" field if the given value is not nil.
+func (_u *DeviceUpdate) SetNillableIsp(v *string) *DeviceUpdate {
+	if v != nil {
+		_u.SetIsp(*v)
+	}
+	return _u
+}
+
+// ClearIsp clears the value of the "isp" field.
+func (_u *DeviceUpdate) ClearIsp() *DeviceUpdate {
+	_u.mutation.ClearIsp()
 	return _u
 }
 
@@ -388,6 +422,11 @@ func (_u *DeviceUpdate) check() error {
 			return &ValidationError{Name: "fingerprint_hash", err: fmt.Errorf(`ent: validator failed for field "Device.fingerprint_hash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BrowserVersion(); ok {
+		if err := device.BrowserVersionValidator(v); err != nil {
+			return &ValidationError{Name: "browser_version", err: fmt.Errorf(`ent: validator failed for field "Device.browser_version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -457,11 +496,20 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.BrowserCleared() {
 		_spec.ClearField(device.FieldBrowser, field.TypeString)
 	}
+	if value, ok := _u.mutation.BrowserVersion(); ok {
+		_spec.SetField(device.FieldBrowserVersion, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Language(); ok {
 		_spec.SetField(device.FieldLanguage, field.TypeString, value)
 	}
 	if _u.mutation.LanguageCleared() {
 		_spec.ClearField(device.FieldLanguage, field.TypeString)
+	}
+	if value, ok := _u.mutation.Isp(); ok {
+		_spec.SetField(device.FieldIsp, field.TypeString, value)
+	}
+	if _u.mutation.IspCleared() {
+		_spec.ClearField(device.FieldIsp, field.TypeString)
 	}
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)
@@ -702,6 +750,20 @@ func (_u *DeviceUpdateOne) ClearBrowser() *DeviceUpdateOne {
 	return _u
 }
 
+// SetBrowserVersion sets the "browser_version" field.
+func (_u *DeviceUpdateOne) SetBrowserVersion(v string) *DeviceUpdateOne {
+	_u.mutation.SetBrowserVersion(v)
+	return _u
+}
+
+// SetNillableBrowserVersion sets the "browser_version" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableBrowserVersion(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetBrowserVersion(*v)
+	}
+	return _u
+}
+
 // SetLanguage sets the "language" field.
 func (_u *DeviceUpdateOne) SetLanguage(v string) *DeviceUpdateOne {
 	_u.mutation.SetLanguage(v)
@@ -719,6 +781,26 @@ func (_u *DeviceUpdateOne) SetNillableLanguage(v *string) *DeviceUpdateOne {
 // ClearLanguage clears the value of the "language" field.
 func (_u *DeviceUpdateOne) ClearLanguage() *DeviceUpdateOne {
 	_u.mutation.ClearLanguage()
+	return _u
+}
+
+// SetIsp sets the "isp" field.
+func (_u *DeviceUpdateOne) SetIsp(v string) *DeviceUpdateOne {
+	_u.mutation.SetIsp(v)
+	return _u
+}
+
+// SetNillableIsp sets the "isp" field if the given value is not nil.
+func (_u *DeviceUpdateOne) SetNillableIsp(v *string) *DeviceUpdateOne {
+	if v != nil {
+		_u.SetIsp(*v)
+	}
+	return _u
+}
+
+// ClearIsp clears the value of the "isp" field.
+func (_u *DeviceUpdateOne) ClearIsp() *DeviceUpdateOne {
+	_u.mutation.ClearIsp()
 	return _u
 }
 
@@ -886,6 +968,11 @@ func (_u *DeviceUpdateOne) check() error {
 			return &ValidationError{Name: "fingerprint_hash", err: fmt.Errorf(`ent: validator failed for field "Device.fingerprint_hash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BrowserVersion(); ok {
+		if err := device.BrowserVersionValidator(v); err != nil {
+			return &ValidationError{Name: "browser_version", err: fmt.Errorf(`ent: validator failed for field "Device.browser_version": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -972,11 +1059,20 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 	if _u.mutation.BrowserCleared() {
 		_spec.ClearField(device.FieldBrowser, field.TypeString)
 	}
+	if value, ok := _u.mutation.BrowserVersion(); ok {
+		_spec.SetField(device.FieldBrowserVersion, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Language(); ok {
 		_spec.SetField(device.FieldLanguage, field.TypeString, value)
 	}
 	if _u.mutation.LanguageCleared() {
 		_spec.ClearField(device.FieldLanguage, field.TypeString)
+	}
+	if value, ok := _u.mutation.Isp(); ok {
+		_spec.SetField(device.FieldIsp, field.TypeString, value)
+	}
+	if _u.mutation.IspCleared() {
+		_spec.ClearField(device.FieldIsp, field.TypeString)
 	}
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(device.FieldTimezone, field.TypeString, value)

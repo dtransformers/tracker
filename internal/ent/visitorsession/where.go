@@ -84,6 +84,11 @@ func EndedAt(v time.Time) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldEQ(FieldEndedAt, v))
 }
 
+// IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
+func IsActive(v bool) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldIsActive, v))
+}
+
 // LastActivityAt applies equality check predicate on the "last_activity_at" field. It's identical to LastActivityAtEQ.
 func LastActivityAt(v time.Time) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldEQ(FieldLastActivityAt, v))
@@ -112,6 +117,21 @@ func AcquisitionMedium(v string) predicate.VisitorSession {
 // AcquisitionCampaign applies equality check predicate on the "acquisition_campaign" field. It's identical to AcquisitionCampaignEQ.
 func AcquisitionCampaign(v string) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldEQ(FieldAcquisitionCampaign, v))
+}
+
+// CampaignTerm applies equality check predicate on the "campaign_term" field. It's identical to CampaignTermEQ.
+func CampaignTerm(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignTerm, v))
+}
+
+// CampaignContent applies equality check predicate on the "campaign_content" field. It's identical to CampaignContentEQ.
+func CampaignContent(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignContent, v))
+}
+
+// CampaignID applies equality check predicate on the "campaign_id" field. It's identical to CampaignIDEQ.
+func CampaignID(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignID, v))
 }
 
 // ReferrerHost applies equality check predicate on the "referrer_host" field. It's identical to ReferrerHostEQ.
@@ -422,6 +442,16 @@ func EndedAtIsNil() predicate.VisitorSession {
 // EndedAtNotNil applies the NotNil predicate on the "ended_at" field.
 func EndedAtNotNil() predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldNotNull(FieldEndedAt))
+}
+
+// IsActiveEQ applies the EQ predicate on the "is_active" field.
+func IsActiveEQ(v bool) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldIsActive, v))
+}
+
+// IsActiveNEQ applies the NEQ predicate on the "is_active" field.
+func IsActiveNEQ(v bool) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNEQ(FieldIsActive, v))
 }
 
 // LastActivityAtEQ applies the EQ predicate on the "last_activity_at" field.
@@ -837,6 +867,231 @@ func AcquisitionCampaignEqualFold(v string) predicate.VisitorSession {
 // AcquisitionCampaignContainsFold applies the ContainsFold predicate on the "acquisition_campaign" field.
 func AcquisitionCampaignContainsFold(v string) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldContainsFold(FieldAcquisitionCampaign, v))
+}
+
+// CampaignTermEQ applies the EQ predicate on the "campaign_term" field.
+func CampaignTermEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignTerm, v))
+}
+
+// CampaignTermNEQ applies the NEQ predicate on the "campaign_term" field.
+func CampaignTermNEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNEQ(FieldCampaignTerm, v))
+}
+
+// CampaignTermIn applies the In predicate on the "campaign_term" field.
+func CampaignTermIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIn(FieldCampaignTerm, vs...))
+}
+
+// CampaignTermNotIn applies the NotIn predicate on the "campaign_term" field.
+func CampaignTermNotIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotIn(FieldCampaignTerm, vs...))
+}
+
+// CampaignTermGT applies the GT predicate on the "campaign_term" field.
+func CampaignTermGT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGT(FieldCampaignTerm, v))
+}
+
+// CampaignTermGTE applies the GTE predicate on the "campaign_term" field.
+func CampaignTermGTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGTE(FieldCampaignTerm, v))
+}
+
+// CampaignTermLT applies the LT predicate on the "campaign_term" field.
+func CampaignTermLT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLT(FieldCampaignTerm, v))
+}
+
+// CampaignTermLTE applies the LTE predicate on the "campaign_term" field.
+func CampaignTermLTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLTE(FieldCampaignTerm, v))
+}
+
+// CampaignTermContains applies the Contains predicate on the "campaign_term" field.
+func CampaignTermContains(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContains(FieldCampaignTerm, v))
+}
+
+// CampaignTermHasPrefix applies the HasPrefix predicate on the "campaign_term" field.
+func CampaignTermHasPrefix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasPrefix(FieldCampaignTerm, v))
+}
+
+// CampaignTermHasSuffix applies the HasSuffix predicate on the "campaign_term" field.
+func CampaignTermHasSuffix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasSuffix(FieldCampaignTerm, v))
+}
+
+// CampaignTermIsNil applies the IsNil predicate on the "campaign_term" field.
+func CampaignTermIsNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIsNull(FieldCampaignTerm))
+}
+
+// CampaignTermNotNil applies the NotNil predicate on the "campaign_term" field.
+func CampaignTermNotNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotNull(FieldCampaignTerm))
+}
+
+// CampaignTermEqualFold applies the EqualFold predicate on the "campaign_term" field.
+func CampaignTermEqualFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEqualFold(FieldCampaignTerm, v))
+}
+
+// CampaignTermContainsFold applies the ContainsFold predicate on the "campaign_term" field.
+func CampaignTermContainsFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContainsFold(FieldCampaignTerm, v))
+}
+
+// CampaignContentEQ applies the EQ predicate on the "campaign_content" field.
+func CampaignContentEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignContent, v))
+}
+
+// CampaignContentNEQ applies the NEQ predicate on the "campaign_content" field.
+func CampaignContentNEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNEQ(FieldCampaignContent, v))
+}
+
+// CampaignContentIn applies the In predicate on the "campaign_content" field.
+func CampaignContentIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIn(FieldCampaignContent, vs...))
+}
+
+// CampaignContentNotIn applies the NotIn predicate on the "campaign_content" field.
+func CampaignContentNotIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotIn(FieldCampaignContent, vs...))
+}
+
+// CampaignContentGT applies the GT predicate on the "campaign_content" field.
+func CampaignContentGT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGT(FieldCampaignContent, v))
+}
+
+// CampaignContentGTE applies the GTE predicate on the "campaign_content" field.
+func CampaignContentGTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGTE(FieldCampaignContent, v))
+}
+
+// CampaignContentLT applies the LT predicate on the "campaign_content" field.
+func CampaignContentLT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLT(FieldCampaignContent, v))
+}
+
+// CampaignContentLTE applies the LTE predicate on the "campaign_content" field.
+func CampaignContentLTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLTE(FieldCampaignContent, v))
+}
+
+// CampaignContentContains applies the Contains predicate on the "campaign_content" field.
+func CampaignContentContains(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContains(FieldCampaignContent, v))
+}
+
+// CampaignContentHasPrefix applies the HasPrefix predicate on the "campaign_content" field.
+func CampaignContentHasPrefix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasPrefix(FieldCampaignContent, v))
+}
+
+// CampaignContentHasSuffix applies the HasSuffix predicate on the "campaign_content" field.
+func CampaignContentHasSuffix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasSuffix(FieldCampaignContent, v))
+}
+
+// CampaignContentIsNil applies the IsNil predicate on the "campaign_content" field.
+func CampaignContentIsNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIsNull(FieldCampaignContent))
+}
+
+// CampaignContentNotNil applies the NotNil predicate on the "campaign_content" field.
+func CampaignContentNotNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotNull(FieldCampaignContent))
+}
+
+// CampaignContentEqualFold applies the EqualFold predicate on the "campaign_content" field.
+func CampaignContentEqualFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEqualFold(FieldCampaignContent, v))
+}
+
+// CampaignContentContainsFold applies the ContainsFold predicate on the "campaign_content" field.
+func CampaignContentContainsFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContainsFold(FieldCampaignContent, v))
+}
+
+// CampaignIDEQ applies the EQ predicate on the "campaign_id" field.
+func CampaignIDEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEQ(FieldCampaignID, v))
+}
+
+// CampaignIDNEQ applies the NEQ predicate on the "campaign_id" field.
+func CampaignIDNEQ(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNEQ(FieldCampaignID, v))
+}
+
+// CampaignIDIn applies the In predicate on the "campaign_id" field.
+func CampaignIDIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIn(FieldCampaignID, vs...))
+}
+
+// CampaignIDNotIn applies the NotIn predicate on the "campaign_id" field.
+func CampaignIDNotIn(vs ...string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotIn(FieldCampaignID, vs...))
+}
+
+// CampaignIDGT applies the GT predicate on the "campaign_id" field.
+func CampaignIDGT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGT(FieldCampaignID, v))
+}
+
+// CampaignIDGTE applies the GTE predicate on the "campaign_id" field.
+func CampaignIDGTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldGTE(FieldCampaignID, v))
+}
+
+// CampaignIDLT applies the LT predicate on the "campaign_id" field.
+func CampaignIDLT(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLT(FieldCampaignID, v))
+}
+
+// CampaignIDLTE applies the LTE predicate on the "campaign_id" field.
+func CampaignIDLTE(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldLTE(FieldCampaignID, v))
+}
+
+// CampaignIDContains applies the Contains predicate on the "campaign_id" field.
+func CampaignIDContains(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContains(FieldCampaignID, v))
+}
+
+// CampaignIDHasPrefix applies the HasPrefix predicate on the "campaign_id" field.
+func CampaignIDHasPrefix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasPrefix(FieldCampaignID, v))
+}
+
+// CampaignIDHasSuffix applies the HasSuffix predicate on the "campaign_id" field.
+func CampaignIDHasSuffix(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldHasSuffix(FieldCampaignID, v))
+}
+
+// CampaignIDIsNil applies the IsNil predicate on the "campaign_id" field.
+func CampaignIDIsNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldIsNull(FieldCampaignID))
+}
+
+// CampaignIDNotNil applies the NotNil predicate on the "campaign_id" field.
+func CampaignIDNotNil() predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldNotNull(FieldCampaignID))
+}
+
+// CampaignIDEqualFold applies the EqualFold predicate on the "campaign_id" field.
+func CampaignIDEqualFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldEqualFold(FieldCampaignID, v))
+}
+
+// CampaignIDContainsFold applies the ContainsFold predicate on the "campaign_id" field.
+func CampaignIDContainsFold(v string) predicate.VisitorSession {
+	return predicate.VisitorSession(sql.FieldContainsFold(FieldCampaignID, v))
 }
 
 // ReferrerHostEQ applies the EQ predicate on the "referrer_host" field.

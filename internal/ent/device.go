@@ -37,8 +37,12 @@ type Device struct {
 	City string `json:"city,omitempty"`
 	// Browser holds the value of the "browser" field.
 	Browser string `json:"browser,omitempty"`
+	// BrowserVersion holds the value of the "browser_version" field.
+	BrowserVersion string `json:"browser_version,omitempty"`
 	// Language holds the value of the "language" field.
 	Language string `json:"language,omitempty"`
+	// Isp holds the value of the "isp" field.
+	Isp string `json:"isp,omitempty"`
 	// Timezone holds the value of the "timezone" field.
 	Timezone string `json:"timezone,omitempty"`
 	// ScreenWidth holds the value of the "screen_width" field.
@@ -59,7 +63,7 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case device.FieldID, device.FieldVisitorID, device.FieldScreenWidth, device.FieldScreenHeight:
 			values[i] = new(sql.NullInt64)
-		case device.FieldUUID, device.FieldFingerprintHash, device.FieldDeviceType, device.FieldOs, device.FieldAddressIP, device.FieldCountry, device.FieldRegion, device.FieldCity, device.FieldBrowser, device.FieldLanguage, device.FieldTimezone:
+		case device.FieldUUID, device.FieldFingerprintHash, device.FieldDeviceType, device.FieldOs, device.FieldAddressIP, device.FieldCountry, device.FieldRegion, device.FieldCity, device.FieldBrowser, device.FieldBrowserVersion, device.FieldLanguage, device.FieldIsp, device.FieldTimezone:
 			values[i] = new(sql.NullString)
 		case device.FieldFirstSeenAt, device.FieldLastSeenAt:
 			values[i] = new(sql.NullTime)
@@ -144,11 +148,23 @@ func (_m *Device) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Browser = value.String
 			}
+		case device.FieldBrowserVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field browser_version", values[i])
+			} else if value.Valid {
+				_m.BrowserVersion = value.String
+			}
 		case device.FieldLanguage:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field language", values[i])
 			} else if value.Valid {
 				_m.Language = value.String
+			}
+		case device.FieldIsp:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field isp", values[i])
+			} else if value.Valid {
+				_m.Isp = value.String
 			}
 		case device.FieldTimezone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -246,8 +262,14 @@ func (_m *Device) String() string {
 	builder.WriteString("browser=")
 	builder.WriteString(_m.Browser)
 	builder.WriteString(", ")
+	builder.WriteString("browser_version=")
+	builder.WriteString(_m.BrowserVersion)
+	builder.WriteString(", ")
 	builder.WriteString("language=")
 	builder.WriteString(_m.Language)
+	builder.WriteString(", ")
+	builder.WriteString("isp=")
+	builder.WriteString(_m.Isp)
 	builder.WriteString(", ")
 	builder.WriteString("timezone=")
 	builder.WriteString(_m.Timezone)

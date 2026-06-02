@@ -139,6 +139,28 @@ definitions:
       version:
         type: string
     type: object
+  v1.ConsentStatus:
+    enum:
+    - granted
+    - denied
+    - pending
+    type: string
+    x-enum-varnames:
+    - ConsentStatusGranted
+    - ConsentStatusDenied
+    - ConsentStatusPending
+  v1.ConsentType:
+    enum:
+    - tracking
+    - marketing
+    - functional
+    - none
+    type: string
+    x-enum-varnames:
+    - ConsentTypeTracking
+    - ConsentTypeMarketing
+    - ConsentTypeFunctional
+    - ConsentTypeNone
   v1.CreateRequest:
     properties:
       domain:
@@ -162,6 +184,12 @@ definitions:
       acquisition_medium:
         type: string
       acquisition_source:
+        type: string
+      campaign_content:
+        type: string
+      campaign_id:
+        type: string
+      campaign_term:
         type: string
       entry_page:
         type: string
@@ -205,15 +233,16 @@ definitions:
   v1.UpdateConsentRequest:
     properties:
       consent_type:
-        type: string
+        $ref: '#/definitions/v1.ConsentType'
       status:
-        type: string
+        $ref: '#/definitions/v1.ConsentStatus'
     required:
     - consent_type
     - status
     type: object
   v1.UpdateConsentResponse:
     properties:
+      data: {}
       message:
         type: string
       success:

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"tracking/internal/config"
 	"tracking/internal/ent"
 
 	"github.com/gin-gonic/gin"
@@ -15,15 +16,17 @@ import (
 type Handler struct {
 	service *Service
 	logger  *slog.Logger
+	appCfg  config.AppConfig
 }
 
-func NewHandler(service *Service, logger *slog.Logger) *Handler {
+func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) *Handler {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &Handler{
 		service: service,
 		logger:  logger,
+		appCfg:  appCfg,
 	}
 }
 
@@ -72,8 +75,8 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-	sessionExpiration := 30 * 60         // 30 Minutes In Sec
-	visitorExpiration := 3600 * 24 * 365 // 1 Year In Sec
+	sessionExpiration := h.appCfg.SessionExpiration
+	visitorExpiration := h.appCfg.VisitorExpiration
 	c.SetCookie("session_id", response.SessionID, sessionExpiration, "/", "", true, true)
 	c.SetCookie("visitor_uuid", response.UUID, visitorExpiration, "/", "", true, true)
 

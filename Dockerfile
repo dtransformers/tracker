@@ -59,5 +59,6 @@ VOLUME ["/logs"]
 ENV APP_ENV=production
 
 EXPOSE 8080
-
+## TO GENERATE SWAGGER DOCS:
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go        
 ENTRYPOINT ["/app"]

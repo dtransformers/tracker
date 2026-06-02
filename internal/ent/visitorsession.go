@@ -29,6 +29,8 @@ type VisitorSession struct {
 	StartedAt time.Time `json:"started_at,omitempty"`
 	// EndedAt holds the value of the "ended_at" field.
 	EndedAt *time.Time `json:"ended_at,omitempty"`
+	// IsActive holds the value of the "is_active" field.
+	IsActive bool `json:"is_active,omitempty"`
 	// LastActivityAt holds the value of the "last_activity_at" field.
 	LastActivityAt time.Time `json:"last_activity_at,omitempty"`
 	// EntryPage holds the value of the "entry_page" field.
@@ -41,6 +43,12 @@ type VisitorSession struct {
 	AcquisitionMedium string `json:"acquisition_medium,omitempty"`
 	// AcquisitionCampaign holds the value of the "acquisition_campaign" field.
 	AcquisitionCampaign string `json:"acquisition_campaign,omitempty"`
+	// CampaignTerm holds the value of the "campaign_term" field.
+	CampaignTerm string `json:"campaign_term,omitempty"`
+	// CampaignContent holds the value of the "campaign_content" field.
+	CampaignContent string `json:"campaign_content,omitempty"`
+	// CampaignID holds the value of the "campaign_id" field.
+	CampaignID string `json:"campaign_id,omitempty"`
 	// ReferrerHost holds the value of the "referrer_host" field.
 	ReferrerHost string `json:"referrer_host,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -53,9 +61,11 @@ func (*VisitorSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case visitorsession.FieldIsActive:
+			values[i] = new(sql.NullBool)
 		case visitorsession.FieldID, visitorsession.FieldVisitorID, visitorsession.FieldDeviceID:
 			values[i] = new(sql.NullInt64)
-		case visitorsession.FieldUUID, visitorsession.FieldSessionToken, visitorsession.FieldEntryPage, visitorsession.FieldExitPage, visitorsession.FieldAcquisitionSource, visitorsession.FieldAcquisitionMedium, visitorsession.FieldAcquisitionCampaign, visitorsession.FieldReferrerHost:
+		case visitorsession.FieldUUID, visitorsession.FieldSessionToken, visitorsession.FieldEntryPage, visitorsession.FieldExitPage, visitorsession.FieldAcquisitionSource, visitorsession.FieldAcquisitionMedium, visitorsession.FieldAcquisitionCampaign, visitorsession.FieldCampaignTerm, visitorsession.FieldCampaignContent, visitorsession.FieldCampaignID, visitorsession.FieldReferrerHost:
 			values[i] = new(sql.NullString)
 		case visitorsession.FieldStartedAt, visitorsession.FieldEndedAt, visitorsession.FieldLastActivityAt, visitorsession.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -117,6 +127,12 @@ func (_m *VisitorSession) assignValues(columns []string, values []any) error {
 				_m.EndedAt = new(time.Time)
 				*_m.EndedAt = value.Time
 			}
+		case visitorsession.FieldIsActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_active", values[i])
+			} else if value.Valid {
+				_m.IsActive = value.Bool
+			}
 		case visitorsession.FieldLastActivityAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_activity_at", values[i])
@@ -152,6 +168,24 @@ func (_m *VisitorSession) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field acquisition_campaign", values[i])
 			} else if value.Valid {
 				_m.AcquisitionCampaign = value.String
+			}
+		case visitorsession.FieldCampaignTerm:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field campaign_term", values[i])
+			} else if value.Valid {
+				_m.CampaignTerm = value.String
+			}
+		case visitorsession.FieldCampaignContent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field campaign_content", values[i])
+			} else if value.Valid {
+				_m.CampaignContent = value.String
+			}
+		case visitorsession.FieldCampaignID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field campaign_id", values[i])
+			} else if value.Valid {
+				_m.CampaignID = value.String
 			}
 		case visitorsession.FieldReferrerHost:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -221,6 +255,9 @@ func (_m *VisitorSession) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("is_active=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsActive))
+	builder.WriteString(", ")
 	builder.WriteString("last_activity_at=")
 	builder.WriteString(_m.LastActivityAt.Format(time.ANSIC))
 	builder.WriteString(", ")
@@ -238,6 +275,15 @@ func (_m *VisitorSession) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("acquisition_campaign=")
 	builder.WriteString(_m.AcquisitionCampaign)
+	builder.WriteString(", ")
+	builder.WriteString("campaign_term=")
+	builder.WriteString(_m.CampaignTerm)
+	builder.WriteString(", ")
+	builder.WriteString("campaign_content=")
+	builder.WriteString(_m.CampaignContent)
+	builder.WriteString(", ")
+	builder.WriteString("campaign_id=")
+	builder.WriteString(_m.CampaignID)
 	builder.WriteString(", ")
 	builder.WriteString("referrer_host=")
 	builder.WriteString(_m.ReferrerHost)

@@ -29,7 +29,6 @@ func (r *entRepository) SetVisitorConsent(ctx context.Context, visitorID, siteID
 		Where(
 			visitorconsent.VisitorID(visitorID),
 			visitorconsent.SiteID(siteID),
-			visitorconsent.ConsentType(consentType),
 		).First(ctx)
 
 	if err != nil && !ent.IsNotFound(err) {

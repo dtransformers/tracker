@@ -107,6 +107,63 @@ func (_c *MockRepository_Create_Call) RunAndReturn(run func(ctx context.Context,
 	return _c
 }
 
+// DeactivateVisitorSessions provides a mock function for the type MockRepository
+func (_mock *MockRepository) DeactivateVisitorSessions(ctx context.Context, visitorID int64) error {
+	ret := _mock.Called(ctx, visitorID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeactivateVisitorSessions")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, visitorID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockRepository_DeactivateVisitorSessions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeactivateVisitorSessions'
+type MockRepository_DeactivateVisitorSessions_Call struct {
+	*mock.Call
+}
+
+// DeactivateVisitorSessions is a helper method to define mock.On call
+//   - ctx context.Context
+//   - visitorID int64
+func (_e *MockRepository_Expecter) DeactivateVisitorSessions(ctx interface{}, visitorID interface{}) *MockRepository_DeactivateVisitorSessions_Call {
+	return &MockRepository_DeactivateVisitorSessions_Call{Call: _e.mock.On("DeactivateVisitorSessions", ctx, visitorID)}
+}
+
+func (_c *MockRepository_DeactivateVisitorSessions_Call) Run(run func(ctx context.Context, visitorID int64)) *MockRepository_DeactivateVisitorSessions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_DeactivateVisitorSessions_Call) Return(err error) *MockRepository_DeactivateVisitorSessions_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockRepository_DeactivateVisitorSessions_Call) RunAndReturn(run func(ctx context.Context, visitorID int64) error) *MockRepository_DeactivateVisitorSessions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Delete provides a mock function for the type MockRepository
 func (_mock *MockRepository) Delete(ctx context.Context, uuid string) error {
 	ret := _mock.Called(ctx, uuid)
@@ -432,6 +489,74 @@ func (_c *MockRepository_GetByVisitorID_Call) Return(visitorSessions []*ent.Visi
 }
 
 func (_c *MockRepository_GetByVisitorID_Call) RunAndReturn(run func(ctx context.Context, visitorID int64) ([]*ent.VisitorSession, error)) *MockRepository_GetByVisitorID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetVisitorLastActiveSession provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetVisitorLastActiveSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	ret := _mock.Called(ctx, visitorID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetVisitorLastActiveSession")
+	}
+
+	var r0 *ent.VisitorSession
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*ent.VisitorSession, error)); ok {
+		return returnFunc(ctx, visitorID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *ent.VisitorSession); ok {
+		r0 = returnFunc(ctx, visitorID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.VisitorSession)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, visitorID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetVisitorLastActiveSession_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetVisitorLastActiveSession'
+type MockRepository_GetVisitorLastActiveSession_Call struct {
+	*mock.Call
+}
+
+// GetVisitorLastActiveSession is a helper method to define mock.On call
+//   - ctx context.Context
+//   - visitorID int64
+func (_e *MockRepository_Expecter) GetVisitorLastActiveSession(ctx interface{}, visitorID interface{}) *MockRepository_GetVisitorLastActiveSession_Call {
+	return &MockRepository_GetVisitorLastActiveSession_Call{Call: _e.mock.On("GetVisitorLastActiveSession", ctx, visitorID)}
+}
+
+func (_c *MockRepository_GetVisitorLastActiveSession_Call) Run(run func(ctx context.Context, visitorID int64)) *MockRepository_GetVisitorLastActiveSession_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetVisitorLastActiveSession_Call) Return(visitorSession *ent.VisitorSession, err error) *MockRepository_GetVisitorLastActiveSession_Call {
+	_c.Call.Return(visitorSession, err)
+	return _c
+}
+
+func (_c *MockRepository_GetVisitorLastActiveSession_Call) RunAndReturn(run func(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)) *MockRepository_GetVisitorLastActiveSession_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -822,6 +822,34 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.ConsentStatus": {
+            "type": "string",
+            "enum": [
+                "granted",
+                "denied",
+                "pending"
+            ],
+            "x-enum-varnames": [
+                "ConsentStatusGranted",
+                "ConsentStatusDenied",
+                "ConsentStatusPending"
+            ]
+        },
+        "v1.ConsentType": {
+            "type": "string",
+            "enum": [
+                "tracking",
+                "marketing",
+                "functional",
+                "none"
+            ],
+            "x-enum-varnames": [
+                "ConsentTypeTracking",
+                "ConsentTypeMarketing",
+                "ConsentTypeFunctional",
+                "ConsentTypeNone"
+            ]
+        },
         "v1.CreateRequest": {
             "type": "object",
             "required": [
@@ -857,6 +885,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "acquisition_source": {
+                    "type": "string"
+                },
+                "campaign_content": {
+                    "type": "string"
+                },
+                "campaign_id": {
+                    "type": "string"
+                },
+                "campaign_term": {
                     "type": "string"
                 },
                 "entry_page": {
@@ -924,16 +961,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "consent_type": {
-                    "type": "string"
+                    "$ref": "#/definitions/v1.ConsentType"
                 },
                 "status": {
-                    "type": "string"
+                    "$ref": "#/definitions/v1.ConsentStatus"
                 }
             }
         },
         "v1.UpdateConsentResponse": {
             "type": "object",
             "properties": {
+                "data": {},
                 "message": {
                     "type": "string"
                 },

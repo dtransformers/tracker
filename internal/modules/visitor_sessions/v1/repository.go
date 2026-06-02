@@ -12,10 +12,12 @@ type Repository interface {
 	Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.VisitorSession, error)
 	GetByVisitorID(ctx context.Context, visitorID int64) ([]*ent.VisitorSession, error)
+	GetVisitorLastActiveSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)
 	GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)
 	GetByDeviceID(ctx context.Context, deviceID int64) ([]*ent.VisitorSession, error)
 	GetBySessionToken(ctx context.Context, token string) (*ent.VisitorSession, error)
 	Update(ctx context.Context, uuid string, input UpdateSessionInput) (*ent.VisitorSession, error)
+	DeactivateVisitorSessions(ctx context.Context, visitorID int64) error
 	Delete(ctx context.Context, uuid string) error
 }
 
@@ -40,13 +42,19 @@ type CreateSessionInput struct {
 	AcquisitionSource   string
 	AcquisitionMedium   string
 	AcquisitionCampaign string
+	CampaignTerm        string
+	CampaignContent     string
+	CampaignID          string
 	ReferrerHost        string
+	EndedAt             *time.Time
+	IsActive            bool
 }
 
 type UpdateSessionInput struct {
 	EndedAt        *time.Time
 	LastActivityAt *time.Time
 	ExitPage       *string
+	IsActive       *bool
 }
 
 func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error) {
@@ -61,7 +69,15 @@ func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*
 		SetAcquisitionSource(input.AcquisitionSource).
 		SetAcquisitionMedium(input.AcquisitionMedium).
 		SetAcquisitionCampaign(input.AcquisitionCampaign).
-		SetReferrerHost(input.ReferrerHost)
+		SetCampaignTerm(input.CampaignTerm).
+		SetCampaignContent(input.CampaignContent).
+		SetCampaignID(input.CampaignID).
+		SetReferrerHost(input.ReferrerHost).
+		SetIsActive(input.IsActive)
+
+	if input.EndedAt != nil {
+		query.SetEndedAt(*input.EndedAt)
+	}
 
 	s, err := query.Save(ctx)
 	if err != nil {
@@ -97,12 +113,28 @@ func (r *entRepository) GetByVisitorID(ctx context.Context, visitorID int64) ([]
 	return sessions, nil
 }
 
+func (r *entRepository) GetVisitorLastActiveSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	sessions, err := r.client.VisitorSession.
+		Query().
+		Where(visitorsession.VisitorID(visitorID)).
+		Where(visitorsession.EndedAtGT(time.Now())).
+		Where(visitorsession.IsActive(true)).
+		Order(ent.Desc(visitorsession.FieldStartedAt)).
+		First(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get visitor session by visitor id: %w", err)
+	}
+
+	return sessions, nil
+}
+
 func (r *entRepository) GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
 	sessions, err := r.client.VisitorSession.
 		Query().
 		Where(visitorsession.VisitorID(visitorID)).
 		Order(ent.Desc(visitorsession.FieldStartedAt)).
-		Only(ctx)
+		First(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get visitor session by visitor id: %w", err)
@@ -128,6 +160,7 @@ func (r *entRepository) GetBySessionToken(ctx context.Context, token string) (*e
 	s, err := r.client.VisitorSession.
 		Query().
 		Where(visitorsession.SessionToken(token)).
+		Where(visitorsession.IsActive(true)).
 		Only(ctx)
 
 	if err != nil {
@@ -151,6 +184,9 @@ func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateSes
 	if input.ExitPage != nil {
 		query.SetExitPage(*input.ExitPage)
 	}
+	if input.IsActive != nil {
+		query.SetIsActive(*input.IsActive)
+	}
 
 	affected, err := query.Save(ctx)
 	if err != nil {
@@ -162,6 +198,23 @@ func (r *entRepository) Update(ctx context.Context, uuid string, input UpdateSes
 	}
 
 	return r.GetByUUID(ctx, uuid)
+}
+
+func (r *entRepository) DeactivateVisitorSessions(ctx context.Context, visitorID int64) error {
+	_, err := r.client.VisitorSession.
+		Update().
+		Where(
+			visitorsession.VisitorID(visitorID),
+			visitorsession.IsActive(true),
+		).
+		SetIsActive(false).
+		Save(ctx)
+
+	if err != nil {
+		return fmt.Errorf("failed to deactivate visitor sessions: %w", err)
+	}
+
+	return nil
 }
 
 func (r *entRepository) Delete(ctx context.Context, uuid string) error {

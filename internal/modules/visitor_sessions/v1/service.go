@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
+	"tracking/internal/config"
 	"tracking/internal/ent"
 )
 
 type Service struct {
 	repo    Repository
 	logger  *slog.Logger
+	appCfg  config.AppConfig
 	timeout time.Duration
 }
 
-func NewService(repo Repository, logger *slog.Logger) *Service {
+func NewService(repo Repository, logger *slog.Logger, appCfg config.AppConfig) *Service {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &Service{
 		repo:    repo,
 		logger:  logger,
+		appCfg:  appCfg,
 		timeout: 5 * time.Second,
 	}
 }
@@ -32,12 +35,16 @@ type SessionResponse struct {
 	SessionToken        string     `json:"session_token"`
 	StartedAt           time.Time  `json:"started_at"`
 	EndedAt             *time.Time `json:"ended_at,omitempty"`
+	IsActive            bool       `json:"is_active"`
 	LastActivityAt      time.Time  `json:"last_activity_at"`
 	EntryPage           string     `json:"entry_page"`
 	ExitPage            string     `json:"exit_page"`
 	AcquisitionSource   string     `json:"acquisition_source"`
 	AcquisitionMedium   string     `json:"acquisition_medium"`
 	AcquisitionCampaign string     `json:"acquisition_campaign"`
+	CampaignTerm        string     `json:"campaign_term"`
+	CampaignContent     string     `json:"campaign_content"`
+	CampaignID          string     `json:"campaign_id"`
 	ReferrerHost        string     `json:"referrer_host"`
 	CreatedAt           time.Time  `json:"created_at"`
 }
@@ -107,6 +114,17 @@ func (s *Service) GetBySessionTokenRaw(ctx context.Context, token string) (*ent.
 		}
 		return nil, err
 	}
+
+	if sess.IsActive && sess.EndedAt != nil && time.Now().UTC().After(*sess.EndedAt) {
+		isActive := false
+		sess, err = s.repo.Update(ctx, sess.UUID, UpdateSessionInput{IsActive: &isActive})
+		if err != nil {
+			s.logger.WarnContext(ctx, "failed to update expired session status", "error", err)
+			return nil, err
+		}
+		return nil, nil
+	}
+
 	return sess, nil
 }
 
@@ -126,12 +144,16 @@ func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 		SessionToken:        s.SessionToken,
 		StartedAt:           s.StartedAt,
 		EndedAt:             endedAt,
+		IsActive:            s.IsActive,
 		LastActivityAt:      s.LastActivityAt,
 		EntryPage:           s.EntryPage,
 		ExitPage:            s.ExitPage,
 		AcquisitionSource:   s.AcquisitionSource,
 		AcquisitionMedium:   s.AcquisitionMedium,
 		AcquisitionCampaign: s.AcquisitionCampaign,
+		CampaignTerm:        s.CampaignTerm,
+		CampaignContent:     s.CampaignContent,
+		CampaignID:          s.CampaignID,
 		ReferrerHost:        s.ReferrerHost,
 		CreatedAt:           s.CreatedAt,
 	}
@@ -140,6 +162,17 @@ func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 func (s *Service) CreateSession(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
+
+	err := s.repo.DeactivateVisitorSessions(ctx, input.VisitorID)
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to deactivate previous sessions", "error", err)
+	}
+
+	if input.EndedAt == nil && s.appCfg.SessionExpiration > 0 {
+		endedAt := time.Now().UTC().Add(time.Duration(s.appCfg.SessionExpiration) * time.Second)
+		input.EndedAt = &endedAt
+	}
+	input.IsActive = true
 
 	sess, err := s.repo.Create(ctx, input)
 	if err != nil {
@@ -155,6 +188,20 @@ func (s *Service) UpdateSession(ctx context.Context, uuid string, input UpdateSe
 	sess, err := s.repo.Update(ctx, uuid, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update session: %w", err)
+	}
+	return sess, nil
+}
+
+func (s *Service) GetVisitorLastActiveSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.repo.GetVisitorLastActiveSession(ctx, visitorID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
 	}
 	return sess, nil
 }

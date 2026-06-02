@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"time"
+	"tracking/internal/config"
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	consentsv1 "tracking/internal/modules/consents/v1"
@@ -23,14 +24,14 @@ type Module struct {
 	logger       *slog.Logger
 }
 
-func NewModule(client *ent.Client, sitesService *sitesv1.Service, sessionSvc *visitor_sessionsv1.Service, consentsSvc *consentsv1.Service, logger *slog.Logger) *Module {
+func NewModule(client *ent.Client, sitesService *sitesv1.Service, sessionSvc *visitor_sessionsv1.Service, consentsSvc *consentsv1.Service, logger *slog.Logger, appCfg config.AppConfig) *Module {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	repo := NewRepository(client)
 	deviceRepo := devicesv1.NewRepository(client)
 	svc := NewService(repo, sitesService, deviceRepo, sessionSvc, consentsSvc, logger)
-	handler := NewHandler(svc, logger)
+	handler := NewHandler(svc, logger, appCfg)
 
 	return &Module{
 		handler:      handler,

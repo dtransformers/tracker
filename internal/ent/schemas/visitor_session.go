@@ -34,6 +34,9 @@ func (VisitorSession) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 
+		field.Bool("is_active").
+			Default(true),
+
 		field.Time("last_activity_at").
 			Default(time.Now),
 
@@ -50,6 +53,15 @@ func (VisitorSession) Fields() []ent.Field {
 			Optional(),
 
 		field.String("acquisition_campaign").
+			Optional(),
+
+		field.String("campaign_term").
+			Optional(),
+
+		field.String("campaign_content").
+			Optional(),
+
+		field.String("campaign_id").
 			Optional(),
 
 		field.String("referrer_host").

@@ -63,6 +63,7 @@ type CreateVisitorRequest struct {
 	Region    string `json:"region" swaggerignore:"true"`
 	City      string `json:"city" swaggerignore:"true"`
 	Timezone  string `json:"timezone" swaggerignore:"true"`
+	ISP       string `json:"isp" swaggerignore:"true"`
 
 	// Session Info
 	SessionToken        string `json:"session_token" swaggerignore:"true"`
@@ -71,6 +72,9 @@ type CreateVisitorRequest struct {
 	AcquisitionSource   string `json:"acquisition_source"`
 	AcquisitionMedium   string `json:"acquisition_medium"`
 	AcquisitionCampaign string `json:"acquisition_campaign"`
+	CampaignTerm        string `json:"campaign_term"`
+	CampaignContent     string `json:"campaign_content"`
+	CampaignID          string `json:"campaign_id"`
 	ReferrerHost        string `json:"referrer_host"`
 }
 
@@ -143,21 +147,21 @@ func (s *Service) getExistingSession(ctx context.Context, VisitorUUID string, Se
 		return nil, err
 	}
 	if session == nil {
-		return nil, errors.New("session not found")
+		return nil, errors.New("session not found,Please Clear Cookies")
 	}
 	device, err := s.getDeviceByID(ctx, int(session.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found")
+		return nil, errors.New("device not found,Please Clear Cookies")
 	}
 	v, err := s.getVistorByUUID(ctx, VisitorUUID)
 	if err != nil {
 		return nil, err
 	}
 	if v == nil {
-		return nil, errors.New("visitor not found")
+		return nil, errors.New("visitor not found, Please Clear Cookies")
 	}
 	response := toVisitorResponse(v)
 	response.SessionID = session.SessionToken
@@ -182,14 +186,41 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		return nil, err
 	}
 
-	visitorLastSession, err := s.sessionSvc.GetVisitorLastSession(ctx, int64(visitor.ID))
+	visitorLastActiveSession, err := s.sessionSvc.GetVisitorLastActiveSession(ctx, int64(visitor.ID))
 	if err != nil {
 		return nil, err
 	}
-	if visitorLastSession == nil {
-		return nil, errors.New("Visitor Has No Previous Session")
+	if visitorLastActiveSession == nil {
+		visitorLastSession, err := s.sessionSvc.GetVisitorLastSession(ctx, int64(visitor.ID))
+		if err != nil {
+			if ent.IsNotFound(err) {
+				return nil, errors.New("visitor does not exisits, Please Clear Coockies")
+			}
+			return nil, err
+		}
+		if visitorLastSession == nil {
+			return nil, errors.New("visitor does not exisits, Please Clear Coockies")
+		}
+		visitorLastActiveSession, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
+			UUID:                uuid.New().String(),
+			VisitorID:           int64(visitor.ID),
+			DeviceID:            int64(visitorLastSession.DeviceID),
+			SessionToken:        uuid.New().String(),
+			StartedAt:           time.Now().UTC(),
+			EntryPage:           entryPage,
+			AcquisitionSource:   visitorLastSession.AcquisitionSource,
+			AcquisitionMedium:   visitorLastSession.AcquisitionMedium,
+			AcquisitionCampaign: visitorLastSession.AcquisitionCampaign,
+			CampaignTerm:        visitorLastSession.CampaignTerm,
+			CampaignContent:     visitorLastSession.CampaignContent,
+			CampaignID:          visitorLastSession.CampaignID,
+			ReferrerHost:        visitorLastSession.ReferrerHost,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
-	device, err := s.getDeviceByID(ctx, int(visitorLastSession.DeviceID))
+	device, err := s.getDeviceByID(ctx, int(visitorLastActiveSession.DeviceID))
 	if err != nil {
 		return nil, err
 	}
@@ -202,12 +233,15 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		VisitorID:           int64(visitor.ID),
 		DeviceID:            int64(device.ID),
 		SessionToken:        uuid.New().String(),
-		StartedAt:           time.Now(),
+		StartedAt:           time.Now().UTC(),
 		EntryPage:           entryPage,
-		AcquisitionSource:   visitorLastSession.AcquisitionSource,
-		AcquisitionMedium:   visitorLastSession.AcquisitionMedium,
-		AcquisitionCampaign: visitorLastSession.AcquisitionCampaign,
-		ReferrerHost:        visitorLastSession.ReferrerHost,
+		AcquisitionSource:   visitorLastActiveSession.AcquisitionSource,
+		AcquisitionMedium:   visitorLastActiveSession.AcquisitionMedium,
+		AcquisitionCampaign: visitorLastActiveSession.AcquisitionCampaign,
+		CampaignTerm:        visitorLastActiveSession.CampaignTerm,
+		CampaignContent:     visitorLastActiveSession.CampaignContent,
+		CampaignID:          visitorLastActiveSession.CampaignID,
+		ReferrerHost:        visitorLastActiveSession.ReferrerHost,
 	})
 	if err != nil {
 		return nil, err
@@ -346,11 +380,14 @@ func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateVisitor
 				VisitorID:           int64(v.ID),
 				DeviceID:            int64(device.ID),
 				SessionToken:        req.SessionToken,
-				StartedAt:           time.Now(),
+				StartedAt:           time.Now().UTC(),
 				EntryPage:           req.EntryPage,
 				AcquisitionSource:   req.AcquisitionSource,
 				AcquisitionMedium:   req.AcquisitionMedium,
 				AcquisitionCampaign: req.AcquisitionCampaign,
+				CampaignTerm:        req.CampaignTerm,
+				CampaignContent:     req.CampaignContent,
+				CampaignID:          req.CampaignID,
 				ReferrerHost:        req.ReferrerHost,
 			})
 			if err != nil {
@@ -386,7 +423,6 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 			return s.getExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
 		}
 		if req.VisitorUUID != "" && req.SessionUUID == "" {
-
 			return s.createNewSessionForVisitor(ctx, req.VisitorUUID, req.EntryPage, site)
 		}
 	}
@@ -522,6 +558,7 @@ func (s *Service) createDevice(ctx context.Context, req CreateVisitorRequest, vi
 		BrowserVersion:  req.BrowserVersion,
 		Language:        req.Language,
 		Timezone:        req.Timezone,
+		ISP:             req.ISP,
 		ScreenWidth:     req.ScreenWidth,
 		ScreenHeight:    req.ScreenHeight,
 	})
@@ -627,11 +664,14 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 		VisitorID:           int64(v.ID),
 		DeviceID:            int64(device.ID),
 		SessionToken:        geo.SessionToken,
-		StartedAt:           time.Now(),
+		StartedAt:           time.Now().UTC(),
 		EntryPage:           geo.EntryPage,
 		AcquisitionSource:   geo.AcquisitionSource,
 		AcquisitionMedium:   geo.AcquisitionMedium,
 		AcquisitionCampaign: geo.AcquisitionCampaign,
+		CampaignTerm:        geo.CampaignTerm,
+		CampaignContent:     geo.CampaignContent,
+		CampaignID:          geo.CampaignID,
 		ReferrerHost:        geo.ReferrerHost,
 	})
 	if err != nil {
