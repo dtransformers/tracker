@@ -385,6 +385,11 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		})
 		if err != nil {
 			s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
+		} else {
+			_, err = s.repo.SetVisitorConsent(ctx, int64(v.ID), int64(site.ID), "none", "pending")
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to set default visitor consent", "error", err)
+			}
 		}
 	}
 
@@ -770,5 +775,54 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest,
 		Title:       pv.Title,
 		Referrer:    pv.Referrer,
 		CreatedAt:   pv.CreatedAt,
+	}, nil
+}
+
+type UpdateConsentRequest struct {
+	ConsentType string `json:"consent_type" binding:"required"`
+	Status      string `json:"status" binding:"required"`
+}
+
+type UpdateConsentResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+func (s *Service) UpdateVisitorConsent(ctx context.Context, req UpdateConsentRequest, site *ent.Site) (*UpdateConsentResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	var sessionToken string
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		if tracking.Cookies != nil {
+			sessionToken = tracking.Cookies["session_id"]
+		}
+	}
+
+	if sessionToken == "" {
+		return nil, fmt.Errorf("missing session token in cookies")
+	}
+
+	session, err := s.getSession(ctx, sessionToken)
+	if err != nil {
+		return nil, err
+	}
+	if session == nil {
+		return nil, fmt.Errorf("session not found")
+	}
+
+	v, err := s.repo.GetByID(ctx, session.VisitorID)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.repo.SetVisitorConsent(ctx, int64(v.ID), int64(site.ID), req.ConsentType, req.Status)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update consent: %w", err)
+	}
+
+	return &UpdateConsentResponse{
+		Success: true,
+		Message: "Consent updated successfully",
 	}, nil
 }

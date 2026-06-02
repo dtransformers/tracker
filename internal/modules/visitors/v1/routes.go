@@ -64,4 +64,5 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	visitors.POST("/", m.handler.CreateSession)
 	visitors.POST("/events", m.handler.CreateEvent)
 	visitors.POST("/pageviews", m.handler.CreatePageView)
+	visitors.PATCH("/consents", m.handler.UpdateConsent)
 }

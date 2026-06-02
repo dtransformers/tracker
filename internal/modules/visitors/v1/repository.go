@@ -6,6 +6,7 @@ import (
 	"time"
 	"tracking/internal/ent"
 	"tracking/internal/ent/visitor"
+	"tracking/internal/ent/visitorconsent"
 
 	"github.com/google/uuid"
 )
@@ -21,6 +22,7 @@ type Repository interface {
 	CreateSiteVisitor(ctx context.Context, input CreateSiteVisitorInput) (*ent.SiteVisitor, error)
 	CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error)
 	CreatePageView(ctx context.Context, input CreatePageViewInput) (*ent.PageView, error)
+	SetVisitorConsent(ctx context.Context, visitorID, siteID int64, consentType, status string) (*ent.VisitorConsent, error)
 }
 
 type entRepository struct {
@@ -221,4 +223,31 @@ func (r *entRepository) CreatePageView(ctx context.Context, input CreatePageView
 		return nil, fmt.Errorf("failed to create page view: %w", err)
 	}
 	return pv, nil
+}
+
+func (r *entRepository) SetVisitorConsent(ctx context.Context, visitorID, siteID int64, consentType, status string) (*ent.VisitorConsent, error) {
+	vc, err := r.client.VisitorConsent.Query().
+		Where(
+			visitorconsent.VisitorID(visitorID),
+			visitorconsent.SiteID(siteID),
+		).First(ctx)
+
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, fmt.Errorf("failed to query visitor consent: %w", err)
+	}
+
+	if vc != nil {
+		return vc.Update().
+			SetConsentType(consentType).
+			SetStatus(status).
+			Save(ctx)
+	}
+
+	return r.client.VisitorConsent.Create().
+		SetUUID(uuid.New().String()).
+		SetVisitorID(visitorID).
+		SetSiteID(siteID).
+		SetConsentType(consentType).
+		SetStatus(status).
+		Save(ctx)
 }
