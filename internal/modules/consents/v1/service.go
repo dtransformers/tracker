@@ -30,19 +30,60 @@ func NewService(repo Repository, sessionSvc *visitor_sessionsv1.Service, logger 
 	}
 }
 
+type ConsentType string
+
+const (
+	ConsentTypeTracking   ConsentType = "tracking"
+	ConsentTypeMarketing  ConsentType = "marketing"
+	ConsentTypeFunctional ConsentType = "functional"
+	ConsentTypeNone       ConsentType = "none"
+)
+
+func (c ConsentType) Valid() bool {
+	switch c {
+	case ConsentTypeTracking, ConsentTypeMarketing, ConsentTypeFunctional, ConsentTypeNone:
+		return true
+	}
+	return false
+}
+
+type ConsentStatus string
+
+const (
+	ConsentStatusGranted ConsentStatus = "granted"
+	ConsentStatusDenied  ConsentStatus = "denied"
+	ConsentStatusPending ConsentStatus = "pending"
+)
+
+func (s ConsentStatus) Valid() bool {
+	switch s {
+	case ConsentStatusGranted, ConsentStatusDenied, ConsentStatusPending:
+		return true
+	}
+	return false
+}
+
 type UpdateConsentRequest struct {
-	ConsentType string `json:"consent_type" binding:"required"`
-	Status      string `json:"status" binding:"required"`
+	ConsentType ConsentType   `json:"consent_type" binding:"required"`
+	Status      ConsentStatus `json:"status" binding:"required"`
 }
 
 type UpdateConsentResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 func (s *Service) UpdateVisitorConsent(ctx context.Context, req UpdateConsentRequest, site *ent.Site) (*UpdateConsentResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
+
+	if !req.ConsentType.Valid() {
+		return nil, fmt.Errorf("invalid consent type: %s", req.ConsentType)
+	}
+	if !req.Status.Valid() {
+		return nil, fmt.Errorf("invalid consent status: %s", req.Status)
+	}
 
 	var sessionToken string
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
@@ -63,7 +104,7 @@ func (s *Service) UpdateVisitorConsent(ctx context.Context, req UpdateConsentReq
 		return nil, fmt.Errorf("session not found")
 	}
 
-	_, err = s.repo.SetVisitorConsent(ctx, session.VisitorID, int64(site.ID), req.ConsentType, req.Status)
+	consent, err := s.repo.SetVisitorConsent(ctx, session.VisitorID, int64(site.ID), string(req.ConsentType), string(req.Status))
 	if err != nil {
 		return nil, fmt.Errorf("failed to update consent: %w", err)
 	}
@@ -71,6 +112,7 @@ func (s *Service) UpdateVisitorConsent(ctx context.Context, req UpdateConsentReq
 	return &UpdateConsentResponse{
 		Success: true,
 		Message: "Consent updated successfully",
+		Data:    consent,
 	}, nil
 }
 
@@ -78,6 +120,6 @@ func (s *Service) SetDefaultConsent(ctx context.Context, visitorID, siteID int64
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	_, err := s.repo.SetVisitorConsent(ctx, visitorID, siteID, "none", "pending")
+	_, err := s.repo.SetVisitorConsent(ctx, visitorID, siteID, string(ConsentTypeNone), string(ConsentStatusPending))
 	return err
 }

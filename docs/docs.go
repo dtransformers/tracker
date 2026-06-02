@@ -24,6 +24,207 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/consents": {
+            "post": {
+                "description": "Updates the consent status for a specific site and visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Consents"
+                ],
+                "summary": "Update visitor consent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Consent Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateConsentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateConsentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/custom": {
+            "post": {
+                "description": "Records a custom event for a visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Create custom event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Event Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.CreateEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.VisitorEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/pageviews": {
+            "post": {
+                "description": "Records a page view for a visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Create page view",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Page View Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.CreatePageViewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.PageView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sites": {
             "get": {
                 "security": [
@@ -415,157 +616,178 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/v1/visitors/events": {
-            "post": {
-                "description": "Create a new visitor event linked to a valid session.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "visitors"
-                ],
-                "summary": "Create a visitor event",
-                "parameters": [
-                    {
-                        "description": "Create event request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.CreateEventRequest"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Public API Key",
-                        "name": "X-API-Key",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "HMAC Signature",
-                        "name": "X-Signature",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request Timestamp",
-                        "name": "X-Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request Nonce",
-                        "name": "X-Nonce",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.EventResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/visitors/pageviews": {
-            "post": {
-                "description": "Create a new page view linked to a valid session.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "visitors"
-                ],
-                "summary": "Create a page view",
-                "parameters": [
-                    {
-                        "description": "Create page view request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.CreatePageViewRequest"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Public API Key",
-                        "name": "X-API-Key",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "HMAC Signature",
-                        "name": "X-Signature",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request Timestamp",
-                        "name": "X-Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request Nonce",
-                        "name": "X-Nonce",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1.PageViewResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "ent.PageView": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "referrer": {
+                    "description": "Referrer holds the value of the \"referrer\" field.",
+                    "type": "string"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL holds the value of the \"url\" field.",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.VisitorEvent": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "event_name": {
+                    "description": "EventName holds the value of the \"event_name\" field.",
+                    "type": "string"
+                },
+                "event_properties": {
+                    "description": "EventProperties holds the value of the \"event_properties\" field.",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_modules_consents_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.CreateEventRequest": {
+            "type": "object",
+            "required": [
+                "event_name"
+            ],
+            "properties": {
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.CreatePageViewRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_modules_sites_v1.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -596,54 +818,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.CreateEventRequest": {
-            "type": "object",
-            "required": [
-                "event_name",
-                "fingerprint_hash",
-                "session_token"
-            ],
-            "properties": {
-                "event_name": {
-                    "type": "string"
-                },
-                "event_properties": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.CreatePageViewRequest": {
-            "type": "object",
-            "required": [
-                "fingerprint_hash",
-                "session_token",
-                "url"
-            ],
-            "properties": {
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "referrer": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }
@@ -692,37 +866,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "fingerprint_hash": {
-                    "description": "Device Info Extracted by the tracking SDK",
                     "type": "string"
                 },
                 "referrer_host": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.EventResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_uuid": {
-                    "type": "string"
-                },
-                "event_name": {
-                    "type": "string"
-                },
-                "event_properties": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "session_uuid": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                },
-                "visitor_uuid": {
                     "type": "string"
                 }
             }
@@ -738,35 +884,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "v1.PageViewResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "device_uuid": {
-                    "type": "string"
-                },
-                "referrer": {
-                    "type": "string"
-                },
-                "session_uuid": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                },
-                "visitor_uuid": {
-                    "type": "string"
                 }
             }
         },
@@ -796,6 +913,32 @@ const docTemplate = `{
                 },
                 "uuid": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.UpdateConsentRequest": {
+            "type": "object",
+            "required": [
+                "consent_type",
+                "status"
+            ],
+            "properties": {
+                "consent_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UpdateConsentResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -839,6 +982,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "primary_user_id": {
+                    "type": "string"
+                },
+                "session_id": {
                     "type": "string"
                 },
                 "uuid": {

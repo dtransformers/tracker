@@ -36,34 +36,28 @@ RUN go build -trimpath -ldflags "\
     -o /out/app ./cmd/app
 
 
+
+
 ############################
 # 2. Runtime stage
 ############################
 FROM scratch
 
-# Optional: CA certificates (if your app calls HTTPS APIs)
+# CA certificates
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Copy binary
 COPY --from=builder /out/app /app
 
-############################
-# Runtime filesystem layout
-############################
 
-# Temp directory (mounted or used in-memory depending on runtime)
 ENV TMPDIR=/tmp
 VOLUME ["/tmp"]
 
-# Log directory (externalized for observability)
 ENV LOG_DIR=/logs
 VOLUME ["/logs"]
 
-# Optional runtime metadata
 ENV APP_ENV=production
 
-# Expose app port
 EXPOSE 8080
 
-# Run as non-root is not applicable in scratch, but process is isolated
 ENTRYPOINT ["/app"]

@@ -84,7 +84,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 		SessionToken: "session-token",
 	}
 
-	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{})
+	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
 	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 
@@ -178,7 +178,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 
 	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("Update", mock.Anything, mockVisitor.UUID, mock.Anything).Return(updatedVisitor, nil)
-	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
+	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil).Maybe()
 
 	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, "fingerprint-hash").Return(mockDevice, nil)
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
@@ -244,7 +244,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 		SessionToken: "session-token",
 	}
 
-	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{})
+	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
 	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil)
 	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil)
 

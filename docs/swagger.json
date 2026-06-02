@@ -1,791 +1,995 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "This is a tracking service API.",
-    "title": "Tracking API",
-    "termsOfService": "http://swagger.io/terms/",
-    "contact": {
-      "name": "API Support",
-      "url": "http://www.swagger.io/support",
-      "email": "support@swagger.io"
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a tracking service API.",
+        "title": "Tracking API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
-    "license": {
-      "name": "Apache 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/consents": {
+            "post": {
+                "description": "Updates the consent status for a specific site and visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Consents"
+                ],
+                "summary": "Update visitor consent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Consent Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateConsentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateConsentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/custom": {
+            "post": {
+                "description": "Records a custom event for a visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Create custom event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Event Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.CreateEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.VisitorEvent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/pageviews": {
+            "post": {
+                "description": "Records a page view for a visitor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Create page view",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Page View Request Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.CreatePageViewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.PageView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sites": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get a list of all sites",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "List all sites",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Filter by Tenant ID",
+                        "name": "tenant_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Create a new site with auto-generated security keys and assigned tenant ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Create a new site",
+                "parameters": [
+                    {
+                        "description": "Site creation request",
+                        "name": "site",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Domain already exists",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sites/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Get detailed information about a specific site",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get a site by UUID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Permanently delete a site",
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Delete a site",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Update site information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Update a site",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Site update request",
+                        "name": "site",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Domain already in use",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sites/{uuid}/regenerate-keys": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "description": "Generate new public and secret keys for a site",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Regenerate site security keys",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/visitors": {
+            "post": {
+                "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Create a visitor",
+                "parameters": [
+                    {
+                        "description": "Track visitor request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.CreateVisitorRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Public API Key",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HMAC Signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Timestamp",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cookie must contain anonymous_id",
+                        "name": "Cookie",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.VisitorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
     },
-    "version": "1.0"
-  },
-  "host": "localhost:3000",
-  "basePath": "/",
-  "paths": {
-    "/api/v1/sites": {
-      "get": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Get a list of all sites",
-        "produces": ["application/json"],
-        "tags": ["sites"],
-        "summary": "List all sites",
-        "parameters": [
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Filter by Tenant ID",
-            "name": "tenant_id",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.ListResponse"
+    "definitions": {
+        "ent.PageView": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "referrer": {
+                    "description": "Referrer holds the value of the \"referrer\" field.",
+                    "type": "string"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL holds the value of the \"url\" field.",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
             }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+        },
+        "ent.VisitorEvent": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "event_name": {
+                    "description": "EventName holds the value of the \"event_name\" field.",
+                    "type": "string"
+                },
+                "event_properties": {
+                    "description": "EventProperties holds the value of the \"event_properties\" field.",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
             }
-          }
+        },
+        "internal_modules_consents_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.CreateEventRequest": {
+            "type": "object",
+            "required": [
+                "event_name"
+            ],
+            "properties": {
+                "event_name": {
+                    "type": "string"
+                },
+                "event_properties": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.CreatePageViewRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_events_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_sites_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "trace_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CreateRequest": {
+            "type": "object",
+            "required": [
+                "domain",
+                "name",
+                "tenant_id"
+            ],
+            "properties": {
+                "domain": {
+                    "description": "Domain of the site (required, must be unique and valid)",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the site (required, 1-255 characters)",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID of the site",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.CreateVisitorRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash"
+            ],
+            "properties": {
+                "acquisition_campaign": {
+                    "type": "string"
+                },
+                "acquisition_medium": {
+                    "type": "string"
+                },
+                "acquisition_source": {
+                    "type": "string"
+                },
+                "entry_page": {
+                    "type": "string"
+                },
+                "exit_page": {
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer_host": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.ListResponse": {
+            "type": "object",
+            "properties": {
+                "sites": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.Response"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.Response": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UpdateConsentRequest": {
+            "type": "object",
+            "required": [
+                "consent_type",
+                "status"
+            ],
+            "properties": {
+                "consent_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.UpdateConsentResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "v1.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "description": "Optional new domain for the site",
+                    "type": "string"
+                },
+                "is_active": {
+                    "description": "Optional active status",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Optional new name for the site",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Optional new tenant ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.VisitorResponse": {
+            "type": "object",
+            "properties": {
+                "anonymous_id": {
+                    "type": "string"
+                },
+                "first_seen_at": {
+                    "type": "string"
+                },
+                "is_bot": {
+                    "type": "boolean"
+                },
+                "is_verified_human": {
+                    "type": "boolean"
+                },
+                "last_seen_at": {
+                    "type": "string"
+                },
+                "primary_user_id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
         }
-      },
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Create a new site with auto-generated security keys and assigned tenant ID",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["sites"],
-        "summary": "Create a new site",
-        "parameters": [
-          {
-            "description": "Site creation request",
-            "name": "site",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.CreateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/v1.Response"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "409": {
-            "description": "Domain already exists",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          }
-        }
-      }
     },
-    "/api/v1/sites/{uuid}": {
-      "get": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Get detailed information about a specific site",
-        "produces": ["application/json"],
-        "tags": ["sites"],
-        "summary": "Get a site by UUID",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Site UUID",
-            "name": "uuid",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.Response"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          }
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
         }
-      },
-      "delete": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Permanently delete a site",
-        "tags": ["sites"],
-        "summary": "Delete a site",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Site UUID",
-            "name": "uuid",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          }
-        }
-      },
-      "patch": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Update site information",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["sites"],
-        "summary": "Update a site",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Site UUID",
-            "name": "uuid",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "Site update request",
-            "name": "site",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.UpdateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.Response"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "409": {
-            "description": "Domain already in use",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sites/{uuid}/regenerate-keys": {
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "Generate new public and secret keys for a site",
-        "produces": ["application/json"],
-        "tags": ["sites"],
-        "summary": "Regenerate site security keys",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Site UUID",
-            "name": "uuid",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.Response"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/visitors": {
-      "post": {
-        "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["visitors"],
-        "summary": "Create a visitor",
-        "parameters": [
-          {
-            "description": "Track visitor request",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.CreateVisitorRequest"
-            }
-          },
-          {
-            "type": "string",
-            "description": "Public API Key",
-            "name": "X-API-Key",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "HMAC Signature",
-            "name": "X-Signature",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Timestamp",
-            "name": "X-Timestamp",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Nonce",
-            "name": "X-Nonce",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Cookie must contain anonymous_id",
-            "name": "Cookie",
-            "in": "header",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.VisitorResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/visitors/events": {
-      "post": {
-        "description": "Create a new visitor event linked to a valid session.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["visitors"],
-        "summary": "Create a visitor event",
-        "parameters": [
-          {
-            "description": "Create event request",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.CreateEventRequest"
-            }
-          },
-          {
-            "type": "string",
-            "description": "Public API Key",
-            "name": "X-API-Key",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "HMAC Signature",
-            "name": "X-Signature",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Timestamp",
-            "name": "X-Timestamp",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Nonce",
-            "name": "X-Nonce",
-            "in": "header",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.EventResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/visitors/pageviews": {
-      "post": {
-        "description": "Create a new page view linked to a valid session.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["visitors"],
-        "summary": "Create a page view",
-        "parameters": [
-          {
-            "description": "Create page view request",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.CreatePageViewRequest"
-            }
-          },
-          {
-            "type": "string",
-            "description": "Public API Key",
-            "name": "X-API-Key",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "HMAC Signature",
-            "name": "X-Signature",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Timestamp",
-            "name": "X-Timestamp",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "Request Nonce",
-            "name": "X-Nonce",
-            "in": "header",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1.PageViewResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-            }
-          }
-        }
-      }
     }
-  },
-  "definitions": {
-    "internal_modules_sites_v1.ErrorResponse": {
-      "type": "object",
-      "properties": {
-        "details": {
-          "type": "string"
-        },
-        "error": {
-          "type": "string"
-        }
-      }
-    },
-    "internal_modules_visitors_v1.ErrorResponse": {
-      "type": "object",
-      "properties": {
-        "details": {
-          "type": "string"
-        },
-        "error": {
-          "type": "string"
-        },
-        "status": {
-          "type": "integer"
-        },
-        "success": {
-          "type": "boolean"
-        },
-        "trace_id": {
-          "type": "string"
-        },
-        "version": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.CreateEventRequest": {
-      "type": "object",
-      "required": ["event_name", "fingerprint_hash", "session_token"],
-      "properties": {
-        "event_name": {
-          "type": "string"
-        },
-        "event_properties": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "fingerprint_hash": {
-          "type": "string"
-        },
-        "session_token": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.CreatePageViewRequest": {
-      "type": "object",
-      "required": ["fingerprint_hash", "session_token", "url"],
-      "properties": {
-        "fingerprint_hash": {
-          "type": "string"
-        },
-        "referrer": {
-          "type": "string"
-        },
-        "session_token": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.CreateRequest": {
-      "type": "object",
-      "required": ["domain", "name", "tenant_id"],
-      "properties": {
-        "domain": {
-          "description": "Domain of the site (required, must be unique and valid)",
-          "type": "string"
-        },
-        "name": {
-          "description": "Name of the site (required, 1-255 characters)",
-          "type": "string"
-        },
-        "tenant_id": {
-          "description": "Tenant ID of the site",
-          "type": "integer"
-        }
-      }
-    },
-    "v1.CreateVisitorRequest": {
-      "type": "object",
-      "required": ["fingerprint_hash"],
-      "properties": {
-        "acquisition_campaign": {
-          "type": "string"
-        },
-        "acquisition_medium": {
-          "type": "string"
-        },
-        "acquisition_source": {
-          "type": "string"
-        },
-        "entry_page": {
-          "type": "string"
-        },
-        "exit_page": {
-          "type": "string"
-        },
-        "fingerprint_hash": {
-          "description": "Device Info Extracted by the tracking SDK",
-          "type": "string"
-        },
-        "referrer_host": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.EventResponse": {
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string"
-        },
-        "device_uuid": {
-          "type": "string"
-        },
-        "event_name": {
-          "type": "string"
-        },
-        "event_properties": {
-          "type": "object",
-          "additionalProperties": true
-        },
-        "session_uuid": {
-          "type": "string"
-        },
-        "uuid": {
-          "type": "string"
-        },
-        "visitor_uuid": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.ListResponse": {
-      "type": "object",
-      "properties": {
-        "sites": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/v1.Response"
-          }
-        },
-        "total": {
-          "type": "integer"
-        }
-      }
-    },
-    "v1.PageViewResponse": {
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string"
-        },
-        "device_uuid": {
-          "type": "string"
-        },
-        "referrer": {
-          "type": "string"
-        },
-        "session_uuid": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        },
-        "uuid": {
-          "type": "string"
-        },
-        "visitor_uuid": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.Response": {
-      "type": "object",
-      "properties": {
-        "created_at": {
-          "type": "string"
-        },
-        "domain": {
-          "type": "string"
-        },
-        "is_active": {
-          "type": "boolean"
-        },
-        "name": {
-          "type": "string"
-        },
-        "public_key": {
-          "type": "string"
-        },
-        "tenant_id": {
-          "type": "integer"
-        },
-        "updated_at": {
-          "type": "string"
-        },
-        "uuid": {
-          "type": "string"
-        }
-      }
-    },
-    "v1.UpdateRequest": {
-      "type": "object",
-      "properties": {
-        "domain": {
-          "description": "Optional new domain for the site",
-          "type": "string"
-        },
-        "is_active": {
-          "description": "Optional active status",
-          "type": "boolean"
-        },
-        "name": {
-          "description": "Optional new name for the site",
-          "type": "string"
-        },
-        "tenant_id": {
-          "description": "Optional new tenant ID",
-          "type": "integer"
-        }
-      }
-    },
-    "v1.VisitorResponse": {
-      "type": "object",
-      "properties": {
-        "anonymous_id": {
-          "type": "string"
-        },
-        "first_seen_at": {
-          "type": "string"
-        },
-        "is_bot": {
-          "type": "boolean"
-        },
-        "is_verified_human": {
-          "type": "boolean"
-        },
-        "last_seen_at": {
-          "type": "string"
-        },
-        "primary_user_id": {
-          "type": "string"
-        },
-        "uuid": {
-          "type": "string"
-        }
-      }
-    }
-  },
-  "securityDefinitions": {
-    "BasicAuth": {
-      "type": "basic"
-    }
-  }
 }

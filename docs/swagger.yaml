@@ -1,5 +1,122 @@
 basePath: /
 definitions:
+  ent.PageView:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      device_id:
+        description: DeviceID holds the value of the "device_id" field.
+        type: integer
+      id:
+        description: ID of the ent.
+        type: integer
+      referrer:
+        description: Referrer holds the value of the "referrer" field.
+        type: string
+      session_id:
+        description: SessionID holds the value of the "session_id" field.
+        type: integer
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      url:
+        description: URL holds the value of the "url" field.
+        type: string
+      uuid:
+        description: UUID holds the value of the "uuid" field.
+        type: string
+      visitor_id:
+        description: VisitorID holds the value of the "visitor_id" field.
+        type: integer
+    type: object
+  ent.VisitorEvent:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      device_id:
+        description: DeviceID holds the value of the "device_id" field.
+        type: integer
+      event_name:
+        description: EventName holds the value of the "event_name" field.
+        type: string
+      event_properties:
+        additionalProperties: true
+        description: EventProperties holds the value of the "event_properties" field.
+        type: object
+      id:
+        description: ID of the ent.
+        type: integer
+      session_id:
+        description: SessionID holds the value of the "session_id" field.
+        type: integer
+      uuid:
+        description: UUID holds the value of the "uuid" field.
+        type: string
+      visitor_id:
+        description: VisitorID holds the value of the "visitor_id" field.
+        type: integer
+    type: object
+  internal_modules_consents_v1.ErrorResponse:
+    properties:
+      details:
+        type: string
+      error:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+      trace_id:
+        type: string
+      version:
+        type: string
+    type: object
+  internal_modules_events_v1.CreateEventRequest:
+    properties:
+      event_name:
+        type: string
+      event_properties:
+        additionalProperties: true
+        type: object
+      fingerprint_hash:
+        type: string
+      session_token:
+        type: string
+    required:
+    - event_name
+    type: object
+  internal_modules_events_v1.CreatePageViewRequest:
+    properties:
+      fingerprint_hash:
+        type: string
+      referrer:
+        type: string
+      session_token:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    required:
+    - url
+    type: object
+  internal_modules_events_v1.ErrorResponse:
+    properties:
+      details:
+        type: string
+      error:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+      trace_id:
+        type: string
+      version:
+        type: string
+    type: object
   internal_modules_sites_v1.ErrorResponse:
     properties:
       details:
@@ -22,39 +139,6 @@ definitions:
       version:
         type: string
     type: object
-  v1.CreateEventRequest:
-    properties:
-      event_name:
-        type: string
-      event_properties:
-        additionalProperties: true
-        type: object
-      fingerprint_hash:
-        type: string
-      session_token:
-        type: string
-    required:
-      - event_name
-      - fingerprint_hash
-      - session_token
-    type: object
-  v1.CreatePageViewRequest:
-    properties:
-      fingerprint_hash:
-        type: string
-      referrer:
-        type: string
-      session_token:
-        type: string
-      title:
-        type: string
-      url:
-        type: string
-    required:
-      - fingerprint_hash
-      - session_token
-      - url
-    type: object
   v1.CreateRequest:
     properties:
       domain:
@@ -67,9 +151,9 @@ definitions:
         description: Tenant ID of the site
         type: integer
     required:
-      - domain
-      - name
-      - tenant_id
+    - domain
+    - name
+    - tenant_id
     type: object
   v1.CreateVisitorRequest:
     properties:
@@ -84,58 +168,20 @@ definitions:
       exit_page:
         type: string
       fingerprint_hash:
-        description: Device Info Extracted by the tracking SDK
         type: string
       referrer_host:
         type: string
     required:
-      - fingerprint_hash
-    type: object
-  v1.EventResponse:
-    properties:
-      created_at:
-        type: string
-      device_uuid:
-        type: string
-      event_name:
-        type: string
-      event_properties:
-        additionalProperties: true
-        type: object
-      session_uuid:
-        type: string
-      uuid:
-        type: string
-      visitor_uuid:
-        type: string
+    - fingerprint_hash
     type: object
   v1.ListResponse:
     properties:
       sites:
         items:
-          $ref: "#/definitions/v1.Response"
+          $ref: '#/definitions/v1.Response'
         type: array
       total:
         type: integer
-    type: object
-  v1.PageViewResponse:
-    properties:
-      created_at:
-        type: string
-      device_uuid:
-        type: string
-      referrer:
-        type: string
-      session_uuid:
-        type: string
-      title:
-        type: string
-      url:
-        type: string
-      uuid:
-        type: string
-      visitor_uuid:
-        type: string
     type: object
   v1.Response:
     properties:
@@ -155,6 +201,23 @@ definitions:
         type: string
       uuid:
         type: string
+    type: object
+  v1.UpdateConsentRequest:
+    properties:
+      consent_type:
+        type: string
+      status:
+        type: string
+    required:
+    - consent_type
+    - status
+    type: object
+  v1.UpdateConsentResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
     type: object
   v1.UpdateRequest:
     properties:
@@ -185,6 +248,8 @@ definitions:
         type: string
       primary_user_id:
         type: string
+      session_id:
+        type: string
       uuid:
         type: string
     type: object
@@ -202,363 +267,396 @@ info:
   title: Tracking API
   version: "1.0"
 paths:
-  /api/v1/sites:
-    get:
-      description: Get a list of all sites
+  /api/v1/consents:
+    post:
+      consumes:
+      - application/json
+      description: Updates the consent status for a specific site and visitor
       parameters:
-        - description: Filter by Tenant ID
-          format: int64
-          in: query
-          name: tenant_id
-          type: integer
+      - description: Site API Key
+        in: header
+        name: X-Api-Key
+        required: true
+        type: string
+      - description: Client Fingerprint
+        in: header
+        name: X-Fingerprint
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
+      - description: Consent Request Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateConsentRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/v1.ListResponse"
+            $ref: '#/definitions/v1.UpdateConsentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_modules_consents_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
-      security:
-        - BasicAuth: []
-      summary: List all sites
+            $ref: '#/definitions/internal_modules_consents_v1.ErrorResponse'
+      summary: Update visitor consent
       tags:
-        - sites
+      - Consents
+  /api/v1/events/custom:
     post:
       consumes:
-        - application/json
-      description:
-        Create a new site with auto-generated security keys and assigned
+      - application/json
+      description: Records a custom event for a visitor
+      parameters:
+      - description: Site API Key
+        in: header
+        name: X-Api-Key
+        required: true
+        type: string
+      - description: Client Fingerprint
+        in: header
+        name: X-Fingerprint
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
+      - description: Event Request Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_modules_events_v1.CreateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.VisitorEvent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_modules_events_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_modules_events_v1.ErrorResponse'
+      summary: Create custom event
+      tags:
+      - Events
+  /api/v1/events/pageviews:
+    post:
+      consumes:
+      - application/json
+      description: Records a page view for a visitor
+      parameters:
+      - description: Site API Key
+        in: header
+        name: X-Api-Key
+        required: true
+        type: string
+      - description: Client Fingerprint
+        in: header
+        name: X-Fingerprint
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
+      - description: Page View Request Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_modules_events_v1.CreatePageViewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.PageView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_modules_events_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_modules_events_v1.ErrorResponse'
+      summary: Create page view
+      tags:
+      - Events
+  /api/v1/sites:
+    get:
+      description: Get a list of all sites
+      parameters:
+      - description: Filter by Tenant ID
+        format: int64
+        in: query
+        name: tenant_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: List all sites
+      tags:
+      - sites
+    post:
+      consumes:
+      - application/json
+      description: Create a new site with auto-generated security keys and assigned
         tenant ID
       parameters:
-        - description: Site creation request
-          in: body
-          name: site
-          required: true
-          schema:
-            $ref: "#/definitions/v1.CreateRequest"
+      - description: Site creation request
+        in: body
+        name: site
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: "#/definitions/v1.Response"
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "409":
           description: Domain already exists
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
       security:
-        - BasicAuth: []
+      - BasicAuth: []
       summary: Create a new site
       tags:
-        - sites
+      - sites
   /api/v1/sites/{uuid}:
     delete:
       description: Permanently delete a site
       parameters:
-        - description: Site UUID
-          in: path
-          name: uuid
-          required: true
-          type: string
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
       security:
-        - BasicAuth: []
+      - BasicAuth: []
       summary: Delete a site
       tags:
-        - sites
+      - sites
     get:
       description: Get detailed information about a specific site
       parameters:
-        - description: Site UUID
-          in: path
-          name: uuid
-          required: true
-          type: string
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/v1.Response"
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
       security:
-        - BasicAuth: []
+      - BasicAuth: []
       summary: Get a site by UUID
       tags:
-        - sites
+      - sites
     patch:
       consumes:
-        - application/json
+      - application/json
       description: Update site information
       parameters:
-        - description: Site UUID
-          in: path
-          name: uuid
-          required: true
-          type: string
-        - description: Site update request
-          in: body
-          name: site
-          required: true
-          schema:
-            $ref: "#/definitions/v1.UpdateRequest"
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Site update request
+        in: body
+        name: site
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/v1.Response"
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "409":
           description: Domain already in use
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
       security:
-        - BasicAuth: []
+      - BasicAuth: []
       summary: Update a site
       tags:
-        - sites
+      - sites
   /api/v1/sites/{uuid}/regenerate-keys:
     post:
       description: Generate new public and secret keys for a site
       parameters:
-        - description: Site UUID
-          in: path
-          name: uuid
-          required: true
-          type: string
+      - description: Site UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/v1.Response"
+            $ref: '#/definitions/v1.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_sites_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_sites_v1.ErrorResponse'
       security:
-        - BasicAuth: []
+      - BasicAuth: []
       summary: Regenerate site security keys
       tags:
-        - sites
+      - sites
   /api/v1/visitors:
     post:
       consumes:
-        - application/json
-      description:
-        Create a visitor on a site. Creates a new visitor if not exists,
+      - application/json
+      description: Create a visitor on a site. Creates a new visitor if not exists,
         or updates last seen time. Requires anonymous_id cookie.
       parameters:
-        - description: Track visitor request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/v1.CreateVisitorRequest"
-        - description: Public API Key
-          in: header
-          name: X-API-Key
-          required: true
-          type: string
-        - description: HMAC Signature
-          in: header
-          name: X-Signature
-          required: true
-          type: string
-        - description: Request Timestamp
-          in: header
-          name: X-Timestamp
-          required: true
-          type: string
-        - description: Request Nonce
-          in: header
-          name: X-Nonce
-          required: true
-          type: string
-        - description: Cookie must contain anonymous_id
-          in: header
-          name: Cookie
-          required: true
-          type: string
+      - description: Track visitor request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateVisitorRequest'
+      - description: Public API Key
+        in: header
+        name: X-API-Key
+        required: true
+        type: string
+      - description: HMAC Signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Request Timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Request Nonce
+        in: header
+        name: X-Nonce
+        required: true
+        type: string
+      - description: Cookie must contain anonymous_id
+        in: header
+        name: Cookie
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/v1.VisitorResponse"
+            $ref: '#/definitions/v1.VisitorResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_visitors_v1.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+            $ref: '#/definitions/internal_modules_visitors_v1.ErrorResponse'
       summary: Create a visitor
       tags:
-        - visitors
-  /api/v1/visitors/events:
-    post:
-      consumes:
-        - application/json
-      description: Create a new visitor event linked to a valid session.
-      parameters:
-        - description: Create event request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/v1.CreateEventRequest"
-        - description: Public API Key
-          in: header
-          name: X-API-Key
-          required: true
-          type: string
-        - description: HMAC Signature
-          in: header
-          name: X-Signature
-          required: true
-          type: string
-        - description: Request Timestamp
-          in: header
-          name: X-Timestamp
-          required: true
-          type: string
-        - description: Request Nonce
-          in: header
-          name: X-Nonce
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: "#/definitions/v1.EventResponse"
-        "400":
-          description: Bad Request
-          schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-      summary: Create a visitor event
-      tags:
-        - visitors
-  /api/v1/visitors/pageviews:
-    post:
-      consumes:
-        - application/json
-      description: Create a new page view linked to a valid session.
-      parameters:
-        - description: Create page view request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/v1.CreatePageViewRequest"
-        - description: Public API Key
-          in: header
-          name: X-API-Key
-          required: true
-          type: string
-        - description: HMAC Signature
-          in: header
-          name: X-Signature
-          required: true
-          type: string
-        - description: Request Timestamp
-          in: header
-          name: X-Timestamp
-          required: true
-          type: string
-        - description: Request Nonce
-          in: header
-          name: X-Nonce
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: "#/definitions/v1.PageViewResponse"
-        "400":
-          description: Bad Request
-          schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: "#/definitions/internal_modules_visitors_v1.ErrorResponse"
-      summary: Create a page view
-      tags:
-        - visitors
+      - visitors
 securityDefinitions:
   BasicAuth:
     type: basic
