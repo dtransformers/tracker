@@ -32,3 +32,10 @@ packages:
       dir: "internal/modules/visitor_sessions/v1/mocks"
       filename: "mock_{{.InterfaceName}}.go"
       pkgname: "mocks"
+
+  tracking/internal/modules/consents/v1:
+    config:
+      all: true
+      dir: "internal/modules/consents/v1/mocks"
+      filename: "mock_{{.InterfaceName}}.go"
+      pkgname: "mocks"

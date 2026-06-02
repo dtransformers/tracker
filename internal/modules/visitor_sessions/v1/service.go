@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 	"tracking/internal/ent"
@@ -95,6 +96,20 @@ func (s *Service) GetBySessionToken(ctx context.Context, token string) (*Session
 	return toSessionResponse(sess), nil
 }
 
+func (s *Service) GetBySessionTokenRaw(ctx context.Context, token string) (*ent.VisitorSession, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.repo.GetBySessionToken(ctx, token)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return sess, nil
+}
+
 func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 	if s == nil {
 		return nil
@@ -120,4 +135,40 @@ func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 		ReferrerHost:        s.ReferrerHost,
 		CreatedAt:           s.CreatedAt,
 	}
+}
+
+func (s *Service) CreateSession(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session: %w", err)
+	}
+	return sess, nil
+}
+
+func (s *Service) UpdateSession(ctx context.Context, uuid string, input UpdateSessionInput) (*ent.VisitorSession, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.repo.Update(ctx, uuid, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update session: %w", err)
+	}
+	return sess, nil
+}
+
+func (s *Service) GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.repo.GetVisitorLastSession(ctx, visitorID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return sess, nil
 }

@@ -21,7 +21,8 @@ api
 # Go workspace file
 go.work
 go.work.sum
-
+.gocache
+.go
 # env file
 .env
 

@@ -33,7 +33,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Tags visitors
 // @Accept json
 // @Produce json
-// @Param request body CreateSessionRequest true "Track visitor request"
+// @Param request body CreateVisitorRequest true "Track visitor request"
 // @Param X-API-Key header string true "Public API Key"
 // @Param X-Signature header string true "HMAC Signature"
 // @Param X-Timestamp header string true "Request Timestamp"
@@ -43,8 +43,8 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/visitors [post]
-func (h *Handler) CreateSession(c *gin.Context) {
-	var req CreateSessionRequest
+func (h *Handler) CreateVisitor(c *gin.Context) {
+	var req CreateVisitorRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
@@ -78,151 +78,6 @@ func (h *Handler) CreateSession(c *gin.Context) {
 	c.SetCookie("visitor_uuid", response.UUID, visitorExpiration, "/", "", true, true)
 
 	c.JSON(http.StatusOK, response)
-}
-
-// CreateEvent godoc
-// @Summary Create a visitor event
-// @Description Create a new visitor event linked to a valid session.
-// @Tags visitors
-// @Accept json
-// @Produce json
-// @Param request body CreateEventRequest true "Create event request"
-// @Param X-API-Key header string true "Public API Key"
-// @Param X-Signature header string true "HMAC Signature"
-// @Param X-Timestamp header string true "Request Timestamp"
-// @Param X-Nonce header string true "Request Nonce"
-// @Success 200 {object} EventResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/visitors/events [post]
-func (h *Handler) CreateEvent(c *gin.Context) {
-	var req CreateEventRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid request body",
-			Details: formatBindError(err),
-		})
-		return
-	}
-
-	siteObj, exists := c.Get("site")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	site, ok := siteObj.(*ent.Site)
-	if !ok || site == nil || !site.IsActive || site.IsDeleted {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	res, err := h.service.CreateEvent(c.Request.Context(), req, site)
-	if err != nil {
-		h.logger.Error("failed to create visitor event", "error", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, res)
-}
-
-// CreatePageView godoc
-// @Summary Create a page view
-// @Description Create a new page view linked to a valid session.
-// @Tags visitors
-// @Accept json
-// @Produce json
-// @Param request body CreatePageViewRequest true "Create page view request"
-// @Param X-API-Key header string true "Public API Key"
-// @Param X-Signature header string true "HMAC Signature"
-// @Param X-Timestamp header string true "Request Timestamp"
-// @Param X-Nonce header string true "Request Nonce"
-// @Success 200 {object} PageViewResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/visitors/pageviews [post]
-func (h *Handler) CreatePageView(c *gin.Context) {
-	var req CreatePageViewRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid request body",
-			Details: formatBindError(err),
-		})
-		return
-	}
-
-	siteObj, exists := c.Get("site")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	site, ok := siteObj.(*ent.Site)
-	if !ok || site == nil || !site.IsActive || site.IsDeleted {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	res, err := h.service.CreatePageView(c.Request.Context(), req, site)
-	if err != nil {
-		h.logger.Error("failed to create page view", "error", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, res)
-}
-
-// @Summary Update visitor consent
-// @Description Updates the consent status for a specific site and visitor
-// @Tags Visitors
-// @Accept json
-// @Produce json
-// @Param X-Api-Key header string true "Site API Key"
-// @Param X-Fingerprint header string true "Client Fingerprint"
-// @Param X-Nonce header string true "Request Nonce"
-// @Param request body UpdateConsentRequest true "Consent Request Payload"
-// @Success 200 {object} UpdateConsentResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/visitors/consents [patch]
-func (h *Handler) UpdateConsent(c *gin.Context) {
-	var req UpdateConsentRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid request body",
-			Details: formatBindError(err),
-		})
-		return
-	}
-
-	siteObj, exists := c.Get("site")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	site, ok := siteObj.(*ent.Site)
-	if !ok || site == nil || !site.IsActive || site.IsDeleted {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
-		return
-	}
-
-	res, err := h.service.UpdateVisitorConsent(c.Request.Context(), req, site)
-	if err != nil {
-		h.logger.Error("failed to update consent", "error", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, res)
 }
 
 type ErrorResponse struct {

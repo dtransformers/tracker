@@ -355,7 +355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateSessionRequest"
+                            "$ref": "#/definitions/v1.CreateVisitorRequest"
                         }
                     },
                     {
@@ -670,7 +670,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.CreateSessionRequest": {
+        "v1.CreateVisitorRequest": {
             "type": "object",
             "required": [
                 "fingerprint_hash"
