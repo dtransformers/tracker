@@ -491,3 +491,72 @@ export interface TargetProps {
      */
     custom?: Record<string, unknown>;
 }
+
+
+export interface TrackingEvent {
+
+    // ── Mandatory Core Identifiers ────────────────────────────
+    /** UUID v4 — global deduplication key across all platforms */
+    event_id: string;
+    /** Persistent device-level visitor identifier */
+    visitor_id: number;
+    /** Visit-scoped session identifier */
+    session_id: number;
+    /** Internal page identifier where the event occurred */
+    page_id: number;
+    /** Device identifier */
+    device_id: number;
+
+    // ── Event Classification ──────────────────────────────────
+    type: EventType;
+    category: EventCategory;
+    /**
+     * Human-readable event name for dashboards and BI tools.
+     * Convention: Title Case — e.g. "Product Added to Cart", "Form Submitted"
+     */
+    name: string;
+
+    // ── Timestamps ────────────────────────────────────────────
+    /** Browser-recorded event time — ISO 8601 with ms precision */
+    occurred_at: string;
+    /** Server receipt time — added by ingestion API */
+    server_received_at?: string;
+    /**
+     * Monotonically increasing event counter within this session.
+     * Derived from session.sequence_number at emit time.
+     * Critical for ordering events in analytics pipelines.
+     */
+    sequence: number;
+
+    // ── Platform Click IDs ────────────────────────────────────
+    /**
+     * Active click IDs at the moment this event fired.
+     * Copied from `session.click_ids` for convenience — every event carries
+     * them so server-side forwarders never need to look up session state.
+     */
+    click_ids: PlatformClickIds;
+
+
+
+    /**
+     * IP-derived geolocation — populated server-side ONLY.
+     * Never send precise GPS coordinates.
+     */
+
+    // ── Event Payload ─────────────────────────────────────────
+    target: TargetProps;
+
+    // ── Platform API Payloads ─────────────────────────────────
+    /**
+     * Pre-formatted payloads for ad-platform server-side APIs.
+     * Populated by the enrichment pipeline before dispatch.
+     * Each payload is ready to POST to its respective endpoint.
+     */
+
+    // ── SDK Metadata ──────────────────────────────────────────
+    /** Schema version — bump on any breaking field changes */
+    schema_version: string;
+    /** Name of the SDK/library that emitted this event, e.g. "web-tracker-js" */
+    sdk_name?: string;
+    sdk_version?: string;
+}
