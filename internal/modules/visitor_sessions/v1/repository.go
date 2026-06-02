@@ -12,6 +12,7 @@ type Repository interface {
 	Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.VisitorSession, error)
 	GetByVisitorID(ctx context.Context, visitorID int64) ([]*ent.VisitorSession, error)
+	GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)
 	GetByDeviceID(ctx context.Context, deviceID int64) ([]*ent.VisitorSession, error)
 	GetBySessionToken(ctx context.Context, token string) (*ent.VisitorSession, error)
 	Update(ctx context.Context, uuid string, input UpdateSessionInput) (*ent.VisitorSession, error)
@@ -91,6 +92,20 @@ func (r *entRepository) GetByVisitorID(ctx context.Context, visitorID int64) ([]
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get visitor sessions by visitor id: %w", err)
+	}
+
+	return sessions, nil
+}
+
+func (r *entRepository) GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	sessions, err := r.client.VisitorSession.
+		Query().
+		Where(visitorsession.VisitorID(visitorID)).
+		Order(ent.Desc(visitorsession.FieldStartedAt)).
+		Only(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get visitor session by visitor id: %w", err)
 	}
 
 	return sessions, nil

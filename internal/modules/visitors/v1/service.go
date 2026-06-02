@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/url"
@@ -42,7 +43,8 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 type CreateSessionRequest struct {
 	PublicKey string `json:"-"`
 
-	AnonymousID string `json:"anonymous_id" swaggerignore:"true"`
+	VisitorUUID string `json:"visitor_uuid" swaggerignore:"true"`
+	SessionUUID string `json:"session_uuid" swaggerignore:"true"`
 
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
 	DeviceType      string `json:"device_type" swaggerignore:"true"`
@@ -130,21 +132,108 @@ type PageViewResponse struct {
 
 /*
 CreateSession godoc
-responsible on creating the visitor session  since the sdk didn't find any current session, the session creation implecitly requires a device if not found, means also the visitor entity is not found since the device and the entity are conencted, also we need to store this event as a visit to the website on the site visitor entity
-input: the device info, the request info, the site info : all those info are on the request context
-response: the visitor session
 */
-func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
+
+func (s *Service) getExistingSession(ctx context.Context, VisitorUUID string, SessionUUID string) (*VisitorResponse, error) {
+	session, err := s.getSession(ctx, SessionUUID)
+	if err != nil {
+		return nil, err
+	}
+	if session == nil {
+		return nil, errors.New("session not found")
+	}
+	device, err := s.getDeviceByID(ctx, int(session.DeviceID))
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return nil, errors.New("device not found")
+	}
+	v, err := s.getVistorByUUID(ctx, VisitorUUID)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, errors.New("visitor not found")
+	}
+	response := toVisitorResponse(v)
+	response.SessionID = session.SessionToken
+	return response, nil
+
+}
+
+func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID string) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
+	visitor, err := s.getVistorByUUID(ctx, VisitorUUID)
+	if err != nil {
+		return nil, err
+	}
+	if visitor == nil {
+		return nil, errors.New("visitor not found")
+	}
+
+	visitorLastSession, err := s.getVisitorLastSession(ctx, int64(visitor.ID))
+	if err != nil {
+		return nil, err
+	}
+	if visitorLastSession == nil {
+		return nil, errors.New("Visitor Has No Previous Session")
+	}
+	device, err := s.getDeviceByID(ctx, int(visitorLastSession.DeviceID))
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return nil, errors.New("device not found")
+	}
+
+	newSession, err := s.createSession(ctx, CreateSessionRequest{
+		VisitorUUID:         visitor.UUID,
+		DeviceType:          device.DeviceType,
+		OS:                  device.Os,
+		Browser:             device.Browser,
+		AcquisitionSource:   visitorLastSession.AcquisitionSource,
+		AcquisitionMedium:   visitorLastSession.AcquisitionMedium,
+		AcquisitionCampaign: visitorLastSession.AcquisitionCampaign,
+		ReferrerHost:        visitorLastSession.ReferrerHost,
+		SessionToken:        uuid.New().String(),
+	}, int64(visitor.ID), int64(device.ID))
+	if err != nil {
+		return nil, err
+	}
+	if newSession == nil {
+		return nil, errors.New("failed to create new session")
+	}
+
+	response := toVisitorResponse(visitor)
+	response.SessionID = newSession.SessionToken
+	return response, nil
+}
+func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
 	var originalIP string
 	var isBot bool
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		originalIP = tracking.OriginalIP
+
 		if tracking.Cookies != nil && tracking.Cookies["visitor_uuid"] != "" {
-			req.AnonymousID = tracking.Cookies["visitor_uuid"]
+			req.VisitorUUID = tracking.Cookies["visitor_uuid"]
 		}
+		if tracking.Cookies != nil && tracking.Cookies["session_id"] != "" {
+			req.SessionUUID = tracking.Cookies["session_id"]
+		}
+
+		if req.VisitorUUID != "" && req.SessionUUID != "" {
+			return s.getExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
+		}
+
+		if req.VisitorUUID != "" && req.SessionUUID == "" {
+			return s.createNewSessionForVisitor(ctx, req.VisitorUUID)
+		}
+
 		req.DeviceType = tracking.DeviceType
 		if req.OS == "" {
 			req.OS = tracking.OS
@@ -195,17 +284,6 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 
 	if device == nil {
 		isNewDevice = true
-		// With the creation of every device, a new visitor must be created.
-		// If req.AnonymousID already exists, generate a new one to avoid unique constraint violations.
-		if req.AnonymousID != "" {
-			existingV, err := s.getVisitor(ctx, req.AnonymousID)
-			if err != nil {
-				return nil, err
-			}
-			if existingV != nil {
-				req.AnonymousID = uuid.New().String()
-			}
-		}
 		v, err = s.createVisitor(ctx, req, isBot)
 		if err != nil {
 			return nil, err
@@ -292,14 +370,34 @@ func (s *Service) getVisitor(ctx context.Context, anonymousID string) (*ent.Visi
 	return v, nil
 }
 
-func (s *Service) createVisitor(ctx context.Context, req CreateSessionRequest, isBot bool) (*ent.Visitor, error) {
-	anonID := req.AnonymousID
-	if anonID == "" {
-		anonID = uuid.New().String()
+func (s *Service) getVistorByUUID(ctx context.Context, visitorUUID string) (*ent.Visitor, error) {
+
+	v, err := s.repo.GetByUUID(ctx, visitorUUID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get visitor: %w", err)
 	}
+	return v, nil
+}
+
+func (s *Service) getVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+
+	v, err := s.sessionRepo.GetVisitorLastSession(ctx, visitorID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get visitor: %w", err)
+	}
+	return v, nil
+}
+func (s *Service) createVisitor(ctx context.Context, req CreateSessionRequest, isBot bool) (*ent.Visitor, error) {
+
 	v, err := s.repo.Create(ctx, CreateSessionInput{
 		UUID:            uuid.New().String(),
-		AnonymousID:     anonID,
+		AnonymousID:     uuid.New().String(),
 		IsBot:           isBot,
 		IsVerifiedHuman: !isBot,
 	})
@@ -325,6 +423,20 @@ func (s *Service) getDevice(ctx context.Context, fingerprintHash string) (*ent.D
 		return nil, nil
 	}
 	device, err := s.deviceRepo.GetByFingerprintHash(ctx, fingerprintHash)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get device: %w", err)
+	}
+	return device, nil
+}
+
+func (s *Service) getDeviceByID(ctx context.Context, id int) (*ent.Device, error) {
+	if id == 0 {
+		return nil, nil
+	}
+	device, err := s.deviceRepo.GetByID(ctx, id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, nil
@@ -462,7 +574,6 @@ func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintH
 			anonID = uuid.New().String()
 		}
 
-		geo.AnonymousID = anonID
 		geo.FingerprintHash = fingerprintHash
 		geo.SessionToken = sessionToken
 

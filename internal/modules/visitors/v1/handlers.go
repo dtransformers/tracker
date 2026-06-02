@@ -66,18 +66,17 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
 		return
 	}
-
-	res, err := h.service.CreateSession(c.Request.Context(), req, site)
+	response, err := h.service.CreateSession(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to create visitor session", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	c.SetCookie("session_id", res.SessionID, 3600*24*365, "/", "", false, true)
-	c.SetCookie("visitor_uuid", res.UUID, 3600*24*365, "/", "", false, true)
+	c.SetCookie("session_id", response.SessionID, 3600*24*365, "/", "", false, true)
+	c.SetCookie("visitor_uuid", response.UUID, 3600*24*365, "/", "", false, true)
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
 }
 
 // CreateEvent godoc

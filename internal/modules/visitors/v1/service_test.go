@@ -33,7 +33,6 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 
 	req := visitorsv1.CreateSessionRequest{
 		PublicKey:           pubKey,
-		AnonymousID:         anonID,
 		SessionToken:        "session-token",
 		DeviceType:          "desktop",
 		OS:                  "linux",
@@ -448,4 +447,3 @@ func TestCreateEvent_NewSession(t *testing.T) {
 	assert.Equal(t, "new-visitor-uuid", res.VisitorUUID)
 	assert.Equal(t, "new-device-uuid", res.DeviceUUID)
 }
-
