@@ -119,7 +119,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreateEvent(c.Request.Context(), req)
+	res, err := h.service.CreateEvent(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to create visitor event", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
@@ -168,7 +168,7 @@ func (h *Handler) CreatePageView(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreatePageView(c.Request.Context(), req)
+	res, err := h.service.CreatePageView(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to create page view", "error", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})

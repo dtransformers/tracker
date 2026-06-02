@@ -300,7 +300,7 @@ func TestCreateEvent_ExistingSession(t *testing.T) {
 		EventProperties: map[string]interface{}{"button": "blue"},
 	}
 
-	res, err := service.CreateEvent(context.Background(), req)
+	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -363,7 +363,7 @@ func TestCreatePageView_ExistingSession(t *testing.T) {
 		Referrer:        "https://google.com",
 	}
 
-	res, err := service.CreatePageView(context.Background(), req)
+	res, err := service.CreatePageView(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -436,7 +436,7 @@ func TestCreateEvent_NewSession(t *testing.T) {
 		EventName:       "page_load",
 	}
 
-	res, err := service.CreateEvent(context.Background(), req)
+	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)

@@ -162,7 +162,7 @@ func (s *Service) getExistingSession(ctx context.Context, VisitorUUID string, Se
 
 }
 
-func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID string) (*VisitorResponse, error) {
+func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID string, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -172,6 +172,11 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 	}
 	if visitor == nil {
 		return nil, errors.New("visitor not found")
+	}
+
+	visitor, err = s.updateVisitor(ctx, visitor)
+	if err != nil {
+		return nil, err
 	}
 
 	visitorLastSession, err := s.getVisitorLastSession(ctx, int64(visitor.ID))
@@ -205,6 +210,16 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 	}
 	if newSession == nil {
 		return nil, errors.New("failed to create new session")
+	}
+
+	_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
+		UUID:      uuid.New().String(),
+		VisitorID: int64(visitor.ID),
+		SiteID:    int64(site.ID),
+		SessionID: int64(newSession.ID),
+	})
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
 	}
 
 	response := toVisitorResponse(visitor)
@@ -298,9 +313,10 @@ func (s *Service) resolveVisitorAndDevice(ctx context.Context, req CreateSession
 	return v, device, isNewDevice, nil
 }
 
-func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateSessionRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, error) {
+func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateSessionRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, bool, error) {
 	var sessionID int64
 	var sessionToken string
+	var isNewSession bool
 
 	if isNewDevice || req.SessionToken != "" {
 		if req.SessionToken == "" {
@@ -309,26 +325,27 @@ func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateSession
 
 		session, err := s.getSession(ctx, req.SessionToken)
 		if err != nil {
-			return 0, "", err
+			return 0, "", false, err
 		}
 
 		if session == nil {
 			sess, err := s.createSession(ctx, req, int64(v.ID), int64(device.ID))
 			if err != nil {
-				return 0, "", err
+				return 0, "", false, err
 			}
 			sessionID = int64(sess.ID)
 			sessionToken = sess.SessionToken
+			isNewSession = true
 		} else {
 			sess, err := s.updateSession(ctx, session, req)
 			if err != nil {
-				return 0, "", err
+				return 0, "", false, err
 			}
 			sessionID = int64(sess.ID)
 			sessionToken = sess.SessionToken
 		}
 	}
-	return sessionID, sessionToken, nil
+	return sessionID, sessionToken, isNewSession, nil
 }
 func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
@@ -343,7 +360,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		}
 		if req.VisitorUUID != "" && req.SessionUUID == "" {
 
-			return s.createNewSessionForVisitor(ctx, req.VisitorUUID)
+			return s.createNewSessionForVisitor(ctx, req.VisitorUUID, site)
 		}
 	}
 
@@ -354,12 +371,12 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		return nil, err
 	}
 
-	sessionID, sessionToken, err := s.resolveSessionForCreate(ctx, req, v, device, isNewDevice)
+	sessionID, sessionToken, isNewSession, err := s.resolveSessionForCreate(ctx, req, v, device, isNewDevice)
 	if err != nil {
 		return nil, err
 	}
 
-	if sessionID != 0 {
+	if isNewSession && sessionID != 0 {
 		_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
 			UUID:      uuid.New().String(),
 			VisitorID: int64(v.ID),
@@ -564,7 +581,7 @@ func toVisitorResponse(v *ent.Visitor) *VisitorResponse {
 	}
 }
 
-func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateSessionRequest) (*ent.VisitorSession, error) {
+func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateSessionRequest, site *ent.Site) (*ent.VisitorSession, error) {
 	session, err := s.getSession(ctx, sessionToken)
 	if err != nil {
 		return nil, err
@@ -619,6 +636,11 @@ func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintH
 		if err != nil {
 			return nil, err
 		}
+
+		v, err = s.updateVisitor(ctx, v)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	geo.FingerprintHash = fingerprintHash
@@ -628,10 +650,20 @@ func (s *Service) resolveSession(ctx context.Context, sessionToken, fingerprintH
 		return nil, err
 	}
 
+	_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
+		UUID:      uuid.New().String(),
+		VisitorID: int64(v.ID),
+		SiteID:    int64(site.ID),
+		SessionID: int64(session.ID),
+	})
+	if err != nil {
+		s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
+	}
+
 	return session, nil
 }
 
-func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*EventResponse, error) {
+func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site *ent.Site) (*EventResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -645,7 +677,7 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*Eve
 		s.enrichRequestWithTracking(&geo, tracking)
 	}
 
-	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
+	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
 	if err != nil {
 		return nil, err
 	}
@@ -685,7 +717,7 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*Eve
 	}, nil
 }
 
-func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest) (*PageViewResponse, error) {
+func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest, site *ent.Site) (*PageViewResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
@@ -699,7 +731,7 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest)
 		s.enrichRequestWithTracking(&geo, tracking)
 	}
 
-	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
+	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
 	if err != nil {
 		return nil, err
 	}
