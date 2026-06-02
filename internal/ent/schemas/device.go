@@ -44,6 +44,9 @@ func (Device) Fields() []ent.Field {
 		field.String("browser").
 			Optional(),
 
+		field.String("browser_version").
+			Optional(),
+
 		field.String("language").
 			Optional(),
 

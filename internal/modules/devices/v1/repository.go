@@ -29,7 +29,7 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-type CreateDeviceInput struct {
+	type CreateDeviceInput struct {
 	UUID            string
 	VisitorID       int64
 	FingerprintHash string
@@ -40,6 +40,7 @@ type CreateDeviceInput struct {
 	Region          string
 	City            string
 	Browser         string
+	BrowserVersion  string
 	Language        string
 	Timezone        string
 	ScreenWidth     int

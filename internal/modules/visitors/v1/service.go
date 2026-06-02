@@ -53,10 +53,10 @@ type CreateVisitorRequest struct {
 	DeviceType      string `json:"device_type" swaggerignore:"true"`
 	OS              string `json:"os" swaggerignore:"true"`
 	Browser         string `json:"browser" swaggerignore:"true"`
+	BrowserVersion  string `json:"browser_version" swaggerignore:"true"`
 	Language        string `json:"language" swaggerignore:"true"`
 	ScreenWidth     int    `json:"screen_width" swaggerignore:"true"`
 	ScreenHeight    int    `json:"screen_height" swaggerignore:"true"`
-
 	// Geo location information extracted from ip
 	AddressIP string `json:"address_ip" swaggerignore:"true"`
 	Country   string `json:"country" swaggerignore:"true"`
@@ -258,6 +258,9 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 	}
 	if req.Browser == "" {
 		req.Browser = tracking.Browser
+	}
+	if req.BrowserVersion == "" {
+		req.BrowserVersion = tracking.BrowserVersion
 	}
 	if req.Language == "" {
 		req.Language = tracking.AcceptLanguage
@@ -516,6 +519,7 @@ func (s *Service) createDevice(ctx context.Context, req CreateVisitorRequest, vi
 		Region:          req.Region,
 		City:            req.City,
 		Browser:         req.Browser,
+		BrowserVersion:  req.BrowserVersion,
 		Language:        req.Language,
 		Timezone:        req.Timezone,
 		ScreenWidth:     req.ScreenWidth,
