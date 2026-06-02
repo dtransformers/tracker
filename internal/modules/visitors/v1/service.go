@@ -81,12 +81,17 @@ type CreateVisitorRequest struct {
 type VisitorResponse struct {
 	UUID            string    `json:"uuid"`
 	SessionID       string    `json:"session_id"`
-	AnonymousID     string    `json:"anonymous_id"`
 	PrimaryUserID   *string   `json:"primary_user_id,omitempty"`
 	FirstSeenAt     time.Time `json:"first_seen_at"`
 	LastSeenAt      time.Time `json:"last_seen_at"`
 	IsBot           bool      `json:"is_bot"`
 	IsVerifiedHuman bool      `json:"is_verified_human"`
+}
+
+type FullVisitorSessionDetails struct {
+	Visitor *ent.Visitor        `json:"visitor"`
+	Device  *ent.Device         `json:"device"`
+	Session *ent.VisitorSession `json:"session"`
 }
 
 type CreateEventRequest struct {
@@ -137,11 +142,33 @@ type PageViewResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-/*
-CreateSession godoc
-*/
+func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, SessionToken string) (*FullVisitorSessionDetails, error) {
+	session, err := s.sessionSvc.GetSessionByTokenRaw(ctx, SessionToken)
+	if err != nil {
+		return nil, err
+	}
+	if session == nil {
+		return nil, errors.New("session not found,Please Clear Cookies")
+	}
+	device, err := s.deviceRepo.GetByID(ctx, int(session.DeviceID))
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return nil, errors.New("device not found,Please Clear Cookies")
+	}
+	v, err := s.getVistorByUUID(ctx, VisitorUUID)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, errors.New("visitor not found, Please Clear Cookies")
+	}
 
-func (s *Service) getExistingSession(ctx context.Context, VisitorUUID string, SessionUUID string) (*VisitorResponse, error) {
+	return toFullSessionDetails(v, device, session), nil
+}
+
+func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, SessionUUID string) (*VisitorResponse, error) {
 	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, SessionUUID)
 	if err != nil {
 		return nil, err
@@ -420,7 +447,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 		s.enrichRequestWithTracking(&req, tracking)
 		isBot = tracking.Bot
 		if req.VisitorUUID != "" && req.SessionUUID != "" {
-			return s.getExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
+			return s.GetExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
 		}
 		if req.VisitorUUID != "" && req.SessionUUID == "" {
 			return s.createNewSessionForVisitor(ctx, req.VisitorUUID, req.EntryPage, site)
@@ -586,13 +613,19 @@ func toVisitorResponse(v *ent.Visitor) *VisitorResponse {
 	}
 	return &VisitorResponse{
 		UUID:            v.UUID,
-		AnonymousID:     v.AnonymousID,
 		PrimaryUserID:   v.PrimaryUserID,
 		FirstSeenAt:     v.FirstSeenAt,
 		LastSeenAt:      v.LastSeenAt,
 		IsBot:           v.IsBot,
 		IsVerifiedHuman: v.IsVerifiedHuman,
 	}
+}
+
+func toFullSessionDetails(v *ent.Visitor, d *ent.Device, s *ent.VisitorSession) *FullVisitorSessionDetails {
+	if v == nil || d == nil || s == nil {
+		return nil
+	}
+	return &FullVisitorSessionDetails{Visitor: v, Device: d, Session: s}
 }
 
 func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateVisitorRequest, site *ent.Site) (*ent.VisitorSession, error) {
@@ -614,7 +647,7 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 		var anonID string
 		if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 			if tracking.Cookies != nil {
-				anonID = tracking.Cookies["anonymous_id"]
+				anonID = tracking.Cookies["visitor_uuid"]
 			}
 		}
 		if anonID == "" {

@@ -45,7 +45,7 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site 
 	var sessionID string
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		if tracking.Cookies != nil {
-			anonID = tracking.Cookies["anonymous_id"]
+			anonID = tracking.Cookies["visitor_uuid"]
 			sessionID = tracking.Cookies["session_id"]
 		}
 	}
@@ -89,32 +89,26 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest,
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var anonID string
+	var visitorUUID string
 	var sessionID string
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		if tracking.Cookies != nil {
-			anonID = tracking.Cookies["anonymous_id"]
+			visitorUUID = tracking.Cookies["visitor_uuid"]
 			sessionID = tracking.Cookies["session_id"]
 		}
 	}
-	if req.SessionToken == "" {
-		req.SessionToken = sessionID
+	if sessionID == "" {
+		return nil, fmt.Errorf("UnAuthoized Request")
 	}
-	geo := visitorsv1.CreateVisitorRequest{
-		VisitorUUID:  anonID,
-		SessionToken: req.SessionToken,
-		EntryPage:    req.URL,
-	}
-
-	session, err := s.visitorsSvc.ResolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
+	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve session: %w", err)
 	}
 
 	pv, err := s.repo.CreatePageView(ctx, CreatePageViewInput{
-		SessionID: int64(session.ID),
-		VisitorID: session.VisitorID,
-		DeviceID:  session.DeviceID,
+		SessionID: int64(details.Session.ID),
+		VisitorID: int64(details.Visitor.ID),
+		DeviceID:  int64(details.Device.ID),
 		URL:       req.URL,
 		Title:     req.Title,
 		Referrer:  req.Referrer,

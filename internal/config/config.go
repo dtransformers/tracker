@@ -166,7 +166,7 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		runMode = "development"
 	}
 	isDev := runMode == "development"
-	SessionExpiration := 5 // 30 * 60;
+	SessionExpiration := 1 * 60 // 30 * 60;
 	VisitorExpiration := 3600 * 24 * 365
 	return AppConfig{
 		Host:              mustString(env, "APP_HOST"),

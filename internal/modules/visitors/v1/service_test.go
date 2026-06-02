@@ -100,7 +100,6 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, anonID, res.AnonymousID)
 	mockVisitorsRepo.AssertExpectations(t)
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)
@@ -191,7 +190,6 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, anonID, res.AnonymousID)
 	mockVisitorsRepo.AssertExpectations(t)
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)

@@ -60,6 +60,14 @@ func (s *Service) GetByUUID(ctx context.Context, uuid string) (*SessionResponse,
 	return toSessionResponse(sess), nil
 }
 
+func (s *Service) GetSessionByTokenRaw(ctx context.Context, SessionToken string) (*ent.VisitorSession, error) {
+	session, err := s.repo.GetByToken(ctx, SessionToken)
+	if err != nil {
+		return nil, err
+	}
+	return session, nil
+}
+
 func (s *Service) GetByVisitorID(ctx context.Context, visitorID int64) ([]*SessionResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
