@@ -211,72 +211,61 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 	response.SessionID = newSession.SessionToken
 	return response, nil
 }
-func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
-	var originalIP string
-	var isBot bool
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		originalIP = tracking.OriginalIP
 
-		if tracking.Cookies != nil && tracking.Cookies["visitor_uuid"] != "" {
+func (s *Service) enrichRequestWithTracking(req *CreateSessionRequest, tracking *middlewares.TrackingInfo) {
+	if tracking == nil {
+		return
+	}
+
+	if tracking.Cookies != nil {
+		if tracking.Cookies["visitor_uuid"] != "" {
 			req.VisitorUUID = tracking.Cookies["visitor_uuid"]
 		}
-		if tracking.Cookies != nil && tracking.Cookies["session_id"] != "" {
+		if tracking.Cookies["session_id"] != "" {
 			req.SessionUUID = tracking.Cookies["session_id"]
-		}
-
-		if req.VisitorUUID != "" && req.SessionUUID != "" {
-			return s.getExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
-		}
-
-		if req.VisitorUUID != "" && req.SessionUUID == "" {
-			return s.createNewSessionForVisitor(ctx, req.VisitorUUID)
-		}
-
-		req.DeviceType = tracking.DeviceType
-		if req.OS == "" {
-			req.OS = tracking.OS
-		}
-		if req.Browser == "" {
-			req.Browser = tracking.Browser
-		}
-		if req.DeviceType == "" {
-			req.DeviceType = tracking.DeviceType
-		}
-		if req.Language == "" {
-			req.Language = tracking.AcceptLanguage
-		}
-		req.AddressIP = tracking.OriginalIP
-
-		if req.ReferrerHost == "" {
-			if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
-				req.ReferrerHost = u.Host
-			} else {
-				req.ReferrerHost = tracking.Referer
-			}
-		}
-		isBot = tracking.Bot
-
-		if req.Country == "" {
-			req.Country = tracking.Country
-		}
-		if req.Region == "" {
-			req.Region = tracking.Region
-		}
-		if req.City == "" {
-			req.City = tracking.City
-		}
-		if req.Timezone == "" {
-			req.Timezone = tracking.Timezone
 		}
 	}
 
-	s.logger.InfoContext(ctx, "tracking visitor from ip", "address_ip", originalIP)
+	if req.DeviceType == "" {
+		req.DeviceType = tracking.DeviceType
+	}
+	if req.OS == "" {
+		req.OS = tracking.OS
+	}
+	if req.Browser == "" {
+		req.Browser = tracking.Browser
+	}
+	if req.Language == "" {
+		req.Language = tracking.AcceptLanguage
+	}
+	req.AddressIP = tracking.OriginalIP
 
+	if req.ReferrerHost == "" {
+		if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
+			req.ReferrerHost = u.Host
+		} else {
+			req.ReferrerHost = tracking.Referer
+		}
+	}
+
+	if req.Country == "" {
+		req.Country = tracking.Country
+	}
+	if req.Region == "" {
+		req.Region = tracking.Region
+	}
+	if req.City == "" {
+		req.City = tracking.City
+	}
+	if req.Timezone == "" {
+		req.Timezone = tracking.Timezone
+	}
+}
+
+func (s *Service) resolveVisitorAndDevice(ctx context.Context, req CreateSessionRequest, isBot bool) (*ent.Visitor, *ent.Device, bool, error) {
 	device, err := s.getDevice(ctx, req.FingerprintHash)
 	if err != nil {
-		return nil, err
+		return nil, nil, false, err
 	}
 
 	var v *ent.Visitor
@@ -286,29 +275,33 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 		isNewDevice = true
 		v, err = s.createVisitor(ctx, req, isBot)
 		if err != nil {
-			return nil, err
+			return nil, nil, false, err
 		}
 		device, err = s.createDevice(ctx, req, int64(v.ID))
 		if err != nil {
-			return nil, err
+			return nil, nil, false, err
 		}
 	} else {
 		device, err = s.updateDevice(ctx, device, req)
 		if err != nil {
-			return nil, err
+			return nil, nil, false, err
 		}
 		v, err = s.repo.GetByID(ctx, device.VisitorID)
 		if err != nil {
-			return nil, err
+			return nil, nil, false, err
 		}
 		v, err = s.updateVisitor(ctx, v)
 		if err != nil {
-			return nil, err
+			return nil, nil, false, err
 		}
 	}
+	return v, device, isNewDevice, nil
+}
 
+func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateSessionRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, error) {
 	var sessionID int64
 	var sessionToken string
+
 	if isNewDevice || req.SessionToken != "" {
 		if req.SessionToken == "" {
 			req.SessionToken = uuid.New().String()
@@ -316,24 +309,54 @@ func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, s
 
 		session, err := s.getSession(ctx, req.SessionToken)
 		if err != nil {
-			return nil, err
+			return 0, "", err
 		}
 
 		if session == nil {
 			sess, err := s.createSession(ctx, req, int64(v.ID), int64(device.ID))
 			if err != nil {
-				return nil, err
+				return 0, "", err
 			}
 			sessionID = int64(sess.ID)
 			sessionToken = sess.SessionToken
 		} else {
 			sess, err := s.updateSession(ctx, session, req)
 			if err != nil {
-				return nil, err
+				return 0, "", err
 			}
 			sessionID = int64(sess.ID)
 			sessionToken = sess.SessionToken
 		}
+	}
+	return sessionID, sessionToken, nil
+}
+func (s *Service) CreateSession(ctx context.Context, req CreateSessionRequest, site *ent.Site) (*VisitorResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	var isBot bool
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		s.enrichRequestWithTracking(&req, tracking)
+		isBot = tracking.Bot
+		if req.VisitorUUID != "" && req.SessionUUID != "" {
+			return s.getExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
+		}
+		if req.VisitorUUID != "" && req.SessionUUID == "" {
+
+			return s.createNewSessionForVisitor(ctx, req.VisitorUUID)
+		}
+	}
+
+	s.logger.InfoContext(ctx, "tracking visitor from ip", "address_ip", req.AddressIP)
+
+	v, device, isNewDevice, err := s.resolveVisitorAndDevice(ctx, req, isBot)
+	if err != nil {
+		return nil, err
+	}
+
+	sessionID, sessionToken, err := s.resolveSessionForCreate(ctx, req, v, device, isNewDevice)
+	if err != nil {
+		return nil, err
 	}
 
 	if sessionID != 0 {
@@ -612,29 +635,14 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest) (*Eve
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var geo CreateSessionRequest
+	geo := CreateSessionRequest{
+		Country:  req.Country,
+		Region:   req.Region,
+		City:     req.City,
+		Timezone: req.Timezone,
+	}
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		geo.AddressIP = tracking.OriginalIP
-		geo.DeviceType = tracking.DeviceType
-		geo.OS = tracking.OS
-		geo.Browser = tracking.Browser
-		geo.Language = tracking.AcceptLanguage
-		geo.Country = tracking.Country
-		geo.Region = tracking.Region
-		geo.City = tracking.City
-		geo.Timezone = tracking.Timezone
-	}
-	if req.Country != "" {
-		geo.Country = req.Country
-	}
-	if req.Region != "" {
-		geo.Region = req.Region
-	}
-	if req.City != "" {
-		geo.City = req.City
-	}
-	if req.Timezone != "" {
-		geo.Timezone = req.Timezone
+		s.enrichRequestWithTracking(&geo, tracking)
 	}
 
 	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)
@@ -681,29 +689,14 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest)
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var geo CreateSessionRequest
+	geo := CreateSessionRequest{
+		Country:  req.Country,
+		Region:   req.Region,
+		City:     req.City,
+		Timezone: req.Timezone,
+	}
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		geo.AddressIP = tracking.OriginalIP
-		geo.DeviceType = tracking.DeviceType
-		geo.OS = tracking.OS
-		geo.Browser = tracking.Browser
-		geo.Language = tracking.AcceptLanguage
-		geo.Country = tracking.Country
-		geo.Region = tracking.Region
-		geo.City = tracking.City
-		geo.Timezone = tracking.Timezone
-	}
-	if req.Country != "" {
-		geo.Country = req.Country
-	}
-	if req.Region != "" {
-		geo.Region = req.Region
-	}
-	if req.City != "" {
-		geo.City = req.City
-	}
-	if req.Timezone != "" {
-		geo.Timezone = req.Timezone
+		s.enrichRequestWithTracking(&geo, tracking)
 	}
 
 	session, err := s.resolveSession(ctx, req.SessionToken, req.FingerprintHash, geo)

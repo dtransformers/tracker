@@ -72,9 +72,10 @@ func (h *Handler) CreateSession(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
-
-	c.SetCookie("session_id", response.SessionID, 3600*24*365, "/", "", false, true)
-	c.SetCookie("visitor_uuid", response.UUID, 3600*24*365, "/", "", false, true)
+	sessionExpiration := 30 * 60         // 30 Minutes In Sec
+	visitorExpiration := 3600 * 24 * 365 // 1 Year In Sec
+	c.SetCookie("session_id", response.SessionID, sessionExpiration, "/", "", true, true)
+	c.SetCookie("visitor_uuid", response.UUID, visitorExpiration, "/", "", true, true)
 
 	c.JSON(http.StatusOK, response)
 }

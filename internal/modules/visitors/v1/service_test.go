@@ -111,7 +111,6 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	anonID := "anon-123"
 	req := visitorsv1.CreateSessionRequest{
 		PublicKey:           pubKey,
-		AnonymousID:         anonID,
 		SessionToken:        "session-token",
 		DeviceType:          "desktop",
 		OS:                  "linux",
@@ -200,7 +199,6 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 
 	req := visitorsv1.CreateSessionRequest{
 		PublicKey:       pubKey,
-		AnonymousID:     anonID,
 		AddressIP:       "127.0.0.1",
 		FingerprintHash: "fingerprint-hash",
 	}

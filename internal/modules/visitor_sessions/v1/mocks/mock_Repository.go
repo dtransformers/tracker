@@ -436,6 +436,74 @@ func (_c *MockRepository_GetByVisitorID_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
+// GetVisitorLastSession provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetVisitorLastSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error) {
+	ret := _mock.Called(ctx, visitorID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetVisitorLastSession")
+	}
+
+	var r0 *ent.VisitorSession
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*ent.VisitorSession, error)); ok {
+		return returnFunc(ctx, visitorID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *ent.VisitorSession); ok {
+		r0 = returnFunc(ctx, visitorID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.VisitorSession)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, visitorID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetVisitorLastSession_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetVisitorLastSession'
+type MockRepository_GetVisitorLastSession_Call struct {
+	*mock.Call
+}
+
+// GetVisitorLastSession is a helper method to define mock.On call
+//   - ctx context.Context
+//   - visitorID int64
+func (_e *MockRepository_Expecter) GetVisitorLastSession(ctx interface{}, visitorID interface{}) *MockRepository_GetVisitorLastSession_Call {
+	return &MockRepository_GetVisitorLastSession_Call{Call: _e.mock.On("GetVisitorLastSession", ctx, visitorID)}
+}
+
+func (_c *MockRepository_GetVisitorLastSession_Call) Run(run func(ctx context.Context, visitorID int64)) *MockRepository_GetVisitorLastSession_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetVisitorLastSession_Call) Return(visitorSession *ent.VisitorSession, err error) *MockRepository_GetVisitorLastSession_Call {
+	_c.Call.Return(visitorSession, err)
+	return _c
+}
+
+func (_c *MockRepository_GetVisitorLastSession_Call) RunAndReturn(run func(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)) *MockRepository_GetVisitorLastSession_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockRepository
 func (_mock *MockRepository) Update(ctx context.Context, uuid string, input v1.UpdateSessionInput) (*ent.VisitorSession, error) {
 	ret := _mock.Called(ctx, uuid, input)
