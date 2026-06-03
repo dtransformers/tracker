@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -21,14 +22,75 @@ const (
 	FieldVisitorID = "visitor_id"
 	// FieldDeviceID holds the string denoting the device_id field in the database.
 	FieldDeviceID = "device_id"
+	// FieldPageID holds the string denoting the page_id field in the database.
+	FieldPageID = "page_id"
+	// FieldEventType holds the string denoting the event_type field in the database.
+	FieldEventType = "event_type"
+	// FieldEventCategory holds the string denoting the event_category field in the database.
+	FieldEventCategory = "event_category"
 	// FieldEventName holds the string denoting the event_name field in the database.
 	FieldEventName = "event_name"
-	// FieldEventProperties holds the string denoting the event_properties field in the database.
-	FieldEventProperties = "event_properties"
+	// FieldOccurredAt holds the string denoting the occurred_at field in the database.
+	FieldOccurredAt = "occurred_at"
+	// FieldServerReceivedAt holds the string denoting the server_received_at field in the database.
+	FieldServerReceivedAt = "server_received_at"
+	// FieldSequence holds the string denoting the sequence field in the database.
+	FieldSequence = "sequence"
+	// FieldSchemaVersion holds the string denoting the schema_version field in the database.
+	FieldSchemaVersion = "schema_version"
+	// FieldSdkName holds the string denoting the sdk_name field in the database.
+	FieldSdkName = "sdk_name"
+	// FieldSdkVersion holds the string denoting the sdk_version field in the database.
+	FieldSdkVersion = "sdk_version"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// EdgeCustomProps holds the string denoting the custom_props edge name in mutations.
+	EdgeCustomProps = "custom_props"
+	// EdgePlatformClicks holds the string denoting the platform_clicks edge name in mutations.
+	EdgePlatformClicks = "platform_clicks"
+	// EdgeTargetProps holds the string denoting the target_props edge name in mutations.
+	EdgeTargetProps = "target_props"
+	// EdgeCommerceItems holds the string denoting the commerce_items edge name in mutations.
+	EdgeCommerceItems = "commerce_items"
+	// EdgeSearchFilters holds the string denoting the search_filters edge name in mutations.
+	EdgeSearchFilters = "search_filters"
 	// Table holds the table name of the visitorevent in the database.
 	Table = "visitor_events"
+	// CustomPropsTable is the table that holds the custom_props relation/edge.
+	CustomPropsTable = "event_custom_props"
+	// CustomPropsInverseTable is the table name for the EventCustomProp entity.
+	// It exists in this package in order to avoid circular dependency with the "eventcustomprop" package.
+	CustomPropsInverseTable = "event_custom_props"
+	// CustomPropsColumn is the table column denoting the custom_props relation/edge.
+	CustomPropsColumn = "event_id"
+	// PlatformClicksTable is the table that holds the platform_clicks relation/edge.
+	PlatformClicksTable = "visitor_platform_clicks"
+	// PlatformClicksInverseTable is the table name for the VisitorPlatformClick entity.
+	// It exists in this package in order to avoid circular dependency with the "visitorplatformclick" package.
+	PlatformClicksInverseTable = "visitor_platform_clicks"
+	// PlatformClicksColumn is the table column denoting the platform_clicks relation/edge.
+	PlatformClicksColumn = "event_id"
+	// TargetPropsTable is the table that holds the target_props relation/edge.
+	TargetPropsTable = "event_target_props"
+	// TargetPropsInverseTable is the table name for the EventTargetProp entity.
+	// It exists in this package in order to avoid circular dependency with the "eventtargetprop" package.
+	TargetPropsInverseTable = "event_target_props"
+	// TargetPropsColumn is the table column denoting the target_props relation/edge.
+	TargetPropsColumn = "event_id"
+	// CommerceItemsTable is the table that holds the commerce_items relation/edge.
+	CommerceItemsTable = "event_commerce_items"
+	// CommerceItemsInverseTable is the table name for the EventCommerceItem entity.
+	// It exists in this package in order to avoid circular dependency with the "eventcommerceitem" package.
+	CommerceItemsInverseTable = "event_commerce_items"
+	// CommerceItemsColumn is the table column denoting the commerce_items relation/edge.
+	CommerceItemsColumn = "event_id"
+	// SearchFiltersTable is the table that holds the search_filters relation/edge.
+	SearchFiltersTable = "event_target_search_filters"
+	// SearchFiltersInverseTable is the table name for the EventTargetSearchFilter entity.
+	// It exists in this package in order to avoid circular dependency with the "eventtargetsearchfilter" package.
+	SearchFiltersInverseTable = "event_target_search_filters"
+	// SearchFiltersColumn is the table column denoting the search_filters relation/edge.
+	SearchFiltersColumn = "event_id"
 )
 
 // Columns holds all SQL columns for visitorevent fields.
@@ -38,8 +100,16 @@ var Columns = []string{
 	FieldSessionID,
 	FieldVisitorID,
 	FieldDeviceID,
+	FieldPageID,
+	FieldEventType,
+	FieldEventCategory,
 	FieldEventName,
-	FieldEventProperties,
+	FieldOccurredAt,
+	FieldServerReceivedAt,
+	FieldSequence,
+	FieldSchemaVersion,
+	FieldSdkName,
+	FieldSdkVersion,
 	FieldCreatedAt,
 }
 
@@ -88,12 +158,148 @@ func ByDeviceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeviceID, opts...).ToFunc()
 }
 
+// ByPageID orders the results by the page_id field.
+func ByPageID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPageID, opts...).ToFunc()
+}
+
+// ByEventType orders the results by the event_type field.
+func ByEventType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEventType, opts...).ToFunc()
+}
+
+// ByEventCategory orders the results by the event_category field.
+func ByEventCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEventCategory, opts...).ToFunc()
+}
+
 // ByEventName orders the results by the event_name field.
 func ByEventName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEventName, opts...).ToFunc()
 }
 
+// ByOccurredAt orders the results by the occurred_at field.
+func ByOccurredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOccurredAt, opts...).ToFunc()
+}
+
+// ByServerReceivedAt orders the results by the server_received_at field.
+func ByServerReceivedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldServerReceivedAt, opts...).ToFunc()
+}
+
+// BySequence orders the results by the sequence field.
+func BySequence(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSequence, opts...).ToFunc()
+}
+
+// BySchemaVersion orders the results by the schema_version field.
+func BySchemaVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSchemaVersion, opts...).ToFunc()
+}
+
+// BySdkName orders the results by the sdk_name field.
+func BySdkName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSdkName, opts...).ToFunc()
+}
+
+// BySdkVersion orders the results by the sdk_version field.
+func BySdkVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSdkVersion, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByCustomPropsCount orders the results by custom_props count.
+func ByCustomPropsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCustomPropsStep(), opts...)
+	}
+}
+
+// ByCustomProps orders the results by custom_props terms.
+func ByCustomProps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCustomPropsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPlatformClicksField orders the results by platform_clicks field.
+func ByPlatformClicksField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlatformClicksStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByTargetPropsField orders the results by target_props field.
+func ByTargetPropsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTargetPropsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCommerceItemsCount orders the results by commerce_items count.
+func ByCommerceItemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommerceItemsStep(), opts...)
+	}
+}
+
+// ByCommerceItems orders the results by commerce_items terms.
+func ByCommerceItems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommerceItemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySearchFiltersCount orders the results by search_filters count.
+func BySearchFiltersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSearchFiltersStep(), opts...)
+	}
+}
+
+// BySearchFilters orders the results by search_filters terms.
+func BySearchFilters(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSearchFiltersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newCustomPropsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CustomPropsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CustomPropsTable, CustomPropsColumn),
+	)
+}
+func newPlatformClicksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlatformClicksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, PlatformClicksTable, PlatformClicksColumn),
+	)
+}
+func newTargetPropsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TargetPropsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, TargetPropsTable, TargetPropsColumn),
+	)
+}
+func newCommerceItemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommerceItemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommerceItemsTable, CommerceItemsColumn),
+	)
+}
+func newSearchFiltersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SearchFiltersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SearchFiltersTable, SearchFiltersColumn),
+	)
 }

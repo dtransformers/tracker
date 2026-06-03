@@ -6,8 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -104,6 +110,55 @@ func (_u *VisitorEventUpdate) AddDeviceID(v int64) *VisitorEventUpdate {
 	return _u
 }
 
+// SetPageID sets the "page_id" field.
+func (_u *VisitorEventUpdate) SetPageID(v int64) *VisitorEventUpdate {
+	_u.mutation.ResetPageID()
+	_u.mutation.SetPageID(v)
+	return _u
+}
+
+// SetNillablePageID sets the "page_id" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillablePageID(v *int64) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetPageID(*v)
+	}
+	return _u
+}
+
+// AddPageID adds value to the "page_id" field.
+func (_u *VisitorEventUpdate) AddPageID(v int64) *VisitorEventUpdate {
+	_u.mutation.AddPageID(v)
+	return _u
+}
+
+// SetEventType sets the "event_type" field.
+func (_u *VisitorEventUpdate) SetEventType(v string) *VisitorEventUpdate {
+	_u.mutation.SetEventType(v)
+	return _u
+}
+
+// SetNillableEventType sets the "event_type" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableEventType(v *string) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetEventType(*v)
+	}
+	return _u
+}
+
+// SetEventCategory sets the "event_category" field.
+func (_u *VisitorEventUpdate) SetEventCategory(v string) *VisitorEventUpdate {
+	_u.mutation.SetEventCategory(v)
+	return _u
+}
+
+// SetNillableEventCategory sets the "event_category" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableEventCategory(v *string) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetEventCategory(*v)
+	}
+	return _u
+}
+
 // SetEventName sets the "event_name" field.
 func (_u *VisitorEventUpdate) SetEventName(v string) *VisitorEventUpdate {
 	_u.mutation.SetEventName(v)
@@ -118,21 +173,288 @@ func (_u *VisitorEventUpdate) SetNillableEventName(v *string) *VisitorEventUpdat
 	return _u
 }
 
-// SetEventProperties sets the "event_properties" field.
-func (_u *VisitorEventUpdate) SetEventProperties(v map[string]interface{}) *VisitorEventUpdate {
-	_u.mutation.SetEventProperties(v)
+// SetOccurredAt sets the "occurred_at" field.
+func (_u *VisitorEventUpdate) SetOccurredAt(v time.Time) *VisitorEventUpdate {
+	_u.mutation.SetOccurredAt(v)
 	return _u
 }
 
-// ClearEventProperties clears the value of the "event_properties" field.
-func (_u *VisitorEventUpdate) ClearEventProperties() *VisitorEventUpdate {
-	_u.mutation.ClearEventProperties()
+// SetNillableOccurredAt sets the "occurred_at" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableOccurredAt(v *time.Time) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetOccurredAt(*v)
+	}
 	return _u
+}
+
+// ClearOccurredAt clears the value of the "occurred_at" field.
+func (_u *VisitorEventUpdate) ClearOccurredAt() *VisitorEventUpdate {
+	_u.mutation.ClearOccurredAt()
+	return _u
+}
+
+// SetServerReceivedAt sets the "server_received_at" field.
+func (_u *VisitorEventUpdate) SetServerReceivedAt(v time.Time) *VisitorEventUpdate {
+	_u.mutation.SetServerReceivedAt(v)
+	return _u
+}
+
+// SetNillableServerReceivedAt sets the "server_received_at" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableServerReceivedAt(v *time.Time) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetServerReceivedAt(*v)
+	}
+	return _u
+}
+
+// ClearServerReceivedAt clears the value of the "server_received_at" field.
+func (_u *VisitorEventUpdate) ClearServerReceivedAt() *VisitorEventUpdate {
+	_u.mutation.ClearServerReceivedAt()
+	return _u
+}
+
+// SetSequence sets the "sequence" field.
+func (_u *VisitorEventUpdate) SetSequence(v int) *VisitorEventUpdate {
+	_u.mutation.ResetSequence()
+	_u.mutation.SetSequence(v)
+	return _u
+}
+
+// SetNillableSequence sets the "sequence" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableSequence(v *int) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetSequence(*v)
+	}
+	return _u
+}
+
+// AddSequence adds value to the "sequence" field.
+func (_u *VisitorEventUpdate) AddSequence(v int) *VisitorEventUpdate {
+	_u.mutation.AddSequence(v)
+	return _u
+}
+
+// SetSchemaVersion sets the "schema_version" field.
+func (_u *VisitorEventUpdate) SetSchemaVersion(v string) *VisitorEventUpdate {
+	_u.mutation.SetSchemaVersion(v)
+	return _u
+}
+
+// SetNillableSchemaVersion sets the "schema_version" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableSchemaVersion(v *string) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetSchemaVersion(*v)
+	}
+	return _u
+}
+
+// ClearSchemaVersion clears the value of the "schema_version" field.
+func (_u *VisitorEventUpdate) ClearSchemaVersion() *VisitorEventUpdate {
+	_u.mutation.ClearSchemaVersion()
+	return _u
+}
+
+// SetSdkName sets the "sdk_name" field.
+func (_u *VisitorEventUpdate) SetSdkName(v string) *VisitorEventUpdate {
+	_u.mutation.SetSdkName(v)
+	return _u
+}
+
+// SetNillableSdkName sets the "sdk_name" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableSdkName(v *string) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetSdkName(*v)
+	}
+	return _u
+}
+
+// ClearSdkName clears the value of the "sdk_name" field.
+func (_u *VisitorEventUpdate) ClearSdkName() *VisitorEventUpdate {
+	_u.mutation.ClearSdkName()
+	return _u
+}
+
+// SetSdkVersion sets the "sdk_version" field.
+func (_u *VisitorEventUpdate) SetSdkVersion(v string) *VisitorEventUpdate {
+	_u.mutation.SetSdkVersion(v)
+	return _u
+}
+
+// SetNillableSdkVersion sets the "sdk_version" field if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableSdkVersion(v *string) *VisitorEventUpdate {
+	if v != nil {
+		_u.SetSdkVersion(*v)
+	}
+	return _u
+}
+
+// ClearSdkVersion clears the value of the "sdk_version" field.
+func (_u *VisitorEventUpdate) ClearSdkVersion() *VisitorEventUpdate {
+	_u.mutation.ClearSdkVersion()
+	return _u
+}
+
+// AddCustomPropIDs adds the "custom_props" edge to the EventCustomProp entity by IDs.
+func (_u *VisitorEventUpdate) AddCustomPropIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.AddCustomPropIDs(ids...)
+	return _u
+}
+
+// AddCustomProps adds the "custom_props" edges to the EventCustomProp entity.
+func (_u *VisitorEventUpdate) AddCustomProps(v ...*EventCustomProp) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCustomPropIDs(ids...)
+}
+
+// SetPlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID.
+func (_u *VisitorEventUpdate) SetPlatformClicksID(id int64) *VisitorEventUpdate {
+	_u.mutation.SetPlatformClicksID(id)
+	return _u
+}
+
+// SetNillablePlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillablePlatformClicksID(id *int64) *VisitorEventUpdate {
+	if id != nil {
+		_u = _u.SetPlatformClicksID(*id)
+	}
+	return _u
+}
+
+// SetPlatformClicks sets the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (_u *VisitorEventUpdate) SetPlatformClicks(v *VisitorPlatformClick) *VisitorEventUpdate {
+	return _u.SetPlatformClicksID(v.ID)
+}
+
+// SetTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID.
+func (_u *VisitorEventUpdate) SetTargetPropsID(id int64) *VisitorEventUpdate {
+	_u.mutation.SetTargetPropsID(id)
+	return _u
+}
+
+// SetNillableTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID if the given value is not nil.
+func (_u *VisitorEventUpdate) SetNillableTargetPropsID(id *int64) *VisitorEventUpdate {
+	if id != nil {
+		_u = _u.SetTargetPropsID(*id)
+	}
+	return _u
+}
+
+// SetTargetProps sets the "target_props" edge to the EventTargetProp entity.
+func (_u *VisitorEventUpdate) SetTargetProps(v *EventTargetProp) *VisitorEventUpdate {
+	return _u.SetTargetPropsID(v.ID)
+}
+
+// AddCommerceItemIDs adds the "commerce_items" edge to the EventCommerceItem entity by IDs.
+func (_u *VisitorEventUpdate) AddCommerceItemIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.AddCommerceItemIDs(ids...)
+	return _u
+}
+
+// AddCommerceItems adds the "commerce_items" edges to the EventCommerceItem entity.
+func (_u *VisitorEventUpdate) AddCommerceItems(v ...*EventCommerceItem) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommerceItemIDs(ids...)
+}
+
+// AddSearchFilterIDs adds the "search_filters" edge to the EventTargetSearchFilter entity by IDs.
+func (_u *VisitorEventUpdate) AddSearchFilterIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.AddSearchFilterIDs(ids...)
+	return _u
+}
+
+// AddSearchFilters adds the "search_filters" edges to the EventTargetSearchFilter entity.
+func (_u *VisitorEventUpdate) AddSearchFilters(v ...*EventTargetSearchFilter) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSearchFilterIDs(ids...)
 }
 
 // Mutation returns the VisitorEventMutation object of the builder.
 func (_u *VisitorEventUpdate) Mutation() *VisitorEventMutation {
 	return _u.mutation
+}
+
+// ClearCustomProps clears all "custom_props" edges to the EventCustomProp entity.
+func (_u *VisitorEventUpdate) ClearCustomProps() *VisitorEventUpdate {
+	_u.mutation.ClearCustomProps()
+	return _u
+}
+
+// RemoveCustomPropIDs removes the "custom_props" edge to EventCustomProp entities by IDs.
+func (_u *VisitorEventUpdate) RemoveCustomPropIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.RemoveCustomPropIDs(ids...)
+	return _u
+}
+
+// RemoveCustomProps removes "custom_props" edges to EventCustomProp entities.
+func (_u *VisitorEventUpdate) RemoveCustomProps(v ...*EventCustomProp) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCustomPropIDs(ids...)
+}
+
+// ClearPlatformClicks clears the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (_u *VisitorEventUpdate) ClearPlatformClicks() *VisitorEventUpdate {
+	_u.mutation.ClearPlatformClicks()
+	return _u
+}
+
+// ClearTargetProps clears the "target_props" edge to the EventTargetProp entity.
+func (_u *VisitorEventUpdate) ClearTargetProps() *VisitorEventUpdate {
+	_u.mutation.ClearTargetProps()
+	return _u
+}
+
+// ClearCommerceItems clears all "commerce_items" edges to the EventCommerceItem entity.
+func (_u *VisitorEventUpdate) ClearCommerceItems() *VisitorEventUpdate {
+	_u.mutation.ClearCommerceItems()
+	return _u
+}
+
+// RemoveCommerceItemIDs removes the "commerce_items" edge to EventCommerceItem entities by IDs.
+func (_u *VisitorEventUpdate) RemoveCommerceItemIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.RemoveCommerceItemIDs(ids...)
+	return _u
+}
+
+// RemoveCommerceItems removes "commerce_items" edges to EventCommerceItem entities.
+func (_u *VisitorEventUpdate) RemoveCommerceItems(v ...*EventCommerceItem) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommerceItemIDs(ids...)
+}
+
+// ClearSearchFilters clears all "search_filters" edges to the EventTargetSearchFilter entity.
+func (_u *VisitorEventUpdate) ClearSearchFilters() *VisitorEventUpdate {
+	_u.mutation.ClearSearchFilters()
+	return _u
+}
+
+// RemoveSearchFilterIDs removes the "search_filters" edge to EventTargetSearchFilter entities by IDs.
+func (_u *VisitorEventUpdate) RemoveSearchFilterIDs(ids ...int64) *VisitorEventUpdate {
+	_u.mutation.RemoveSearchFilterIDs(ids...)
+	return _u
+}
+
+// RemoveSearchFilters removes "search_filters" edges to EventTargetSearchFilter entities.
+func (_u *VisitorEventUpdate) RemoveSearchFilters(v ...*EventTargetSearchFilter) *VisitorEventUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSearchFilterIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -205,14 +527,249 @@ func (_u *VisitorEventUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.AddedDeviceID(); ok {
 		_spec.AddField(visitorevent.FieldDeviceID, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.PageID(); ok {
+		_spec.SetField(visitorevent.FieldPageID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPageID(); ok {
+		_spec.AddField(visitorevent.FieldPageID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.EventType(); ok {
+		_spec.SetField(visitorevent.FieldEventType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EventCategory(); ok {
+		_spec.SetField(visitorevent.FieldEventCategory, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.EventName(); ok {
 		_spec.SetField(visitorevent.FieldEventName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.EventProperties(); ok {
-		_spec.SetField(visitorevent.FieldEventProperties, field.TypeJSON, value)
+	if value, ok := _u.mutation.OccurredAt(); ok {
+		_spec.SetField(visitorevent.FieldOccurredAt, field.TypeTime, value)
 	}
-	if _u.mutation.EventPropertiesCleared() {
-		_spec.ClearField(visitorevent.FieldEventProperties, field.TypeJSON)
+	if _u.mutation.OccurredAtCleared() {
+		_spec.ClearField(visitorevent.FieldOccurredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ServerReceivedAt(); ok {
+		_spec.SetField(visitorevent.FieldServerReceivedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ServerReceivedAtCleared() {
+		_spec.ClearField(visitorevent.FieldServerReceivedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Sequence(); ok {
+		_spec.SetField(visitorevent.FieldSequence, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSequence(); ok {
+		_spec.AddField(visitorevent.FieldSequence, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SchemaVersion(); ok {
+		_spec.SetField(visitorevent.FieldSchemaVersion, field.TypeString, value)
+	}
+	if _u.mutation.SchemaVersionCleared() {
+		_spec.ClearField(visitorevent.FieldSchemaVersion, field.TypeString)
+	}
+	if value, ok := _u.mutation.SdkName(); ok {
+		_spec.SetField(visitorevent.FieldSdkName, field.TypeString, value)
+	}
+	if _u.mutation.SdkNameCleared() {
+		_spec.ClearField(visitorevent.FieldSdkName, field.TypeString)
+	}
+	if value, ok := _u.mutation.SdkVersion(); ok {
+		_spec.SetField(visitorevent.FieldSdkVersion, field.TypeString, value)
+	}
+	if _u.mutation.SdkVersionCleared() {
+		_spec.ClearField(visitorevent.FieldSdkVersion, field.TypeString)
+	}
+	if _u.mutation.CustomPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCustomPropsIDs(); len(nodes) > 0 && !_u.mutation.CustomPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CustomPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PlatformClicksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.PlatformClicksTable,
+			Columns: []string{visitorevent.PlatformClicksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(visitorplatformclick.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PlatformClicksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.PlatformClicksTable,
+			Columns: []string{visitorevent.PlatformClicksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(visitorplatformclick.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TargetPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.TargetPropsTable,
+			Columns: []string{visitorevent.TargetPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetprop.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TargetPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.TargetPropsTable,
+			Columns: []string{visitorevent.TargetPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommerceItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommerceItemsIDs(); len(nodes) > 0 && !_u.mutation.CommerceItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommerceItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SearchFiltersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSearchFiltersIDs(); len(nodes) > 0 && !_u.mutation.SearchFiltersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SearchFiltersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -311,6 +868,55 @@ func (_u *VisitorEventUpdateOne) AddDeviceID(v int64) *VisitorEventUpdateOne {
 	return _u
 }
 
+// SetPageID sets the "page_id" field.
+func (_u *VisitorEventUpdateOne) SetPageID(v int64) *VisitorEventUpdateOne {
+	_u.mutation.ResetPageID()
+	_u.mutation.SetPageID(v)
+	return _u
+}
+
+// SetNillablePageID sets the "page_id" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillablePageID(v *int64) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetPageID(*v)
+	}
+	return _u
+}
+
+// AddPageID adds value to the "page_id" field.
+func (_u *VisitorEventUpdateOne) AddPageID(v int64) *VisitorEventUpdateOne {
+	_u.mutation.AddPageID(v)
+	return _u
+}
+
+// SetEventType sets the "event_type" field.
+func (_u *VisitorEventUpdateOne) SetEventType(v string) *VisitorEventUpdateOne {
+	_u.mutation.SetEventType(v)
+	return _u
+}
+
+// SetNillableEventType sets the "event_type" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableEventType(v *string) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetEventType(*v)
+	}
+	return _u
+}
+
+// SetEventCategory sets the "event_category" field.
+func (_u *VisitorEventUpdateOne) SetEventCategory(v string) *VisitorEventUpdateOne {
+	_u.mutation.SetEventCategory(v)
+	return _u
+}
+
+// SetNillableEventCategory sets the "event_category" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableEventCategory(v *string) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetEventCategory(*v)
+	}
+	return _u
+}
+
 // SetEventName sets the "event_name" field.
 func (_u *VisitorEventUpdateOne) SetEventName(v string) *VisitorEventUpdateOne {
 	_u.mutation.SetEventName(v)
@@ -325,21 +931,288 @@ func (_u *VisitorEventUpdateOne) SetNillableEventName(v *string) *VisitorEventUp
 	return _u
 }
 
-// SetEventProperties sets the "event_properties" field.
-func (_u *VisitorEventUpdateOne) SetEventProperties(v map[string]interface{}) *VisitorEventUpdateOne {
-	_u.mutation.SetEventProperties(v)
+// SetOccurredAt sets the "occurred_at" field.
+func (_u *VisitorEventUpdateOne) SetOccurredAt(v time.Time) *VisitorEventUpdateOne {
+	_u.mutation.SetOccurredAt(v)
 	return _u
 }
 
-// ClearEventProperties clears the value of the "event_properties" field.
-func (_u *VisitorEventUpdateOne) ClearEventProperties() *VisitorEventUpdateOne {
-	_u.mutation.ClearEventProperties()
+// SetNillableOccurredAt sets the "occurred_at" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableOccurredAt(v *time.Time) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetOccurredAt(*v)
+	}
 	return _u
+}
+
+// ClearOccurredAt clears the value of the "occurred_at" field.
+func (_u *VisitorEventUpdateOne) ClearOccurredAt() *VisitorEventUpdateOne {
+	_u.mutation.ClearOccurredAt()
+	return _u
+}
+
+// SetServerReceivedAt sets the "server_received_at" field.
+func (_u *VisitorEventUpdateOne) SetServerReceivedAt(v time.Time) *VisitorEventUpdateOne {
+	_u.mutation.SetServerReceivedAt(v)
+	return _u
+}
+
+// SetNillableServerReceivedAt sets the "server_received_at" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableServerReceivedAt(v *time.Time) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetServerReceivedAt(*v)
+	}
+	return _u
+}
+
+// ClearServerReceivedAt clears the value of the "server_received_at" field.
+func (_u *VisitorEventUpdateOne) ClearServerReceivedAt() *VisitorEventUpdateOne {
+	_u.mutation.ClearServerReceivedAt()
+	return _u
+}
+
+// SetSequence sets the "sequence" field.
+func (_u *VisitorEventUpdateOne) SetSequence(v int) *VisitorEventUpdateOne {
+	_u.mutation.ResetSequence()
+	_u.mutation.SetSequence(v)
+	return _u
+}
+
+// SetNillableSequence sets the "sequence" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableSequence(v *int) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetSequence(*v)
+	}
+	return _u
+}
+
+// AddSequence adds value to the "sequence" field.
+func (_u *VisitorEventUpdateOne) AddSequence(v int) *VisitorEventUpdateOne {
+	_u.mutation.AddSequence(v)
+	return _u
+}
+
+// SetSchemaVersion sets the "schema_version" field.
+func (_u *VisitorEventUpdateOne) SetSchemaVersion(v string) *VisitorEventUpdateOne {
+	_u.mutation.SetSchemaVersion(v)
+	return _u
+}
+
+// SetNillableSchemaVersion sets the "schema_version" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableSchemaVersion(v *string) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetSchemaVersion(*v)
+	}
+	return _u
+}
+
+// ClearSchemaVersion clears the value of the "schema_version" field.
+func (_u *VisitorEventUpdateOne) ClearSchemaVersion() *VisitorEventUpdateOne {
+	_u.mutation.ClearSchemaVersion()
+	return _u
+}
+
+// SetSdkName sets the "sdk_name" field.
+func (_u *VisitorEventUpdateOne) SetSdkName(v string) *VisitorEventUpdateOne {
+	_u.mutation.SetSdkName(v)
+	return _u
+}
+
+// SetNillableSdkName sets the "sdk_name" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableSdkName(v *string) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetSdkName(*v)
+	}
+	return _u
+}
+
+// ClearSdkName clears the value of the "sdk_name" field.
+func (_u *VisitorEventUpdateOne) ClearSdkName() *VisitorEventUpdateOne {
+	_u.mutation.ClearSdkName()
+	return _u
+}
+
+// SetSdkVersion sets the "sdk_version" field.
+func (_u *VisitorEventUpdateOne) SetSdkVersion(v string) *VisitorEventUpdateOne {
+	_u.mutation.SetSdkVersion(v)
+	return _u
+}
+
+// SetNillableSdkVersion sets the "sdk_version" field if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableSdkVersion(v *string) *VisitorEventUpdateOne {
+	if v != nil {
+		_u.SetSdkVersion(*v)
+	}
+	return _u
+}
+
+// ClearSdkVersion clears the value of the "sdk_version" field.
+func (_u *VisitorEventUpdateOne) ClearSdkVersion() *VisitorEventUpdateOne {
+	_u.mutation.ClearSdkVersion()
+	return _u
+}
+
+// AddCustomPropIDs adds the "custom_props" edge to the EventCustomProp entity by IDs.
+func (_u *VisitorEventUpdateOne) AddCustomPropIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.AddCustomPropIDs(ids...)
+	return _u
+}
+
+// AddCustomProps adds the "custom_props" edges to the EventCustomProp entity.
+func (_u *VisitorEventUpdateOne) AddCustomProps(v ...*EventCustomProp) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCustomPropIDs(ids...)
+}
+
+// SetPlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID.
+func (_u *VisitorEventUpdateOne) SetPlatformClicksID(id int64) *VisitorEventUpdateOne {
+	_u.mutation.SetPlatformClicksID(id)
+	return _u
+}
+
+// SetNillablePlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillablePlatformClicksID(id *int64) *VisitorEventUpdateOne {
+	if id != nil {
+		_u = _u.SetPlatformClicksID(*id)
+	}
+	return _u
+}
+
+// SetPlatformClicks sets the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (_u *VisitorEventUpdateOne) SetPlatformClicks(v *VisitorPlatformClick) *VisitorEventUpdateOne {
+	return _u.SetPlatformClicksID(v.ID)
+}
+
+// SetTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID.
+func (_u *VisitorEventUpdateOne) SetTargetPropsID(id int64) *VisitorEventUpdateOne {
+	_u.mutation.SetTargetPropsID(id)
+	return _u
+}
+
+// SetNillableTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID if the given value is not nil.
+func (_u *VisitorEventUpdateOne) SetNillableTargetPropsID(id *int64) *VisitorEventUpdateOne {
+	if id != nil {
+		_u = _u.SetTargetPropsID(*id)
+	}
+	return _u
+}
+
+// SetTargetProps sets the "target_props" edge to the EventTargetProp entity.
+func (_u *VisitorEventUpdateOne) SetTargetProps(v *EventTargetProp) *VisitorEventUpdateOne {
+	return _u.SetTargetPropsID(v.ID)
+}
+
+// AddCommerceItemIDs adds the "commerce_items" edge to the EventCommerceItem entity by IDs.
+func (_u *VisitorEventUpdateOne) AddCommerceItemIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.AddCommerceItemIDs(ids...)
+	return _u
+}
+
+// AddCommerceItems adds the "commerce_items" edges to the EventCommerceItem entity.
+func (_u *VisitorEventUpdateOne) AddCommerceItems(v ...*EventCommerceItem) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommerceItemIDs(ids...)
+}
+
+// AddSearchFilterIDs adds the "search_filters" edge to the EventTargetSearchFilter entity by IDs.
+func (_u *VisitorEventUpdateOne) AddSearchFilterIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.AddSearchFilterIDs(ids...)
+	return _u
+}
+
+// AddSearchFilters adds the "search_filters" edges to the EventTargetSearchFilter entity.
+func (_u *VisitorEventUpdateOne) AddSearchFilters(v ...*EventTargetSearchFilter) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSearchFilterIDs(ids...)
 }
 
 // Mutation returns the VisitorEventMutation object of the builder.
 func (_u *VisitorEventUpdateOne) Mutation() *VisitorEventMutation {
 	return _u.mutation
+}
+
+// ClearCustomProps clears all "custom_props" edges to the EventCustomProp entity.
+func (_u *VisitorEventUpdateOne) ClearCustomProps() *VisitorEventUpdateOne {
+	_u.mutation.ClearCustomProps()
+	return _u
+}
+
+// RemoveCustomPropIDs removes the "custom_props" edge to EventCustomProp entities by IDs.
+func (_u *VisitorEventUpdateOne) RemoveCustomPropIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.RemoveCustomPropIDs(ids...)
+	return _u
+}
+
+// RemoveCustomProps removes "custom_props" edges to EventCustomProp entities.
+func (_u *VisitorEventUpdateOne) RemoveCustomProps(v ...*EventCustomProp) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCustomPropIDs(ids...)
+}
+
+// ClearPlatformClicks clears the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (_u *VisitorEventUpdateOne) ClearPlatformClicks() *VisitorEventUpdateOne {
+	_u.mutation.ClearPlatformClicks()
+	return _u
+}
+
+// ClearTargetProps clears the "target_props" edge to the EventTargetProp entity.
+func (_u *VisitorEventUpdateOne) ClearTargetProps() *VisitorEventUpdateOne {
+	_u.mutation.ClearTargetProps()
+	return _u
+}
+
+// ClearCommerceItems clears all "commerce_items" edges to the EventCommerceItem entity.
+func (_u *VisitorEventUpdateOne) ClearCommerceItems() *VisitorEventUpdateOne {
+	_u.mutation.ClearCommerceItems()
+	return _u
+}
+
+// RemoveCommerceItemIDs removes the "commerce_items" edge to EventCommerceItem entities by IDs.
+func (_u *VisitorEventUpdateOne) RemoveCommerceItemIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.RemoveCommerceItemIDs(ids...)
+	return _u
+}
+
+// RemoveCommerceItems removes "commerce_items" edges to EventCommerceItem entities.
+func (_u *VisitorEventUpdateOne) RemoveCommerceItems(v ...*EventCommerceItem) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommerceItemIDs(ids...)
+}
+
+// ClearSearchFilters clears all "search_filters" edges to the EventTargetSearchFilter entity.
+func (_u *VisitorEventUpdateOne) ClearSearchFilters() *VisitorEventUpdateOne {
+	_u.mutation.ClearSearchFilters()
+	return _u
+}
+
+// RemoveSearchFilterIDs removes the "search_filters" edge to EventTargetSearchFilter entities by IDs.
+func (_u *VisitorEventUpdateOne) RemoveSearchFilterIDs(ids ...int64) *VisitorEventUpdateOne {
+	_u.mutation.RemoveSearchFilterIDs(ids...)
+	return _u
+}
+
+// RemoveSearchFilters removes "search_filters" edges to EventTargetSearchFilter entities.
+func (_u *VisitorEventUpdateOne) RemoveSearchFilters(v ...*EventTargetSearchFilter) *VisitorEventUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSearchFilterIDs(ids...)
 }
 
 // Where appends a list predicates to the VisitorEventUpdate builder.
@@ -442,14 +1315,249 @@ func (_u *VisitorEventUpdateOne) sqlSave(ctx context.Context) (_node *VisitorEve
 	if value, ok := _u.mutation.AddedDeviceID(); ok {
 		_spec.AddField(visitorevent.FieldDeviceID, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.PageID(); ok {
+		_spec.SetField(visitorevent.FieldPageID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPageID(); ok {
+		_spec.AddField(visitorevent.FieldPageID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.EventType(); ok {
+		_spec.SetField(visitorevent.FieldEventType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EventCategory(); ok {
+		_spec.SetField(visitorevent.FieldEventCategory, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.EventName(); ok {
 		_spec.SetField(visitorevent.FieldEventName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.EventProperties(); ok {
-		_spec.SetField(visitorevent.FieldEventProperties, field.TypeJSON, value)
+	if value, ok := _u.mutation.OccurredAt(); ok {
+		_spec.SetField(visitorevent.FieldOccurredAt, field.TypeTime, value)
 	}
-	if _u.mutation.EventPropertiesCleared() {
-		_spec.ClearField(visitorevent.FieldEventProperties, field.TypeJSON)
+	if _u.mutation.OccurredAtCleared() {
+		_spec.ClearField(visitorevent.FieldOccurredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ServerReceivedAt(); ok {
+		_spec.SetField(visitorevent.FieldServerReceivedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ServerReceivedAtCleared() {
+		_spec.ClearField(visitorevent.FieldServerReceivedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Sequence(); ok {
+		_spec.SetField(visitorevent.FieldSequence, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSequence(); ok {
+		_spec.AddField(visitorevent.FieldSequence, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SchemaVersion(); ok {
+		_spec.SetField(visitorevent.FieldSchemaVersion, field.TypeString, value)
+	}
+	if _u.mutation.SchemaVersionCleared() {
+		_spec.ClearField(visitorevent.FieldSchemaVersion, field.TypeString)
+	}
+	if value, ok := _u.mutation.SdkName(); ok {
+		_spec.SetField(visitorevent.FieldSdkName, field.TypeString, value)
+	}
+	if _u.mutation.SdkNameCleared() {
+		_spec.ClearField(visitorevent.FieldSdkName, field.TypeString)
+	}
+	if value, ok := _u.mutation.SdkVersion(); ok {
+		_spec.SetField(visitorevent.FieldSdkVersion, field.TypeString, value)
+	}
+	if _u.mutation.SdkVersionCleared() {
+		_spec.ClearField(visitorevent.FieldSdkVersion, field.TypeString)
+	}
+	if _u.mutation.CustomPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCustomPropsIDs(); len(nodes) > 0 && !_u.mutation.CustomPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CustomPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PlatformClicksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.PlatformClicksTable,
+			Columns: []string{visitorevent.PlatformClicksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(visitorplatformclick.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PlatformClicksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.PlatformClicksTable,
+			Columns: []string{visitorevent.PlatformClicksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(visitorplatformclick.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TargetPropsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.TargetPropsTable,
+			Columns: []string{visitorevent.TargetPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetprop.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TargetPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.TargetPropsTable,
+			Columns: []string{visitorevent.TargetPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommerceItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommerceItemsIDs(); len(nodes) > 0 && !_u.mutation.CommerceItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommerceItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SearchFiltersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSearchFiltersIDs(); len(nodes) > 0 && !_u.mutation.SearchFiltersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SearchFiltersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &VisitorEvent{config: _u.config}
 	_spec.Assign = _node.assignValues

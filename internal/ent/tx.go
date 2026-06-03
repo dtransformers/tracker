@@ -14,6 +14,14 @@ type Tx struct {
 	config
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// EventCommerceItem is the client for interacting with the EventCommerceItem builders.
+	EventCommerceItem *EventCommerceItemClient
+	// EventCustomProp is the client for interacting with the EventCustomProp builders.
+	EventCustomProp *EventCustomPropClient
+	// EventTargetProp is the client for interacting with the EventTargetProp builders.
+	EventTargetProp *EventTargetPropClient
+	// EventTargetSearchFilter is the client for interacting with the EventTargetSearchFilter builders.
+	EventTargetSearchFilter *EventTargetSearchFilterClient
 	// PageView is the client for interacting with the PageView builders.
 	PageView *PageViewClient
 	// Site is the client for interacting with the Site builders.
@@ -26,6 +34,8 @@ type Tx struct {
 	VisitorConsent *VisitorConsentClient
 	// VisitorEvent is the client for interacting with the VisitorEvent builders.
 	VisitorEvent *VisitorEventClient
+	// VisitorPlatformClick is the client for interacting with the VisitorPlatformClick builders.
+	VisitorPlatformClick *VisitorPlatformClickClient
 	// VisitorSession is the client for interacting with the VisitorSession builders.
 	VisitorSession *VisitorSessionClient
 
@@ -160,12 +170,17 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Device = NewDeviceClient(tx.config)
+	tx.EventCommerceItem = NewEventCommerceItemClient(tx.config)
+	tx.EventCustomProp = NewEventCustomPropClient(tx.config)
+	tx.EventTargetProp = NewEventTargetPropClient(tx.config)
+	tx.EventTargetSearchFilter = NewEventTargetSearchFilterClient(tx.config)
 	tx.PageView = NewPageViewClient(tx.config)
 	tx.Site = NewSiteClient(tx.config)
 	tx.SiteVisitor = NewSiteVisitorClient(tx.config)
 	tx.Visitor = NewVisitorClient(tx.config)
 	tx.VisitorConsent = NewVisitorConsentClient(tx.config)
 	tx.VisitorEvent = NewVisitorEventClient(tx.config)
+	tx.VisitorPlatformClick = NewVisitorPlatformClickClient(tx.config)
 	tx.VisitorSession = NewVisitorSessionClient(tx.config)
 }
 

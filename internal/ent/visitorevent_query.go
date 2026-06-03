@@ -4,10 +4,16 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,10 +24,15 @@ import (
 // VisitorEventQuery is the builder for querying VisitorEvent entities.
 type VisitorEventQuery struct {
 	config
-	ctx        *QueryContext
-	order      []visitorevent.OrderOption
-	inters     []Interceptor
-	predicates []predicate.VisitorEvent
+	ctx                *QueryContext
+	order              []visitorevent.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.VisitorEvent
+	withCustomProps    *EventCustomPropQuery
+	withPlatformClicks *VisitorPlatformClickQuery
+	withTargetProps    *EventTargetPropQuery
+	withCommerceItems  *EventCommerceItemQuery
+	withSearchFilters  *EventTargetSearchFilterQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +67,116 @@ func (_q *VisitorEventQuery) Unique(unique bool) *VisitorEventQuery {
 func (_q *VisitorEventQuery) Order(o ...visitorevent.OrderOption) *VisitorEventQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryCustomProps chains the current query on the "custom_props" edge.
+func (_q *VisitorEventQuery) QueryCustomProps() *EventCustomPropQuery {
+	query := (&EventCustomPropClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, selector),
+			sqlgraph.To(eventcustomprop.Table, eventcustomprop.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.CustomPropsTable, visitorevent.CustomPropsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPlatformClicks chains the current query on the "platform_clicks" edge.
+func (_q *VisitorEventQuery) QueryPlatformClicks() *VisitorPlatformClickQuery {
+	query := (&VisitorPlatformClickClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, selector),
+			sqlgraph.To(visitorplatformclick.Table, visitorplatformclick.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, visitorevent.PlatformClicksTable, visitorevent.PlatformClicksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTargetProps chains the current query on the "target_props" edge.
+func (_q *VisitorEventQuery) QueryTargetProps() *EventTargetPropQuery {
+	query := (&EventTargetPropClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, selector),
+			sqlgraph.To(eventtargetprop.Table, eventtargetprop.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, visitorevent.TargetPropsTable, visitorevent.TargetPropsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCommerceItems chains the current query on the "commerce_items" edge.
+func (_q *VisitorEventQuery) QueryCommerceItems() *EventCommerceItemQuery {
+	query := (&EventCommerceItemClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, selector),
+			sqlgraph.To(eventcommerceitem.Table, eventcommerceitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.CommerceItemsTable, visitorevent.CommerceItemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySearchFilters chains the current query on the "search_filters" edge.
+func (_q *VisitorEventQuery) QuerySearchFilters() *EventTargetSearchFilterQuery {
+	query := (&EventTargetSearchFilterClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, selector),
+			sqlgraph.To(eventtargetsearchfilter.Table, eventtargetsearchfilter.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.SearchFiltersTable, visitorevent.SearchFiltersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first VisitorEvent entity from the query.
@@ -245,15 +366,75 @@ func (_q *VisitorEventQuery) Clone() *VisitorEventQuery {
 		return nil
 	}
 	return &VisitorEventQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]visitorevent.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.VisitorEvent{}, _q.predicates...),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]visitorevent.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.VisitorEvent{}, _q.predicates...),
+		withCustomProps:    _q.withCustomProps.Clone(),
+		withPlatformClicks: _q.withPlatformClicks.Clone(),
+		withTargetProps:    _q.withTargetProps.Clone(),
+		withCommerceItems:  _q.withCommerceItems.Clone(),
+		withSearchFilters:  _q.withSearchFilters.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithCustomProps tells the query-builder to eager-load the nodes that are connected to
+// the "custom_props" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VisitorEventQuery) WithCustomProps(opts ...func(*EventCustomPropQuery)) *VisitorEventQuery {
+	query := (&EventCustomPropClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCustomProps = query
+	return _q
+}
+
+// WithPlatformClicks tells the query-builder to eager-load the nodes that are connected to
+// the "platform_clicks" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VisitorEventQuery) WithPlatformClicks(opts ...func(*VisitorPlatformClickQuery)) *VisitorEventQuery {
+	query := (&VisitorPlatformClickClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPlatformClicks = query
+	return _q
+}
+
+// WithTargetProps tells the query-builder to eager-load the nodes that are connected to
+// the "target_props" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VisitorEventQuery) WithTargetProps(opts ...func(*EventTargetPropQuery)) *VisitorEventQuery {
+	query := (&EventTargetPropClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTargetProps = query
+	return _q
+}
+
+// WithCommerceItems tells the query-builder to eager-load the nodes that are connected to
+// the "commerce_items" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VisitorEventQuery) WithCommerceItems(opts ...func(*EventCommerceItemQuery)) *VisitorEventQuery {
+	query := (&EventCommerceItemClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCommerceItems = query
+	return _q
+}
+
+// WithSearchFilters tells the query-builder to eager-load the nodes that are connected to
+// the "search_filters" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *VisitorEventQuery) WithSearchFilters(opts ...func(*EventTargetSearchFilterQuery)) *VisitorEventQuery {
+	query := (&EventTargetSearchFilterClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSearchFilters = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +513,15 @@ func (_q *VisitorEventQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *VisitorEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*VisitorEvent, error) {
 	var (
-		nodes = []*VisitorEvent{}
-		_spec = _q.querySpec()
+		nodes       = []*VisitorEvent{}
+		_spec       = _q.querySpec()
+		loadedTypes = [5]bool{
+			_q.withCustomProps != nil,
+			_q.withPlatformClicks != nil,
+			_q.withTargetProps != nil,
+			_q.withCommerceItems != nil,
+			_q.withSearchFilters != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*VisitorEvent).scanValues(nil, columns)
@@ -341,6 +529,7 @@ func (_q *VisitorEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &VisitorEvent{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +541,187 @@ func (_q *VisitorEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withCustomProps; query != nil {
+		if err := _q.loadCustomProps(ctx, query, nodes,
+			func(n *VisitorEvent) { n.Edges.CustomProps = []*EventCustomProp{} },
+			func(n *VisitorEvent, e *EventCustomProp) { n.Edges.CustomProps = append(n.Edges.CustomProps, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPlatformClicks; query != nil {
+		if err := _q.loadPlatformClicks(ctx, query, nodes, nil,
+			func(n *VisitorEvent, e *VisitorPlatformClick) { n.Edges.PlatformClicks = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTargetProps; query != nil {
+		if err := _q.loadTargetProps(ctx, query, nodes, nil,
+			func(n *VisitorEvent, e *EventTargetProp) { n.Edges.TargetProps = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCommerceItems; query != nil {
+		if err := _q.loadCommerceItems(ctx, query, nodes,
+			func(n *VisitorEvent) { n.Edges.CommerceItems = []*EventCommerceItem{} },
+			func(n *VisitorEvent, e *EventCommerceItem) { n.Edges.CommerceItems = append(n.Edges.CommerceItems, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSearchFilters; query != nil {
+		if err := _q.loadSearchFilters(ctx, query, nodes,
+			func(n *VisitorEvent) { n.Edges.SearchFilters = []*EventTargetSearchFilter{} },
+			func(n *VisitorEvent, e *EventTargetSearchFilter) {
+				n.Edges.SearchFilters = append(n.Edges.SearchFilters, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *VisitorEventQuery) loadCustomProps(ctx context.Context, query *EventCustomPropQuery, nodes []*VisitorEvent, init func(*VisitorEvent), assign func(*VisitorEvent, *EventCustomProp)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*VisitorEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(eventcustomprop.FieldEventID)
+	}
+	query.Where(predicate.EventCustomProp(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(visitorevent.CustomPropsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EventID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "event_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VisitorEventQuery) loadPlatformClicks(ctx context.Context, query *VisitorPlatformClickQuery, nodes []*VisitorEvent, init func(*VisitorEvent), assign func(*VisitorEvent, *VisitorPlatformClick)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*VisitorEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(visitorplatformclick.FieldEventID)
+	}
+	query.Where(predicate.VisitorPlatformClick(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(visitorevent.PlatformClicksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EventID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "event_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VisitorEventQuery) loadTargetProps(ctx context.Context, query *EventTargetPropQuery, nodes []*VisitorEvent, init func(*VisitorEvent), assign func(*VisitorEvent, *EventTargetProp)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*VisitorEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(eventtargetprop.FieldEventID)
+	}
+	query.Where(predicate.EventTargetProp(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(visitorevent.TargetPropsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EventID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "event_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VisitorEventQuery) loadCommerceItems(ctx context.Context, query *EventCommerceItemQuery, nodes []*VisitorEvent, init func(*VisitorEvent), assign func(*VisitorEvent, *EventCommerceItem)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*VisitorEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(eventcommerceitem.FieldEventID)
+	}
+	query.Where(predicate.EventCommerceItem(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(visitorevent.CommerceItemsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EventID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "event_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *VisitorEventQuery) loadSearchFilters(ctx context.Context, query *EventTargetSearchFilterQuery, nodes []*VisitorEvent, init func(*VisitorEvent), assign func(*VisitorEvent, *EventTargetSearchFilter)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*VisitorEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(eventtargetsearchfilter.FieldEventID)
+	}
+	query.Where(predicate.EventTargetSearchFilter(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(visitorevent.SearchFiltersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EventID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "event_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *VisitorEventQuery) sqlCount(ctx context.Context) (int, error) {

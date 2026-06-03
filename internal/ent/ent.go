@@ -9,12 +9,17 @@ import (
 	"reflect"
 	"sync"
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorconsent"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
@@ -80,14 +85,19 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			device.Table:         device.ValidColumn,
-			pageview.Table:       pageview.ValidColumn,
-			site.Table:           site.ValidColumn,
-			sitevisitor.Table:    sitevisitor.ValidColumn,
-			visitor.Table:        visitor.ValidColumn,
-			visitorconsent.Table: visitorconsent.ValidColumn,
-			visitorevent.Table:   visitorevent.ValidColumn,
-			visitorsession.Table: visitorsession.ValidColumn,
+			device.Table:                  device.ValidColumn,
+			eventcommerceitem.Table:       eventcommerceitem.ValidColumn,
+			eventcustomprop.Table:         eventcustomprop.ValidColumn,
+			eventtargetprop.Table:         eventtargetprop.ValidColumn,
+			eventtargetsearchfilter.Table: eventtargetsearchfilter.ValidColumn,
+			pageview.Table:                pageview.ValidColumn,
+			site.Table:                    site.ValidColumn,
+			sitevisitor.Table:             sitevisitor.ValidColumn,
+			visitor.Table:                 visitor.ValidColumn,
+			visitorconsent.Table:          visitorconsent.ValidColumn,
+			visitorevent.Table:            visitorevent.ValidColumn,
+			visitorplatformclick.Table:    visitorplatformclick.ValidColumn,
+			visitorsession.Table:          visitorsession.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -7,6 +7,7 @@ import (
 	"tracking/internal/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -74,9 +75,54 @@ func DeviceID(v int64) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldEQ(FieldDeviceID, v))
 }
 
+// PageID applies equality check predicate on the "page_id" field. It's identical to PageIDEQ.
+func PageID(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldPageID, v))
+}
+
+// EventType applies equality check predicate on the "event_type" field. It's identical to EventTypeEQ.
+func EventType(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldEventType, v))
+}
+
+// EventCategory applies equality check predicate on the "event_category" field. It's identical to EventCategoryEQ.
+func EventCategory(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldEventCategory, v))
+}
+
 // EventName applies equality check predicate on the "event_name" field. It's identical to EventNameEQ.
 func EventName(v string) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldEQ(FieldEventName, v))
+}
+
+// OccurredAt applies equality check predicate on the "occurred_at" field. It's identical to OccurredAtEQ.
+func OccurredAt(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldOccurredAt, v))
+}
+
+// ServerReceivedAt applies equality check predicate on the "server_received_at" field. It's identical to ServerReceivedAtEQ.
+func ServerReceivedAt(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldServerReceivedAt, v))
+}
+
+// Sequence applies equality check predicate on the "sequence" field. It's identical to SequenceEQ.
+func Sequence(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSequence, v))
+}
+
+// SchemaVersion applies equality check predicate on the "schema_version" field. It's identical to SchemaVersionEQ.
+func SchemaVersion(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSchemaVersion, v))
+}
+
+// SdkName applies equality check predicate on the "sdk_name" field. It's identical to SdkNameEQ.
+func SdkName(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSdkName, v))
+}
+
+// SdkVersion applies equality check predicate on the "sdk_version" field. It's identical to SdkVersionEQ.
+func SdkVersion(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSdkVersion, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -269,6 +315,176 @@ func DeviceIDLTE(v int64) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldLTE(FieldDeviceID, v))
 }
 
+// PageIDEQ applies the EQ predicate on the "page_id" field.
+func PageIDEQ(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldPageID, v))
+}
+
+// PageIDNEQ applies the NEQ predicate on the "page_id" field.
+func PageIDNEQ(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldPageID, v))
+}
+
+// PageIDIn applies the In predicate on the "page_id" field.
+func PageIDIn(vs ...int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldPageID, vs...))
+}
+
+// PageIDNotIn applies the NotIn predicate on the "page_id" field.
+func PageIDNotIn(vs ...int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldPageID, vs...))
+}
+
+// PageIDGT applies the GT predicate on the "page_id" field.
+func PageIDGT(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldPageID, v))
+}
+
+// PageIDGTE applies the GTE predicate on the "page_id" field.
+func PageIDGTE(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldPageID, v))
+}
+
+// PageIDLT applies the LT predicate on the "page_id" field.
+func PageIDLT(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldPageID, v))
+}
+
+// PageIDLTE applies the LTE predicate on the "page_id" field.
+func PageIDLTE(v int64) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldPageID, v))
+}
+
+// EventTypeEQ applies the EQ predicate on the "event_type" field.
+func EventTypeEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldEventType, v))
+}
+
+// EventTypeNEQ applies the NEQ predicate on the "event_type" field.
+func EventTypeNEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldEventType, v))
+}
+
+// EventTypeIn applies the In predicate on the "event_type" field.
+func EventTypeIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldEventType, vs...))
+}
+
+// EventTypeNotIn applies the NotIn predicate on the "event_type" field.
+func EventTypeNotIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldEventType, vs...))
+}
+
+// EventTypeGT applies the GT predicate on the "event_type" field.
+func EventTypeGT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldEventType, v))
+}
+
+// EventTypeGTE applies the GTE predicate on the "event_type" field.
+func EventTypeGTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldEventType, v))
+}
+
+// EventTypeLT applies the LT predicate on the "event_type" field.
+func EventTypeLT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldEventType, v))
+}
+
+// EventTypeLTE applies the LTE predicate on the "event_type" field.
+func EventTypeLTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldEventType, v))
+}
+
+// EventTypeContains applies the Contains predicate on the "event_type" field.
+func EventTypeContains(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContains(FieldEventType, v))
+}
+
+// EventTypeHasPrefix applies the HasPrefix predicate on the "event_type" field.
+func EventTypeHasPrefix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasPrefix(FieldEventType, v))
+}
+
+// EventTypeHasSuffix applies the HasSuffix predicate on the "event_type" field.
+func EventTypeHasSuffix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasSuffix(FieldEventType, v))
+}
+
+// EventTypeEqualFold applies the EqualFold predicate on the "event_type" field.
+func EventTypeEqualFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEqualFold(FieldEventType, v))
+}
+
+// EventTypeContainsFold applies the ContainsFold predicate on the "event_type" field.
+func EventTypeContainsFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContainsFold(FieldEventType, v))
+}
+
+// EventCategoryEQ applies the EQ predicate on the "event_category" field.
+func EventCategoryEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldEventCategory, v))
+}
+
+// EventCategoryNEQ applies the NEQ predicate on the "event_category" field.
+func EventCategoryNEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldEventCategory, v))
+}
+
+// EventCategoryIn applies the In predicate on the "event_category" field.
+func EventCategoryIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldEventCategory, vs...))
+}
+
+// EventCategoryNotIn applies the NotIn predicate on the "event_category" field.
+func EventCategoryNotIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldEventCategory, vs...))
+}
+
+// EventCategoryGT applies the GT predicate on the "event_category" field.
+func EventCategoryGT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldEventCategory, v))
+}
+
+// EventCategoryGTE applies the GTE predicate on the "event_category" field.
+func EventCategoryGTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldEventCategory, v))
+}
+
+// EventCategoryLT applies the LT predicate on the "event_category" field.
+func EventCategoryLT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldEventCategory, v))
+}
+
+// EventCategoryLTE applies the LTE predicate on the "event_category" field.
+func EventCategoryLTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldEventCategory, v))
+}
+
+// EventCategoryContains applies the Contains predicate on the "event_category" field.
+func EventCategoryContains(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContains(FieldEventCategory, v))
+}
+
+// EventCategoryHasPrefix applies the HasPrefix predicate on the "event_category" field.
+func EventCategoryHasPrefix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasPrefix(FieldEventCategory, v))
+}
+
+// EventCategoryHasSuffix applies the HasSuffix predicate on the "event_category" field.
+func EventCategoryHasSuffix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasSuffix(FieldEventCategory, v))
+}
+
+// EventCategoryEqualFold applies the EqualFold predicate on the "event_category" field.
+func EventCategoryEqualFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEqualFold(FieldEventCategory, v))
+}
+
+// EventCategoryContainsFold applies the ContainsFold predicate on the "event_category" field.
+func EventCategoryContainsFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContainsFold(FieldEventCategory, v))
+}
+
 // EventNameEQ applies the EQ predicate on the "event_name" field.
 func EventNameEQ(v string) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldEQ(FieldEventName, v))
@@ -334,14 +550,369 @@ func EventNameContainsFold(v string) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldContainsFold(FieldEventName, v))
 }
 
-// EventPropertiesIsNil applies the IsNil predicate on the "event_properties" field.
-func EventPropertiesIsNil() predicate.VisitorEvent {
-	return predicate.VisitorEvent(sql.FieldIsNull(FieldEventProperties))
+// OccurredAtEQ applies the EQ predicate on the "occurred_at" field.
+func OccurredAtEQ(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldOccurredAt, v))
 }
 
-// EventPropertiesNotNil applies the NotNil predicate on the "event_properties" field.
-func EventPropertiesNotNil() predicate.VisitorEvent {
-	return predicate.VisitorEvent(sql.FieldNotNull(FieldEventProperties))
+// OccurredAtNEQ applies the NEQ predicate on the "occurred_at" field.
+func OccurredAtNEQ(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldOccurredAt, v))
+}
+
+// OccurredAtIn applies the In predicate on the "occurred_at" field.
+func OccurredAtIn(vs ...time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldOccurredAt, vs...))
+}
+
+// OccurredAtNotIn applies the NotIn predicate on the "occurred_at" field.
+func OccurredAtNotIn(vs ...time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldOccurredAt, vs...))
+}
+
+// OccurredAtGT applies the GT predicate on the "occurred_at" field.
+func OccurredAtGT(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldOccurredAt, v))
+}
+
+// OccurredAtGTE applies the GTE predicate on the "occurred_at" field.
+func OccurredAtGTE(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldOccurredAt, v))
+}
+
+// OccurredAtLT applies the LT predicate on the "occurred_at" field.
+func OccurredAtLT(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldOccurredAt, v))
+}
+
+// OccurredAtLTE applies the LTE predicate on the "occurred_at" field.
+func OccurredAtLTE(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldOccurredAt, v))
+}
+
+// OccurredAtIsNil applies the IsNil predicate on the "occurred_at" field.
+func OccurredAtIsNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIsNull(FieldOccurredAt))
+}
+
+// OccurredAtNotNil applies the NotNil predicate on the "occurred_at" field.
+func OccurredAtNotNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotNull(FieldOccurredAt))
+}
+
+// ServerReceivedAtEQ applies the EQ predicate on the "server_received_at" field.
+func ServerReceivedAtEQ(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtNEQ applies the NEQ predicate on the "server_received_at" field.
+func ServerReceivedAtNEQ(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtIn applies the In predicate on the "server_received_at" field.
+func ServerReceivedAtIn(vs ...time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldServerReceivedAt, vs...))
+}
+
+// ServerReceivedAtNotIn applies the NotIn predicate on the "server_received_at" field.
+func ServerReceivedAtNotIn(vs ...time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldServerReceivedAt, vs...))
+}
+
+// ServerReceivedAtGT applies the GT predicate on the "server_received_at" field.
+func ServerReceivedAtGT(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtGTE applies the GTE predicate on the "server_received_at" field.
+func ServerReceivedAtGTE(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtLT applies the LT predicate on the "server_received_at" field.
+func ServerReceivedAtLT(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtLTE applies the LTE predicate on the "server_received_at" field.
+func ServerReceivedAtLTE(v time.Time) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldServerReceivedAt, v))
+}
+
+// ServerReceivedAtIsNil applies the IsNil predicate on the "server_received_at" field.
+func ServerReceivedAtIsNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIsNull(FieldServerReceivedAt))
+}
+
+// ServerReceivedAtNotNil applies the NotNil predicate on the "server_received_at" field.
+func ServerReceivedAtNotNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotNull(FieldServerReceivedAt))
+}
+
+// SequenceEQ applies the EQ predicate on the "sequence" field.
+func SequenceEQ(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSequence, v))
+}
+
+// SequenceNEQ applies the NEQ predicate on the "sequence" field.
+func SequenceNEQ(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldSequence, v))
+}
+
+// SequenceIn applies the In predicate on the "sequence" field.
+func SequenceIn(vs ...int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldSequence, vs...))
+}
+
+// SequenceNotIn applies the NotIn predicate on the "sequence" field.
+func SequenceNotIn(vs ...int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldSequence, vs...))
+}
+
+// SequenceGT applies the GT predicate on the "sequence" field.
+func SequenceGT(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldSequence, v))
+}
+
+// SequenceGTE applies the GTE predicate on the "sequence" field.
+func SequenceGTE(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldSequence, v))
+}
+
+// SequenceLT applies the LT predicate on the "sequence" field.
+func SequenceLT(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldSequence, v))
+}
+
+// SequenceLTE applies the LTE predicate on the "sequence" field.
+func SequenceLTE(v int) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldSequence, v))
+}
+
+// SchemaVersionEQ applies the EQ predicate on the "schema_version" field.
+func SchemaVersionEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSchemaVersion, v))
+}
+
+// SchemaVersionNEQ applies the NEQ predicate on the "schema_version" field.
+func SchemaVersionNEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldSchemaVersion, v))
+}
+
+// SchemaVersionIn applies the In predicate on the "schema_version" field.
+func SchemaVersionIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldSchemaVersion, vs...))
+}
+
+// SchemaVersionNotIn applies the NotIn predicate on the "schema_version" field.
+func SchemaVersionNotIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldSchemaVersion, vs...))
+}
+
+// SchemaVersionGT applies the GT predicate on the "schema_version" field.
+func SchemaVersionGT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldSchemaVersion, v))
+}
+
+// SchemaVersionGTE applies the GTE predicate on the "schema_version" field.
+func SchemaVersionGTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldSchemaVersion, v))
+}
+
+// SchemaVersionLT applies the LT predicate on the "schema_version" field.
+func SchemaVersionLT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldSchemaVersion, v))
+}
+
+// SchemaVersionLTE applies the LTE predicate on the "schema_version" field.
+func SchemaVersionLTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldSchemaVersion, v))
+}
+
+// SchemaVersionContains applies the Contains predicate on the "schema_version" field.
+func SchemaVersionContains(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContains(FieldSchemaVersion, v))
+}
+
+// SchemaVersionHasPrefix applies the HasPrefix predicate on the "schema_version" field.
+func SchemaVersionHasPrefix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasPrefix(FieldSchemaVersion, v))
+}
+
+// SchemaVersionHasSuffix applies the HasSuffix predicate on the "schema_version" field.
+func SchemaVersionHasSuffix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasSuffix(FieldSchemaVersion, v))
+}
+
+// SchemaVersionIsNil applies the IsNil predicate on the "schema_version" field.
+func SchemaVersionIsNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIsNull(FieldSchemaVersion))
+}
+
+// SchemaVersionNotNil applies the NotNil predicate on the "schema_version" field.
+func SchemaVersionNotNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotNull(FieldSchemaVersion))
+}
+
+// SchemaVersionEqualFold applies the EqualFold predicate on the "schema_version" field.
+func SchemaVersionEqualFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEqualFold(FieldSchemaVersion, v))
+}
+
+// SchemaVersionContainsFold applies the ContainsFold predicate on the "schema_version" field.
+func SchemaVersionContainsFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContainsFold(FieldSchemaVersion, v))
+}
+
+// SdkNameEQ applies the EQ predicate on the "sdk_name" field.
+func SdkNameEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSdkName, v))
+}
+
+// SdkNameNEQ applies the NEQ predicate on the "sdk_name" field.
+func SdkNameNEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldSdkName, v))
+}
+
+// SdkNameIn applies the In predicate on the "sdk_name" field.
+func SdkNameIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldSdkName, vs...))
+}
+
+// SdkNameNotIn applies the NotIn predicate on the "sdk_name" field.
+func SdkNameNotIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldSdkName, vs...))
+}
+
+// SdkNameGT applies the GT predicate on the "sdk_name" field.
+func SdkNameGT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldSdkName, v))
+}
+
+// SdkNameGTE applies the GTE predicate on the "sdk_name" field.
+func SdkNameGTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldSdkName, v))
+}
+
+// SdkNameLT applies the LT predicate on the "sdk_name" field.
+func SdkNameLT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldSdkName, v))
+}
+
+// SdkNameLTE applies the LTE predicate on the "sdk_name" field.
+func SdkNameLTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldSdkName, v))
+}
+
+// SdkNameContains applies the Contains predicate on the "sdk_name" field.
+func SdkNameContains(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContains(FieldSdkName, v))
+}
+
+// SdkNameHasPrefix applies the HasPrefix predicate on the "sdk_name" field.
+func SdkNameHasPrefix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasPrefix(FieldSdkName, v))
+}
+
+// SdkNameHasSuffix applies the HasSuffix predicate on the "sdk_name" field.
+func SdkNameHasSuffix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasSuffix(FieldSdkName, v))
+}
+
+// SdkNameIsNil applies the IsNil predicate on the "sdk_name" field.
+func SdkNameIsNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIsNull(FieldSdkName))
+}
+
+// SdkNameNotNil applies the NotNil predicate on the "sdk_name" field.
+func SdkNameNotNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotNull(FieldSdkName))
+}
+
+// SdkNameEqualFold applies the EqualFold predicate on the "sdk_name" field.
+func SdkNameEqualFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEqualFold(FieldSdkName, v))
+}
+
+// SdkNameContainsFold applies the ContainsFold predicate on the "sdk_name" field.
+func SdkNameContainsFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContainsFold(FieldSdkName, v))
+}
+
+// SdkVersionEQ applies the EQ predicate on the "sdk_version" field.
+func SdkVersionEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEQ(FieldSdkVersion, v))
+}
+
+// SdkVersionNEQ applies the NEQ predicate on the "sdk_version" field.
+func SdkVersionNEQ(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNEQ(FieldSdkVersion, v))
+}
+
+// SdkVersionIn applies the In predicate on the "sdk_version" field.
+func SdkVersionIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIn(FieldSdkVersion, vs...))
+}
+
+// SdkVersionNotIn applies the NotIn predicate on the "sdk_version" field.
+func SdkVersionNotIn(vs ...string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotIn(FieldSdkVersion, vs...))
+}
+
+// SdkVersionGT applies the GT predicate on the "sdk_version" field.
+func SdkVersionGT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGT(FieldSdkVersion, v))
+}
+
+// SdkVersionGTE applies the GTE predicate on the "sdk_version" field.
+func SdkVersionGTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldGTE(FieldSdkVersion, v))
+}
+
+// SdkVersionLT applies the LT predicate on the "sdk_version" field.
+func SdkVersionLT(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLT(FieldSdkVersion, v))
+}
+
+// SdkVersionLTE applies the LTE predicate on the "sdk_version" field.
+func SdkVersionLTE(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldLTE(FieldSdkVersion, v))
+}
+
+// SdkVersionContains applies the Contains predicate on the "sdk_version" field.
+func SdkVersionContains(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContains(FieldSdkVersion, v))
+}
+
+// SdkVersionHasPrefix applies the HasPrefix predicate on the "sdk_version" field.
+func SdkVersionHasPrefix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasPrefix(FieldSdkVersion, v))
+}
+
+// SdkVersionHasSuffix applies the HasSuffix predicate on the "sdk_version" field.
+func SdkVersionHasSuffix(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldHasSuffix(FieldSdkVersion, v))
+}
+
+// SdkVersionIsNil applies the IsNil predicate on the "sdk_version" field.
+func SdkVersionIsNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldIsNull(FieldSdkVersion))
+}
+
+// SdkVersionNotNil applies the NotNil predicate on the "sdk_version" field.
+func SdkVersionNotNil() predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldNotNull(FieldSdkVersion))
+}
+
+// SdkVersionEqualFold applies the EqualFold predicate on the "sdk_version" field.
+func SdkVersionEqualFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldEqualFold(FieldSdkVersion, v))
+}
+
+// SdkVersionContainsFold applies the ContainsFold predicate on the "sdk_version" field.
+func SdkVersionContainsFold(v string) predicate.VisitorEvent {
+	return predicate.VisitorEvent(sql.FieldContainsFold(FieldSdkVersion, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -382,6 +953,121 @@ func CreatedAtLT(v time.Time) predicate.VisitorEvent {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.VisitorEvent {
 	return predicate.VisitorEvent(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// HasCustomProps applies the HasEdge predicate on the "custom_props" edge.
+func HasCustomProps() predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CustomPropsTable, CustomPropsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCustomPropsWith applies the HasEdge predicate on the "custom_props" edge with a given conditions (other predicates).
+func HasCustomPropsWith(preds ...predicate.EventCustomProp) predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := newCustomPropsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPlatformClicks applies the HasEdge predicate on the "platform_clicks" edge.
+func HasPlatformClicks() predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, PlatformClicksTable, PlatformClicksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlatformClicksWith applies the HasEdge predicate on the "platform_clicks" edge with a given conditions (other predicates).
+func HasPlatformClicksWith(preds ...predicate.VisitorPlatformClick) predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := newPlatformClicksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTargetProps applies the HasEdge predicate on the "target_props" edge.
+func HasTargetProps() predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TargetPropsTable, TargetPropsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTargetPropsWith applies the HasEdge predicate on the "target_props" edge with a given conditions (other predicates).
+func HasTargetPropsWith(preds ...predicate.EventTargetProp) predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := newTargetPropsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCommerceItems applies the HasEdge predicate on the "commerce_items" edge.
+func HasCommerceItems() predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommerceItemsTable, CommerceItemsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCommerceItemsWith applies the HasEdge predicate on the "commerce_items" edge with a given conditions (other predicates).
+func HasCommerceItemsWith(preds ...predicate.EventCommerceItem) predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := newCommerceItemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSearchFilters applies the HasEdge predicate on the "search_filters" edge.
+func HasSearchFilters() predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SearchFiltersTable, SearchFiltersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSearchFiltersWith applies the HasEdge predicate on the "search_filters" edge with a given conditions (other predicates).
+func HasSearchFiltersWith(preds ...predicate.EventTargetSearchFilter) predicate.VisitorEvent {
+	return predicate.VisitorEvent(func(s *sql.Selector) {
+		step := newSearchFiltersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

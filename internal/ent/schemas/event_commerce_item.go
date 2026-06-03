@@ -6,12 +6,10 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// EventCommerceItem holds the schema definition for the EventCommerceItem entity.
 type EventCommerceItem struct {
 	ent.Schema
 }
 
-// Fields of the EventCommerceItem.
 func (EventCommerceItem) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id").Unique().Immutable(),
@@ -35,7 +33,6 @@ func (EventCommerceItem) Fields() []ent.Field {
 	}
 }
 
-// Edges of the EventCommerceItem.
 func (EventCommerceItem) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("event", VisitorEvent.Type).

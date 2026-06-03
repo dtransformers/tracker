@@ -12,17 +12,23 @@ import (
 	"tracking/internal/ent/migrate"
 
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/site"
 	"tracking/internal/ent/sitevisitor"
 	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorconsent"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -32,6 +38,14 @@ type Client struct {
 	Schema *migrate.Schema
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// EventCommerceItem is the client for interacting with the EventCommerceItem builders.
+	EventCommerceItem *EventCommerceItemClient
+	// EventCustomProp is the client for interacting with the EventCustomProp builders.
+	EventCustomProp *EventCustomPropClient
+	// EventTargetProp is the client for interacting with the EventTargetProp builders.
+	EventTargetProp *EventTargetPropClient
+	// EventTargetSearchFilter is the client for interacting with the EventTargetSearchFilter builders.
+	EventTargetSearchFilter *EventTargetSearchFilterClient
 	// PageView is the client for interacting with the PageView builders.
 	PageView *PageViewClient
 	// Site is the client for interacting with the Site builders.
@@ -44,6 +58,8 @@ type Client struct {
 	VisitorConsent *VisitorConsentClient
 	// VisitorEvent is the client for interacting with the VisitorEvent builders.
 	VisitorEvent *VisitorEventClient
+	// VisitorPlatformClick is the client for interacting with the VisitorPlatformClick builders.
+	VisitorPlatformClick *VisitorPlatformClickClient
 	// VisitorSession is the client for interacting with the VisitorSession builders.
 	VisitorSession *VisitorSessionClient
 }
@@ -58,12 +74,17 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Device = NewDeviceClient(c.config)
+	c.EventCommerceItem = NewEventCommerceItemClient(c.config)
+	c.EventCustomProp = NewEventCustomPropClient(c.config)
+	c.EventTargetProp = NewEventTargetPropClient(c.config)
+	c.EventTargetSearchFilter = NewEventTargetSearchFilterClient(c.config)
 	c.PageView = NewPageViewClient(c.config)
 	c.Site = NewSiteClient(c.config)
 	c.SiteVisitor = NewSiteVisitorClient(c.config)
 	c.Visitor = NewVisitorClient(c.config)
 	c.VisitorConsent = NewVisitorConsentClient(c.config)
 	c.VisitorEvent = NewVisitorEventClient(c.config)
+	c.VisitorPlatformClick = NewVisitorPlatformClickClient(c.config)
 	c.VisitorSession = NewVisitorSessionClient(c.config)
 }
 
@@ -155,16 +176,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Device:         NewDeviceClient(cfg),
-		PageView:       NewPageViewClient(cfg),
-		Site:           NewSiteClient(cfg),
-		SiteVisitor:    NewSiteVisitorClient(cfg),
-		Visitor:        NewVisitorClient(cfg),
-		VisitorConsent: NewVisitorConsentClient(cfg),
-		VisitorEvent:   NewVisitorEventClient(cfg),
-		VisitorSession: NewVisitorSessionClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Device:                  NewDeviceClient(cfg),
+		EventCommerceItem:       NewEventCommerceItemClient(cfg),
+		EventCustomProp:         NewEventCustomPropClient(cfg),
+		EventTargetProp:         NewEventTargetPropClient(cfg),
+		EventTargetSearchFilter: NewEventTargetSearchFilterClient(cfg),
+		PageView:                NewPageViewClient(cfg),
+		Site:                    NewSiteClient(cfg),
+		SiteVisitor:             NewSiteVisitorClient(cfg),
+		Visitor:                 NewVisitorClient(cfg),
+		VisitorConsent:          NewVisitorConsentClient(cfg),
+		VisitorEvent:            NewVisitorEventClient(cfg),
+		VisitorPlatformClick:    NewVisitorPlatformClickClient(cfg),
+		VisitorSession:          NewVisitorSessionClient(cfg),
 	}, nil
 }
 
@@ -182,16 +208,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Device:         NewDeviceClient(cfg),
-		PageView:       NewPageViewClient(cfg),
-		Site:           NewSiteClient(cfg),
-		SiteVisitor:    NewSiteVisitorClient(cfg),
-		Visitor:        NewVisitorClient(cfg),
-		VisitorConsent: NewVisitorConsentClient(cfg),
-		VisitorEvent:   NewVisitorEventClient(cfg),
-		VisitorSession: NewVisitorSessionClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Device:                  NewDeviceClient(cfg),
+		EventCommerceItem:       NewEventCommerceItemClient(cfg),
+		EventCustomProp:         NewEventCustomPropClient(cfg),
+		EventTargetProp:         NewEventTargetPropClient(cfg),
+		EventTargetSearchFilter: NewEventTargetSearchFilterClient(cfg),
+		PageView:                NewPageViewClient(cfg),
+		Site:                    NewSiteClient(cfg),
+		SiteVisitor:             NewSiteVisitorClient(cfg),
+		Visitor:                 NewVisitorClient(cfg),
+		VisitorConsent:          NewVisitorConsentClient(cfg),
+		VisitorEvent:            NewVisitorEventClient(cfg),
+		VisitorPlatformClick:    NewVisitorPlatformClickClient(cfg),
+		VisitorSession:          NewVisitorSessionClient(cfg),
 	}, nil
 }
 
@@ -221,8 +252,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Device, c.PageView, c.Site, c.SiteVisitor, c.Visitor, c.VisitorConsent,
-		c.VisitorEvent, c.VisitorSession,
+		c.Device, c.EventCommerceItem, c.EventCustomProp, c.EventTargetProp,
+		c.EventTargetSearchFilter, c.PageView, c.Site, c.SiteVisitor, c.Visitor,
+		c.VisitorConsent, c.VisitorEvent, c.VisitorPlatformClick, c.VisitorSession,
 	} {
 		n.Use(hooks...)
 	}
@@ -232,8 +264,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Device, c.PageView, c.Site, c.SiteVisitor, c.Visitor, c.VisitorConsent,
-		c.VisitorEvent, c.VisitorSession,
+		c.Device, c.EventCommerceItem, c.EventCustomProp, c.EventTargetProp,
+		c.EventTargetSearchFilter, c.PageView, c.Site, c.SiteVisitor, c.Visitor,
+		c.VisitorConsent, c.VisitorEvent, c.VisitorPlatformClick, c.VisitorSession,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -244,6 +277,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *DeviceMutation:
 		return c.Device.mutate(ctx, m)
+	case *EventCommerceItemMutation:
+		return c.EventCommerceItem.mutate(ctx, m)
+	case *EventCustomPropMutation:
+		return c.EventCustomProp.mutate(ctx, m)
+	case *EventTargetPropMutation:
+		return c.EventTargetProp.mutate(ctx, m)
+	case *EventTargetSearchFilterMutation:
+		return c.EventTargetSearchFilter.mutate(ctx, m)
 	case *PageViewMutation:
 		return c.PageView.mutate(ctx, m)
 	case *SiteMutation:
@@ -256,6 +297,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.VisitorConsent.mutate(ctx, m)
 	case *VisitorEventMutation:
 		return c.VisitorEvent.mutate(ctx, m)
+	case *VisitorPlatformClickMutation:
+		return c.VisitorPlatformClick.mutate(ctx, m)
 	case *VisitorSessionMutation:
 		return c.VisitorSession.mutate(ctx, m)
 	default:
@@ -393,6 +436,602 @@ func (c *DeviceClient) mutate(ctx context.Context, m *DeviceMutation) (Value, er
 		return (&DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Device mutation op: %q", m.Op())
+	}
+}
+
+// EventCommerceItemClient is a client for the EventCommerceItem schema.
+type EventCommerceItemClient struct {
+	config
+}
+
+// NewEventCommerceItemClient returns a client for the EventCommerceItem from the given config.
+func NewEventCommerceItemClient(c config) *EventCommerceItemClient {
+	return &EventCommerceItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `eventcommerceitem.Hooks(f(g(h())))`.
+func (c *EventCommerceItemClient) Use(hooks ...Hook) {
+	c.hooks.EventCommerceItem = append(c.hooks.EventCommerceItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `eventcommerceitem.Intercept(f(g(h())))`.
+func (c *EventCommerceItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EventCommerceItem = append(c.inters.EventCommerceItem, interceptors...)
+}
+
+// Create returns a builder for creating a EventCommerceItem entity.
+func (c *EventCommerceItemClient) Create() *EventCommerceItemCreate {
+	mutation := newEventCommerceItemMutation(c.config, OpCreate)
+	return &EventCommerceItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EventCommerceItem entities.
+func (c *EventCommerceItemClient) CreateBulk(builders ...*EventCommerceItemCreate) *EventCommerceItemCreateBulk {
+	return &EventCommerceItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventCommerceItemClient) MapCreateBulk(slice any, setFunc func(*EventCommerceItemCreate, int)) *EventCommerceItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventCommerceItemCreateBulk{err: fmt.Errorf("calling to EventCommerceItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventCommerceItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventCommerceItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EventCommerceItem.
+func (c *EventCommerceItemClient) Update() *EventCommerceItemUpdate {
+	mutation := newEventCommerceItemMutation(c.config, OpUpdate)
+	return &EventCommerceItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventCommerceItemClient) UpdateOne(_m *EventCommerceItem) *EventCommerceItemUpdateOne {
+	mutation := newEventCommerceItemMutation(c.config, OpUpdateOne, withEventCommerceItem(_m))
+	return &EventCommerceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventCommerceItemClient) UpdateOneID(id int64) *EventCommerceItemUpdateOne {
+	mutation := newEventCommerceItemMutation(c.config, OpUpdateOne, withEventCommerceItemID(id))
+	return &EventCommerceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EventCommerceItem.
+func (c *EventCommerceItemClient) Delete() *EventCommerceItemDelete {
+	mutation := newEventCommerceItemMutation(c.config, OpDelete)
+	return &EventCommerceItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventCommerceItemClient) DeleteOne(_m *EventCommerceItem) *EventCommerceItemDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventCommerceItemClient) DeleteOneID(id int64) *EventCommerceItemDeleteOne {
+	builder := c.Delete().Where(eventcommerceitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventCommerceItemDeleteOne{builder}
+}
+
+// Query returns a query builder for EventCommerceItem.
+func (c *EventCommerceItemClient) Query() *EventCommerceItemQuery {
+	return &EventCommerceItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEventCommerceItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EventCommerceItem entity by its id.
+func (c *EventCommerceItemClient) Get(ctx context.Context, id int64) (*EventCommerceItem, error) {
+	return c.Query().Where(eventcommerceitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventCommerceItemClient) GetX(ctx context.Context, id int64) *EventCommerceItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEvent queries the event edge of a EventCommerceItem.
+func (c *EventCommerceItemClient) QueryEvent(_m *EventCommerceItem) *VisitorEventQuery {
+	query := (&VisitorEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(eventcommerceitem.Table, eventcommerceitem.FieldID, id),
+			sqlgraph.To(visitorevent.Table, visitorevent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, eventcommerceitem.EventTable, eventcommerceitem.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EventCommerceItemClient) Hooks() []Hook {
+	return c.hooks.EventCommerceItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventCommerceItemClient) Interceptors() []Interceptor {
+	return c.inters.EventCommerceItem
+}
+
+func (c *EventCommerceItemClient) mutate(ctx context.Context, m *EventCommerceItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventCommerceItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventCommerceItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventCommerceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventCommerceItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EventCommerceItem mutation op: %q", m.Op())
+	}
+}
+
+// EventCustomPropClient is a client for the EventCustomProp schema.
+type EventCustomPropClient struct {
+	config
+}
+
+// NewEventCustomPropClient returns a client for the EventCustomProp from the given config.
+func NewEventCustomPropClient(c config) *EventCustomPropClient {
+	return &EventCustomPropClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `eventcustomprop.Hooks(f(g(h())))`.
+func (c *EventCustomPropClient) Use(hooks ...Hook) {
+	c.hooks.EventCustomProp = append(c.hooks.EventCustomProp, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `eventcustomprop.Intercept(f(g(h())))`.
+func (c *EventCustomPropClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EventCustomProp = append(c.inters.EventCustomProp, interceptors...)
+}
+
+// Create returns a builder for creating a EventCustomProp entity.
+func (c *EventCustomPropClient) Create() *EventCustomPropCreate {
+	mutation := newEventCustomPropMutation(c.config, OpCreate)
+	return &EventCustomPropCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EventCustomProp entities.
+func (c *EventCustomPropClient) CreateBulk(builders ...*EventCustomPropCreate) *EventCustomPropCreateBulk {
+	return &EventCustomPropCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventCustomPropClient) MapCreateBulk(slice any, setFunc func(*EventCustomPropCreate, int)) *EventCustomPropCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventCustomPropCreateBulk{err: fmt.Errorf("calling to EventCustomPropClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventCustomPropCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventCustomPropCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EventCustomProp.
+func (c *EventCustomPropClient) Update() *EventCustomPropUpdate {
+	mutation := newEventCustomPropMutation(c.config, OpUpdate)
+	return &EventCustomPropUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventCustomPropClient) UpdateOne(_m *EventCustomProp) *EventCustomPropUpdateOne {
+	mutation := newEventCustomPropMutation(c.config, OpUpdateOne, withEventCustomProp(_m))
+	return &EventCustomPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventCustomPropClient) UpdateOneID(id int64) *EventCustomPropUpdateOne {
+	mutation := newEventCustomPropMutation(c.config, OpUpdateOne, withEventCustomPropID(id))
+	return &EventCustomPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EventCustomProp.
+func (c *EventCustomPropClient) Delete() *EventCustomPropDelete {
+	mutation := newEventCustomPropMutation(c.config, OpDelete)
+	return &EventCustomPropDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventCustomPropClient) DeleteOne(_m *EventCustomProp) *EventCustomPropDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventCustomPropClient) DeleteOneID(id int64) *EventCustomPropDeleteOne {
+	builder := c.Delete().Where(eventcustomprop.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventCustomPropDeleteOne{builder}
+}
+
+// Query returns a query builder for EventCustomProp.
+func (c *EventCustomPropClient) Query() *EventCustomPropQuery {
+	return &EventCustomPropQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEventCustomProp},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EventCustomProp entity by its id.
+func (c *EventCustomPropClient) Get(ctx context.Context, id int64) (*EventCustomProp, error) {
+	return c.Query().Where(eventcustomprop.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventCustomPropClient) GetX(ctx context.Context, id int64) *EventCustomProp {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEvent queries the event edge of a EventCustomProp.
+func (c *EventCustomPropClient) QueryEvent(_m *EventCustomProp) *VisitorEventQuery {
+	query := (&VisitorEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(eventcustomprop.Table, eventcustomprop.FieldID, id),
+			sqlgraph.To(visitorevent.Table, visitorevent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, eventcustomprop.EventTable, eventcustomprop.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EventCustomPropClient) Hooks() []Hook {
+	return c.hooks.EventCustomProp
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventCustomPropClient) Interceptors() []Interceptor {
+	return c.inters.EventCustomProp
+}
+
+func (c *EventCustomPropClient) mutate(ctx context.Context, m *EventCustomPropMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventCustomPropCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventCustomPropUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventCustomPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventCustomPropDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EventCustomProp mutation op: %q", m.Op())
+	}
+}
+
+// EventTargetPropClient is a client for the EventTargetProp schema.
+type EventTargetPropClient struct {
+	config
+}
+
+// NewEventTargetPropClient returns a client for the EventTargetProp from the given config.
+func NewEventTargetPropClient(c config) *EventTargetPropClient {
+	return &EventTargetPropClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `eventtargetprop.Hooks(f(g(h())))`.
+func (c *EventTargetPropClient) Use(hooks ...Hook) {
+	c.hooks.EventTargetProp = append(c.hooks.EventTargetProp, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `eventtargetprop.Intercept(f(g(h())))`.
+func (c *EventTargetPropClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EventTargetProp = append(c.inters.EventTargetProp, interceptors...)
+}
+
+// Create returns a builder for creating a EventTargetProp entity.
+func (c *EventTargetPropClient) Create() *EventTargetPropCreate {
+	mutation := newEventTargetPropMutation(c.config, OpCreate)
+	return &EventTargetPropCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EventTargetProp entities.
+func (c *EventTargetPropClient) CreateBulk(builders ...*EventTargetPropCreate) *EventTargetPropCreateBulk {
+	return &EventTargetPropCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventTargetPropClient) MapCreateBulk(slice any, setFunc func(*EventTargetPropCreate, int)) *EventTargetPropCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventTargetPropCreateBulk{err: fmt.Errorf("calling to EventTargetPropClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventTargetPropCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventTargetPropCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EventTargetProp.
+func (c *EventTargetPropClient) Update() *EventTargetPropUpdate {
+	mutation := newEventTargetPropMutation(c.config, OpUpdate)
+	return &EventTargetPropUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventTargetPropClient) UpdateOne(_m *EventTargetProp) *EventTargetPropUpdateOne {
+	mutation := newEventTargetPropMutation(c.config, OpUpdateOne, withEventTargetProp(_m))
+	return &EventTargetPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventTargetPropClient) UpdateOneID(id int64) *EventTargetPropUpdateOne {
+	mutation := newEventTargetPropMutation(c.config, OpUpdateOne, withEventTargetPropID(id))
+	return &EventTargetPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EventTargetProp.
+func (c *EventTargetPropClient) Delete() *EventTargetPropDelete {
+	mutation := newEventTargetPropMutation(c.config, OpDelete)
+	return &EventTargetPropDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventTargetPropClient) DeleteOne(_m *EventTargetProp) *EventTargetPropDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventTargetPropClient) DeleteOneID(id int64) *EventTargetPropDeleteOne {
+	builder := c.Delete().Where(eventtargetprop.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventTargetPropDeleteOne{builder}
+}
+
+// Query returns a query builder for EventTargetProp.
+func (c *EventTargetPropClient) Query() *EventTargetPropQuery {
+	return &EventTargetPropQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEventTargetProp},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EventTargetProp entity by its id.
+func (c *EventTargetPropClient) Get(ctx context.Context, id int64) (*EventTargetProp, error) {
+	return c.Query().Where(eventtargetprop.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventTargetPropClient) GetX(ctx context.Context, id int64) *EventTargetProp {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEvent queries the event edge of a EventTargetProp.
+func (c *EventTargetPropClient) QueryEvent(_m *EventTargetProp) *VisitorEventQuery {
+	query := (&VisitorEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(eventtargetprop.Table, eventtargetprop.FieldID, id),
+			sqlgraph.To(visitorevent.Table, visitorevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, eventtargetprop.EventTable, eventtargetprop.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EventTargetPropClient) Hooks() []Hook {
+	return c.hooks.EventTargetProp
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventTargetPropClient) Interceptors() []Interceptor {
+	return c.inters.EventTargetProp
+}
+
+func (c *EventTargetPropClient) mutate(ctx context.Context, m *EventTargetPropMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventTargetPropCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventTargetPropUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventTargetPropUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventTargetPropDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EventTargetProp mutation op: %q", m.Op())
+	}
+}
+
+// EventTargetSearchFilterClient is a client for the EventTargetSearchFilter schema.
+type EventTargetSearchFilterClient struct {
+	config
+}
+
+// NewEventTargetSearchFilterClient returns a client for the EventTargetSearchFilter from the given config.
+func NewEventTargetSearchFilterClient(c config) *EventTargetSearchFilterClient {
+	return &EventTargetSearchFilterClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `eventtargetsearchfilter.Hooks(f(g(h())))`.
+func (c *EventTargetSearchFilterClient) Use(hooks ...Hook) {
+	c.hooks.EventTargetSearchFilter = append(c.hooks.EventTargetSearchFilter, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `eventtargetsearchfilter.Intercept(f(g(h())))`.
+func (c *EventTargetSearchFilterClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EventTargetSearchFilter = append(c.inters.EventTargetSearchFilter, interceptors...)
+}
+
+// Create returns a builder for creating a EventTargetSearchFilter entity.
+func (c *EventTargetSearchFilterClient) Create() *EventTargetSearchFilterCreate {
+	mutation := newEventTargetSearchFilterMutation(c.config, OpCreate)
+	return &EventTargetSearchFilterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EventTargetSearchFilter entities.
+func (c *EventTargetSearchFilterClient) CreateBulk(builders ...*EventTargetSearchFilterCreate) *EventTargetSearchFilterCreateBulk {
+	return &EventTargetSearchFilterCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventTargetSearchFilterClient) MapCreateBulk(slice any, setFunc func(*EventTargetSearchFilterCreate, int)) *EventTargetSearchFilterCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventTargetSearchFilterCreateBulk{err: fmt.Errorf("calling to EventTargetSearchFilterClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventTargetSearchFilterCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventTargetSearchFilterCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EventTargetSearchFilter.
+func (c *EventTargetSearchFilterClient) Update() *EventTargetSearchFilterUpdate {
+	mutation := newEventTargetSearchFilterMutation(c.config, OpUpdate)
+	return &EventTargetSearchFilterUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventTargetSearchFilterClient) UpdateOne(_m *EventTargetSearchFilter) *EventTargetSearchFilterUpdateOne {
+	mutation := newEventTargetSearchFilterMutation(c.config, OpUpdateOne, withEventTargetSearchFilter(_m))
+	return &EventTargetSearchFilterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventTargetSearchFilterClient) UpdateOneID(id int64) *EventTargetSearchFilterUpdateOne {
+	mutation := newEventTargetSearchFilterMutation(c.config, OpUpdateOne, withEventTargetSearchFilterID(id))
+	return &EventTargetSearchFilterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EventTargetSearchFilter.
+func (c *EventTargetSearchFilterClient) Delete() *EventTargetSearchFilterDelete {
+	mutation := newEventTargetSearchFilterMutation(c.config, OpDelete)
+	return &EventTargetSearchFilterDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventTargetSearchFilterClient) DeleteOne(_m *EventTargetSearchFilter) *EventTargetSearchFilterDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventTargetSearchFilterClient) DeleteOneID(id int64) *EventTargetSearchFilterDeleteOne {
+	builder := c.Delete().Where(eventtargetsearchfilter.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventTargetSearchFilterDeleteOne{builder}
+}
+
+// Query returns a query builder for EventTargetSearchFilter.
+func (c *EventTargetSearchFilterClient) Query() *EventTargetSearchFilterQuery {
+	return &EventTargetSearchFilterQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEventTargetSearchFilter},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EventTargetSearchFilter entity by its id.
+func (c *EventTargetSearchFilterClient) Get(ctx context.Context, id int64) (*EventTargetSearchFilter, error) {
+	return c.Query().Where(eventtargetsearchfilter.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventTargetSearchFilterClient) GetX(ctx context.Context, id int64) *EventTargetSearchFilter {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEvent queries the event edge of a EventTargetSearchFilter.
+func (c *EventTargetSearchFilterClient) QueryEvent(_m *EventTargetSearchFilter) *VisitorEventQuery {
+	query := (&VisitorEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(eventtargetsearchfilter.Table, eventtargetsearchfilter.FieldID, id),
+			sqlgraph.To(visitorevent.Table, visitorevent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, eventtargetsearchfilter.EventTable, eventtargetsearchfilter.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EventTargetSearchFilterClient) Hooks() []Hook {
+	return c.hooks.EventTargetSearchFilter
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventTargetSearchFilterClient) Interceptors() []Interceptor {
+	return c.inters.EventTargetSearchFilter
+}
+
+func (c *EventTargetSearchFilterClient) mutate(ctx context.Context, m *EventTargetSearchFilterMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventTargetSearchFilterCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventTargetSearchFilterUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventTargetSearchFilterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventTargetSearchFilterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EventTargetSearchFilter mutation op: %q", m.Op())
 	}
 }
 
@@ -1169,6 +1808,86 @@ func (c *VisitorEventClient) GetX(ctx context.Context, id int64) *VisitorEvent {
 	return obj
 }
 
+// QueryCustomProps queries the custom_props edge of a VisitorEvent.
+func (c *VisitorEventClient) QueryCustomProps(_m *VisitorEvent) *EventCustomPropQuery {
+	query := (&EventCustomPropClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, id),
+			sqlgraph.To(eventcustomprop.Table, eventcustomprop.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.CustomPropsTable, visitorevent.CustomPropsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPlatformClicks queries the platform_clicks edge of a VisitorEvent.
+func (c *VisitorEventClient) QueryPlatformClicks(_m *VisitorEvent) *VisitorPlatformClickQuery {
+	query := (&VisitorPlatformClickClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, id),
+			sqlgraph.To(visitorplatformclick.Table, visitorplatformclick.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, visitorevent.PlatformClicksTable, visitorevent.PlatformClicksColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTargetProps queries the target_props edge of a VisitorEvent.
+func (c *VisitorEventClient) QueryTargetProps(_m *VisitorEvent) *EventTargetPropQuery {
+	query := (&EventTargetPropClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, id),
+			sqlgraph.To(eventtargetprop.Table, eventtargetprop.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, visitorevent.TargetPropsTable, visitorevent.TargetPropsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCommerceItems queries the commerce_items edge of a VisitorEvent.
+func (c *VisitorEventClient) QueryCommerceItems(_m *VisitorEvent) *EventCommerceItemQuery {
+	query := (&EventCommerceItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, id),
+			sqlgraph.To(eventcommerceitem.Table, eventcommerceitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.CommerceItemsTable, visitorevent.CommerceItemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySearchFilters queries the search_filters edge of a VisitorEvent.
+func (c *VisitorEventClient) QuerySearchFilters(_m *VisitorEvent) *EventTargetSearchFilterQuery {
+	query := (&EventTargetSearchFilterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorevent.Table, visitorevent.FieldID, id),
+			sqlgraph.To(eventtargetsearchfilter.Table, eventtargetsearchfilter.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, visitorevent.SearchFiltersTable, visitorevent.SearchFiltersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *VisitorEventClient) Hooks() []Hook {
 	return c.hooks.VisitorEvent
@@ -1191,6 +1910,155 @@ func (c *VisitorEventClient) mutate(ctx context.Context, m *VisitorEventMutation
 		return (&VisitorEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown VisitorEvent mutation op: %q", m.Op())
+	}
+}
+
+// VisitorPlatformClickClient is a client for the VisitorPlatformClick schema.
+type VisitorPlatformClickClient struct {
+	config
+}
+
+// NewVisitorPlatformClickClient returns a client for the VisitorPlatformClick from the given config.
+func NewVisitorPlatformClickClient(c config) *VisitorPlatformClickClient {
+	return &VisitorPlatformClickClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `visitorplatformclick.Hooks(f(g(h())))`.
+func (c *VisitorPlatformClickClient) Use(hooks ...Hook) {
+	c.hooks.VisitorPlatformClick = append(c.hooks.VisitorPlatformClick, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `visitorplatformclick.Intercept(f(g(h())))`.
+func (c *VisitorPlatformClickClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VisitorPlatformClick = append(c.inters.VisitorPlatformClick, interceptors...)
+}
+
+// Create returns a builder for creating a VisitorPlatformClick entity.
+func (c *VisitorPlatformClickClient) Create() *VisitorPlatformClickCreate {
+	mutation := newVisitorPlatformClickMutation(c.config, OpCreate)
+	return &VisitorPlatformClickCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VisitorPlatformClick entities.
+func (c *VisitorPlatformClickClient) CreateBulk(builders ...*VisitorPlatformClickCreate) *VisitorPlatformClickCreateBulk {
+	return &VisitorPlatformClickCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VisitorPlatformClickClient) MapCreateBulk(slice any, setFunc func(*VisitorPlatformClickCreate, int)) *VisitorPlatformClickCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VisitorPlatformClickCreateBulk{err: fmt.Errorf("calling to VisitorPlatformClickClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VisitorPlatformClickCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VisitorPlatformClickCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VisitorPlatformClick.
+func (c *VisitorPlatformClickClient) Update() *VisitorPlatformClickUpdate {
+	mutation := newVisitorPlatformClickMutation(c.config, OpUpdate)
+	return &VisitorPlatformClickUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VisitorPlatformClickClient) UpdateOne(_m *VisitorPlatformClick) *VisitorPlatformClickUpdateOne {
+	mutation := newVisitorPlatformClickMutation(c.config, OpUpdateOne, withVisitorPlatformClick(_m))
+	return &VisitorPlatformClickUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VisitorPlatformClickClient) UpdateOneID(id int64) *VisitorPlatformClickUpdateOne {
+	mutation := newVisitorPlatformClickMutation(c.config, OpUpdateOne, withVisitorPlatformClickID(id))
+	return &VisitorPlatformClickUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VisitorPlatformClick.
+func (c *VisitorPlatformClickClient) Delete() *VisitorPlatformClickDelete {
+	mutation := newVisitorPlatformClickMutation(c.config, OpDelete)
+	return &VisitorPlatformClickDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VisitorPlatformClickClient) DeleteOne(_m *VisitorPlatformClick) *VisitorPlatformClickDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VisitorPlatformClickClient) DeleteOneID(id int64) *VisitorPlatformClickDeleteOne {
+	builder := c.Delete().Where(visitorplatformclick.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VisitorPlatformClickDeleteOne{builder}
+}
+
+// Query returns a query builder for VisitorPlatformClick.
+func (c *VisitorPlatformClickClient) Query() *VisitorPlatformClickQuery {
+	return &VisitorPlatformClickQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVisitorPlatformClick},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VisitorPlatformClick entity by its id.
+func (c *VisitorPlatformClickClient) Get(ctx context.Context, id int64) (*VisitorPlatformClick, error) {
+	return c.Query().Where(visitorplatformclick.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VisitorPlatformClickClient) GetX(ctx context.Context, id int64) *VisitorPlatformClick {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEvent queries the event edge of a VisitorPlatformClick.
+func (c *VisitorPlatformClickClient) QueryEvent(_m *VisitorPlatformClick) *VisitorEventQuery {
+	query := (&VisitorEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(visitorplatformclick.Table, visitorplatformclick.FieldID, id),
+			sqlgraph.To(visitorevent.Table, visitorevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, visitorplatformclick.EventTable, visitorplatformclick.EventColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VisitorPlatformClickClient) Hooks() []Hook {
+	return c.hooks.VisitorPlatformClick
+}
+
+// Interceptors returns the client interceptors.
+func (c *VisitorPlatformClickClient) Interceptors() []Interceptor {
+	return c.inters.VisitorPlatformClick
+}
+
+func (c *VisitorPlatformClickClient) mutate(ctx context.Context, m *VisitorPlatformClickMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VisitorPlatformClickCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VisitorPlatformClickUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VisitorPlatformClickUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VisitorPlatformClickDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VisitorPlatformClick mutation op: %q", m.Op())
 	}
 }
 
@@ -1330,11 +2198,13 @@ func (c *VisitorSessionClient) mutate(ctx context.Context, m *VisitorSessionMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Device, PageView, Site, SiteVisitor, Visitor, VisitorConsent, VisitorEvent,
-		VisitorSession []ent.Hook
+		Device, EventCommerceItem, EventCustomProp, EventTargetProp,
+		EventTargetSearchFilter, PageView, Site, SiteVisitor, Visitor, VisitorConsent,
+		VisitorEvent, VisitorPlatformClick, VisitorSession []ent.Hook
 	}
 	inters struct {
-		Device, PageView, Site, SiteVisitor, Visitor, VisitorConsent, VisitorEvent,
-		VisitorSession []ent.Interceptor
+		Device, EventCommerceItem, EventCustomProp, EventTargetProp,
+		EventTargetSearchFilter, PageView, Site, SiteVisitor, Visitor, VisitorConsent,
+		VisitorEvent, VisitorPlatformClick, VisitorSession []ent.Interceptor
 	}
 )

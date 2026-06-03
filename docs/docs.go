@@ -748,6 +748,9 @@ const docTemplate = `{
                 "occurred_at": {
                     "type": "string"
                 },
+                "page_id": {
+                    "type": "integer"
+                },
                 "schema_version": {
                     "type": "string"
                 },

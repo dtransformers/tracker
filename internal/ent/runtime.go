@@ -5,6 +5,8 @@ package ent
 import (
 	"time"
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/schemas"
 	"tracking/internal/ent/site"
@@ -45,6 +47,18 @@ func init() {
 	deviceDescLastSeenAt := deviceFields[17].Descriptor()
 	// device.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	device.DefaultLastSeenAt = deviceDescLastSeenAt.Default.(func() time.Time)
+	eventcustompropFields := schemas.EventCustomProp{}.Fields()
+	_ = eventcustompropFields
+	// eventcustompropDescKey is the schema descriptor for key field.
+	eventcustompropDescKey := eventcustompropFields[2].Descriptor()
+	// eventcustomprop.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	eventcustomprop.KeyValidator = eventcustompropDescKey.Validators[0].(func(string) error)
+	eventtargetsearchfilterFields := schemas.EventTargetSearchFilter{}.Fields()
+	_ = eventtargetsearchfilterFields
+	// eventtargetsearchfilterDescKey is the schema descriptor for key field.
+	eventtargetsearchfilterDescKey := eventtargetsearchfilterFields[2].Descriptor()
+	// eventtargetsearchfilter.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	eventtargetsearchfilter.KeyValidator = eventtargetsearchfilterDescKey.Validators[0].(func(string) error)
 	pageviewFields := schemas.PageView{}.Fields()
 	_ = pageviewFields
 	// pageviewDescUUID is the schema descriptor for uuid field.
@@ -188,7 +202,7 @@ func init() {
 	// visitorevent.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
 	visitorevent.UUIDValidator = visitoreventDescUUID.Validators[0].(func(string) error)
 	// visitoreventDescCreatedAt is the schema descriptor for created_at field.
-	visitoreventDescCreatedAt := visitoreventFields[7].Descriptor()
+	visitoreventDescCreatedAt := visitoreventFields[15].Descriptor()
 	// visitorevent.DefaultCreatedAt holds the default value on creation for the created_at field.
 	visitorevent.DefaultCreatedAt = visitoreventDescCreatedAt.Default.(func() time.Time)
 	visitorsessionFields := schemas.VisitorSession{}.Fields()

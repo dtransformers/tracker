@@ -36,6 +36,162 @@ var (
 		Columns:    DevicesColumns,
 		PrimaryKey: []*schema.Column{DevicesColumns[0]},
 	}
+	// EventCommerceItemsColumns holds the columns for the "event_commerce_items" table.
+	EventCommerceItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "item_id", Type: field.TypeString},
+		{Name: "item_name", Type: field.TypeString, Nullable: true},
+		{Name: "item_brand", Type: field.TypeString, Nullable: true},
+		{Name: "item_category", Type: field.TypeString, Nullable: true},
+		{Name: "item_category_2", Type: field.TypeString, Nullable: true},
+		{Name: "item_category_3", Type: field.TypeString, Nullable: true},
+		{Name: "item_variant", Type: field.TypeString, Nullable: true},
+		{Name: "price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "currency", Type: field.TypeString, Nullable: true},
+		{Name: "quantity", Type: field.TypeInt, Nullable: true},
+		{Name: "coupon", Type: field.TypeString, Nullable: true},
+		{Name: "discount", Type: field.TypeFloat64, Nullable: true},
+		{Name: "index", Type: field.TypeInt, Nullable: true},
+		{Name: "item_list_id", Type: field.TypeString, Nullable: true},
+		{Name: "item_list_name", Type: field.TypeString, Nullable: true},
+		{Name: "affiliation", Type: field.TypeString, Nullable: true},
+		{Name: "event_id", Type: field.TypeInt64},
+	}
+	// EventCommerceItemsTable holds the schema information for the "event_commerce_items" table.
+	EventCommerceItemsTable = &schema.Table{
+		Name:       "event_commerce_items",
+		Columns:    EventCommerceItemsColumns,
+		PrimaryKey: []*schema.Column{EventCommerceItemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "event_commerce_items_visitor_events_commerce_items",
+				Columns:    []*schema.Column{EventCommerceItemsColumns[17]},
+				RefColumns: []*schema.Column{VisitorEventsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// EventCustomPropsColumns holds the columns for the "event_custom_props" table.
+	EventCustomPropsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString, Nullable: true},
+		{Name: "event_id", Type: field.TypeInt64},
+	}
+	// EventCustomPropsTable holds the schema information for the "event_custom_props" table.
+	EventCustomPropsTable = &schema.Table{
+		Name:       "event_custom_props",
+		Columns:    EventCustomPropsColumns,
+		PrimaryKey: []*schema.Column{EventCustomPropsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "event_custom_props_visitor_events_custom_props",
+				Columns:    []*schema.Column{EventCustomPropsColumns[3]},
+				RefColumns: []*schema.Column{VisitorEventsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// EventTargetPropsColumns holds the columns for the "event_target_props" table.
+	EventTargetPropsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "element_type", Type: field.TypeString, Nullable: true},
+		{Name: "element_id", Type: field.TypeString, Nullable: true},
+		{Name: "element_name", Type: field.TypeString, Nullable: true},
+		{Name: "element_text", Type: field.TypeString, Nullable: true},
+		{Name: "element_class", Type: field.TypeString, Nullable: true},
+		{Name: "element_selector", Type: field.TypeString, Nullable: true},
+		{Name: "component", Type: field.TypeString, Nullable: true},
+		{Name: "page_name", Type: field.TypeString, Nullable: true},
+		{Name: "button_name", Type: field.TypeString, Nullable: true},
+		{Name: "button_id", Type: field.TypeString, Nullable: true},
+		{Name: "href", Type: field.TypeString, Nullable: true},
+		{Name: "form_name", Type: field.TypeString, Nullable: true},
+		{Name: "form_id", Type: field.TypeString, Nullable: true},
+		{Name: "form_field", Type: field.TypeString, Nullable: true},
+		{Name: "form_value_hash", Type: field.TypeString, Nullable: true},
+		{Name: "form_field_count", Type: field.TypeInt, Nullable: true},
+		{Name: "form_completion_pct", Type: field.TypeFloat64, Nullable: true},
+		{Name: "media_type", Type: field.TypeString, Nullable: true},
+		{Name: "media_id", Type: field.TypeString, Nullable: true},
+		{Name: "media_title", Type: field.TypeString, Nullable: true},
+		{Name: "media_provider", Type: field.TypeString, Nullable: true},
+		{Name: "media_duration_ms", Type: field.TypeInt64, Nullable: true},
+		{Name: "media_current_time_ms", Type: field.TypeInt64, Nullable: true},
+		{Name: "media_percent", Type: field.TypeFloat64, Nullable: true},
+		{Name: "media_quality", Type: field.TypeString, Nullable: true},
+		{Name: "media_sound_on", Type: field.TypeBool, Nullable: true},
+		{Name: "media_fullscreen", Type: field.TypeBool, Nullable: true},
+		{Name: "scroll_percent", Type: field.TypeFloat64, Nullable: true},
+		{Name: "scroll_direction", Type: field.TypeString, Nullable: true},
+		{Name: "scroll_depth_px", Type: field.TypeInt, Nullable: true},
+		{Name: "mouse_button", Type: field.TypeString, Nullable: true},
+		{Name: "click_x", Type: field.TypeInt, Nullable: true},
+		{Name: "click_y", Type: field.TypeInt, Nullable: true},
+		{Name: "element_x", Type: field.TypeInt, Nullable: true},
+		{Name: "element_y", Type: field.TypeInt, Nullable: true},
+		{Name: "transaction_id", Type: field.TypeString, Nullable: true},
+		{Name: "currency", Type: field.TypeString, Nullable: true},
+		{Name: "value", Type: field.TypeFloat64, Nullable: true},
+		{Name: "tax", Type: field.TypeFloat64, Nullable: true},
+		{Name: "shipping", Type: field.TypeFloat64, Nullable: true},
+		{Name: "coupon", Type: field.TypeString, Nullable: true},
+		{Name: "affiliation", Type: field.TypeString, Nullable: true},
+		{Name: "payment_type", Type: field.TypeString, Nullable: true},
+		{Name: "shipping_tier", Type: field.TypeString, Nullable: true},
+		{Name: "search_term", Type: field.TypeString, Nullable: true},
+		{Name: "search_results_count", Type: field.TypeInt, Nullable: true},
+		{Name: "auth_provider", Type: field.TypeString, Nullable: true},
+		{Name: "auth_method", Type: field.TypeString, Nullable: true},
+		{Name: "is_new_user", Type: field.TypeBool, Nullable: true},
+		{Name: "error_code", Type: field.TypeString, Nullable: true},
+		{Name: "error_message", Type: field.TypeString, Nullable: true},
+		{Name: "error_severity", Type: field.TypeString, Nullable: true},
+		{Name: "error_stack", Type: field.TypeString, Nullable: true},
+		{Name: "http_status", Type: field.TypeInt, Nullable: true},
+		{Name: "component_name", Type: field.TypeString, Nullable: true},
+		{Name: "share_platform", Type: field.TypeString, Nullable: true},
+		{Name: "share_method", Type: field.TypeString, Nullable: true},
+		{Name: "duration_ms", Type: field.TypeInt64, Nullable: true},
+		{Name: "feature", Type: field.TypeString, Nullable: true},
+		{Name: "priority", Type: field.TypeString, Nullable: true},
+		{Name: "event_id", Type: field.TypeInt64, Unique: true},
+	}
+	// EventTargetPropsTable holds the schema information for the "event_target_props" table.
+	EventTargetPropsTable = &schema.Table{
+		Name:       "event_target_props",
+		Columns:    EventTargetPropsColumns,
+		PrimaryKey: []*schema.Column{EventTargetPropsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "event_target_props_visitor_events_target_props",
+				Columns:    []*schema.Column{EventTargetPropsColumns[61]},
+				RefColumns: []*schema.Column{VisitorEventsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// EventTargetSearchFiltersColumns holds the columns for the "event_target_search_filters" table.
+	EventTargetSearchFiltersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString, Nullable: true},
+		{Name: "event_id", Type: field.TypeInt64},
+	}
+	// EventTargetSearchFiltersTable holds the schema information for the "event_target_search_filters" table.
+	EventTargetSearchFiltersTable = &schema.Table{
+		Name:       "event_target_search_filters",
+		Columns:    EventTargetSearchFiltersColumns,
+		PrimaryKey: []*schema.Column{EventTargetSearchFiltersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "event_target_search_filters_visitor_events_search_filters",
+				Columns:    []*schema.Column{EventTargetSearchFiltersColumns[3]},
+				RefColumns: []*schema.Column{VisitorEventsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// PageViewsColumns holds the columns for the "page_views" table.
 	PageViewsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -134,8 +290,16 @@ var (
 		{Name: "session_id", Type: field.TypeInt64},
 		{Name: "visitor_id", Type: field.TypeInt64},
 		{Name: "device_id", Type: field.TypeInt64},
+		{Name: "page_id", Type: field.TypeInt64},
+		{Name: "event_type", Type: field.TypeString},
+		{Name: "event_category", Type: field.TypeString},
 		{Name: "event_name", Type: field.TypeString},
-		{Name: "event_properties", Type: field.TypeJSON, Nullable: true},
+		{Name: "occurred_at", Type: field.TypeTime, Nullable: true},
+		{Name: "server_received_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sequence", Type: field.TypeInt},
+		{Name: "schema_version", Type: field.TypeString, Nullable: true},
+		{Name: "sdk_name", Type: field.TypeString, Nullable: true},
+		{Name: "sdk_version", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 	}
 	// VisitorEventsTable holds the schema information for the "visitor_events" table.
@@ -143,6 +307,40 @@ var (
 		Name:       "visitor_events",
 		Columns:    VisitorEventsColumns,
 		PrimaryKey: []*schema.Column{VisitorEventsColumns[0]},
+	}
+	// VisitorPlatformClicksColumns holds the columns for the "visitor_platform_clicks" table.
+	VisitorPlatformClicksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "gclid", Type: field.TypeString, Nullable: true},
+		{Name: "gbraid", Type: field.TypeString, Nullable: true},
+		{Name: "wbraid", Type: field.TypeString, Nullable: true},
+		{Name: "dclid", Type: field.TypeString, Nullable: true},
+		{Name: "fbclid", Type: field.TypeString, Nullable: true},
+		{Name: "fbp", Type: field.TypeString, Nullable: true},
+		{Name: "fbc", Type: field.TypeString, Nullable: true},
+		{Name: "ttclid", Type: field.TypeString, Nullable: true},
+		{Name: "ttp", Type: field.TypeString, Nullable: true},
+		{Name: "msclkid", Type: field.TypeString, Nullable: true},
+		{Name: "twclid", Type: field.TypeString, Nullable: true},
+		{Name: "li_fat_id", Type: field.TypeString, Nullable: true},
+		{Name: "sc_cid", Type: field.TypeString, Nullable: true},
+		{Name: "epik", Type: field.TypeString, Nullable: true},
+		{Name: "liveramp_ats_id", Type: field.TypeString, Nullable: true},
+		{Name: "event_id", Type: field.TypeInt64, Unique: true},
+	}
+	// VisitorPlatformClicksTable holds the schema information for the "visitor_platform_clicks" table.
+	VisitorPlatformClicksTable = &schema.Table{
+		Name:       "visitor_platform_clicks",
+		Columns:    VisitorPlatformClicksColumns,
+		PrimaryKey: []*schema.Column{VisitorPlatformClicksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "visitor_platform_clicks_visitor_events_platform_clicks",
+				Columns:    []*schema.Column{VisitorPlatformClicksColumns[16]},
+				RefColumns: []*schema.Column{VisitorEventsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// VisitorSessionsColumns holds the columns for the "visitor_sessions" table.
 	VisitorSessionsColumns = []*schema.Column{
@@ -175,15 +373,25 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DevicesTable,
+		EventCommerceItemsTable,
+		EventCustomPropsTable,
+		EventTargetPropsTable,
+		EventTargetSearchFiltersTable,
 		PageViewsTable,
 		SitesTable,
 		SiteVisitorsTable,
 		VisitorsTable,
 		VisitorConsentsTable,
 		VisitorEventsTable,
+		VisitorPlatformClicksTable,
 		VisitorSessionsTable,
 	}
 )
 
 func init() {
+	EventCommerceItemsTable.ForeignKeys[0].RefTable = VisitorEventsTable
+	EventCustomPropsTable.ForeignKeys[0].RefTable = VisitorEventsTable
+	EventTargetPropsTable.ForeignKeys[0].RefTable = VisitorEventsTable
+	EventTargetSearchFiltersTable.ForeignKeys[0].RefTable = VisitorEventsTable
+	VisitorPlatformClicksTable.ForeignKeys[0].RefTable = VisitorEventsTable
 }

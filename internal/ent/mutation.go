@@ -9,6 +9,10 @@ import (
 	"sync"
 	"time"
 	"tracking/internal/ent/device"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/pageview"
 	"tracking/internal/ent/predicate"
 	"tracking/internal/ent/site"
@@ -16,6 +20,7 @@ import (
 	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorconsent"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 	"tracking/internal/ent/visitorsession"
 
 	"entgo.io/ent"
@@ -31,14 +36,19 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDevice         = "Device"
-	TypePageView       = "PageView"
-	TypeSite           = "Site"
-	TypeSiteVisitor    = "SiteVisitor"
-	TypeVisitor        = "Visitor"
-	TypeVisitorConsent = "VisitorConsent"
-	TypeVisitorEvent   = "VisitorEvent"
-	TypeVisitorSession = "VisitorSession"
+	TypeDevice                  = "Device"
+	TypeEventCommerceItem       = "EventCommerceItem"
+	TypeEventCustomProp         = "EventCustomProp"
+	TypeEventTargetProp         = "EventTargetProp"
+	TypeEventTargetSearchFilter = "EventTargetSearchFilter"
+	TypePageView                = "PageView"
+	TypeSite                    = "Site"
+	TypeSiteVisitor             = "SiteVisitor"
+	TypeVisitor                 = "Visitor"
+	TypeVisitorConsent          = "VisitorConsent"
+	TypeVisitorEvent            = "VisitorEvent"
+	TypeVisitorPlatformClick    = "VisitorPlatformClick"
+	TypeVisitorSession          = "VisitorSession"
 )
 
 // DeviceMutation represents an operation that mutates the Device nodes in the graph.
@@ -1618,6 +1628,8071 @@ func (m *DeviceMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DeviceMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Device edge %s", name)
+}
+
+// EventCommerceItemMutation represents an operation that mutates the EventCommerceItem nodes in the graph.
+type EventCommerceItemMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int64
+	item_id         *string
+	item_name       *string
+	item_brand      *string
+	item_category   *string
+	item_category_2 *string
+	item_category_3 *string
+	item_variant    *string
+	price           *float64
+	addprice        *float64
+	currency        *string
+	quantity        *int
+	addquantity     *int
+	coupon          *string
+	discount        *float64
+	adddiscount     *float64
+	index           *int
+	addindex        *int
+	item_list_id    *string
+	item_list_name  *string
+	affiliation     *string
+	clearedFields   map[string]struct{}
+	event           *int64
+	clearedevent    bool
+	done            bool
+	oldValue        func(context.Context) (*EventCommerceItem, error)
+	predicates      []predicate.EventCommerceItem
+}
+
+var _ ent.Mutation = (*EventCommerceItemMutation)(nil)
+
+// eventcommerceitemOption allows management of the mutation configuration using functional options.
+type eventcommerceitemOption func(*EventCommerceItemMutation)
+
+// newEventCommerceItemMutation creates new mutation for the EventCommerceItem entity.
+func newEventCommerceItemMutation(c config, op Op, opts ...eventcommerceitemOption) *EventCommerceItemMutation {
+	m := &EventCommerceItemMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEventCommerceItem,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEventCommerceItemID sets the ID field of the mutation.
+func withEventCommerceItemID(id int64) eventcommerceitemOption {
+	return func(m *EventCommerceItemMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EventCommerceItem
+		)
+		m.oldValue = func(ctx context.Context) (*EventCommerceItem, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EventCommerceItem.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEventCommerceItem sets the old EventCommerceItem of the mutation.
+func withEventCommerceItem(node *EventCommerceItem) eventcommerceitemOption {
+	return func(m *EventCommerceItemMutation) {
+		m.oldValue = func(context.Context) (*EventCommerceItem, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EventCommerceItemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EventCommerceItemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EventCommerceItem entities.
+func (m *EventCommerceItemMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EventCommerceItemMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EventCommerceItemMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EventCommerceItem.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEventID sets the "event_id" field.
+func (m *EventCommerceItemMutation) SetEventID(i int64) {
+	m.event = &i
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *EventCommerceItemMutation) EventID() (r int64, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldEventID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *EventCommerceItemMutation) ResetEventID() {
+	m.event = nil
+}
+
+// SetItemID sets the "item_id" field.
+func (m *EventCommerceItemMutation) SetItemID(s string) {
+	m.item_id = &s
+}
+
+// ItemID returns the value of the "item_id" field in the mutation.
+func (m *EventCommerceItemMutation) ItemID() (r string, exists bool) {
+	v := m.item_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemID returns the old "item_id" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemID: %w", err)
+	}
+	return oldValue.ItemID, nil
+}
+
+// ResetItemID resets all changes to the "item_id" field.
+func (m *EventCommerceItemMutation) ResetItemID() {
+	m.item_id = nil
+}
+
+// SetItemName sets the "item_name" field.
+func (m *EventCommerceItemMutation) SetItemName(s string) {
+	m.item_name = &s
+}
+
+// ItemName returns the value of the "item_name" field in the mutation.
+func (m *EventCommerceItemMutation) ItemName() (r string, exists bool) {
+	v := m.item_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemName returns the old "item_name" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemName: %w", err)
+	}
+	return oldValue.ItemName, nil
+}
+
+// ClearItemName clears the value of the "item_name" field.
+func (m *EventCommerceItemMutation) ClearItemName() {
+	m.item_name = nil
+	m.clearedFields[eventcommerceitem.FieldItemName] = struct{}{}
+}
+
+// ItemNameCleared returns if the "item_name" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemNameCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemName]
+	return ok
+}
+
+// ResetItemName resets all changes to the "item_name" field.
+func (m *EventCommerceItemMutation) ResetItemName() {
+	m.item_name = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemName)
+}
+
+// SetItemBrand sets the "item_brand" field.
+func (m *EventCommerceItemMutation) SetItemBrand(s string) {
+	m.item_brand = &s
+}
+
+// ItemBrand returns the value of the "item_brand" field in the mutation.
+func (m *EventCommerceItemMutation) ItemBrand() (r string, exists bool) {
+	v := m.item_brand
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemBrand returns the old "item_brand" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemBrand(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemBrand is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemBrand requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemBrand: %w", err)
+	}
+	return oldValue.ItemBrand, nil
+}
+
+// ClearItemBrand clears the value of the "item_brand" field.
+func (m *EventCommerceItemMutation) ClearItemBrand() {
+	m.item_brand = nil
+	m.clearedFields[eventcommerceitem.FieldItemBrand] = struct{}{}
+}
+
+// ItemBrandCleared returns if the "item_brand" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemBrandCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemBrand]
+	return ok
+}
+
+// ResetItemBrand resets all changes to the "item_brand" field.
+func (m *EventCommerceItemMutation) ResetItemBrand() {
+	m.item_brand = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemBrand)
+}
+
+// SetItemCategory sets the "item_category" field.
+func (m *EventCommerceItemMutation) SetItemCategory(s string) {
+	m.item_category = &s
+}
+
+// ItemCategory returns the value of the "item_category" field in the mutation.
+func (m *EventCommerceItemMutation) ItemCategory() (r string, exists bool) {
+	v := m.item_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemCategory returns the old "item_category" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemCategory: %w", err)
+	}
+	return oldValue.ItemCategory, nil
+}
+
+// ClearItemCategory clears the value of the "item_category" field.
+func (m *EventCommerceItemMutation) ClearItemCategory() {
+	m.item_category = nil
+	m.clearedFields[eventcommerceitem.FieldItemCategory] = struct{}{}
+}
+
+// ItemCategoryCleared returns if the "item_category" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemCategoryCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemCategory]
+	return ok
+}
+
+// ResetItemCategory resets all changes to the "item_category" field.
+func (m *EventCommerceItemMutation) ResetItemCategory() {
+	m.item_category = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemCategory)
+}
+
+// SetItemCategory2 sets the "item_category_2" field.
+func (m *EventCommerceItemMutation) SetItemCategory2(s string) {
+	m.item_category_2 = &s
+}
+
+// ItemCategory2 returns the value of the "item_category_2" field in the mutation.
+func (m *EventCommerceItemMutation) ItemCategory2() (r string, exists bool) {
+	v := m.item_category_2
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemCategory2 returns the old "item_category_2" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemCategory2(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemCategory2 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemCategory2 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemCategory2: %w", err)
+	}
+	return oldValue.ItemCategory2, nil
+}
+
+// ClearItemCategory2 clears the value of the "item_category_2" field.
+func (m *EventCommerceItemMutation) ClearItemCategory2() {
+	m.item_category_2 = nil
+	m.clearedFields[eventcommerceitem.FieldItemCategory2] = struct{}{}
+}
+
+// ItemCategory2Cleared returns if the "item_category_2" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemCategory2Cleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemCategory2]
+	return ok
+}
+
+// ResetItemCategory2 resets all changes to the "item_category_2" field.
+func (m *EventCommerceItemMutation) ResetItemCategory2() {
+	m.item_category_2 = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemCategory2)
+}
+
+// SetItemCategory3 sets the "item_category_3" field.
+func (m *EventCommerceItemMutation) SetItemCategory3(s string) {
+	m.item_category_3 = &s
+}
+
+// ItemCategory3 returns the value of the "item_category_3" field in the mutation.
+func (m *EventCommerceItemMutation) ItemCategory3() (r string, exists bool) {
+	v := m.item_category_3
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemCategory3 returns the old "item_category_3" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemCategory3(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemCategory3 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemCategory3 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemCategory3: %w", err)
+	}
+	return oldValue.ItemCategory3, nil
+}
+
+// ClearItemCategory3 clears the value of the "item_category_3" field.
+func (m *EventCommerceItemMutation) ClearItemCategory3() {
+	m.item_category_3 = nil
+	m.clearedFields[eventcommerceitem.FieldItemCategory3] = struct{}{}
+}
+
+// ItemCategory3Cleared returns if the "item_category_3" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemCategory3Cleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemCategory3]
+	return ok
+}
+
+// ResetItemCategory3 resets all changes to the "item_category_3" field.
+func (m *EventCommerceItemMutation) ResetItemCategory3() {
+	m.item_category_3 = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemCategory3)
+}
+
+// SetItemVariant sets the "item_variant" field.
+func (m *EventCommerceItemMutation) SetItemVariant(s string) {
+	m.item_variant = &s
+}
+
+// ItemVariant returns the value of the "item_variant" field in the mutation.
+func (m *EventCommerceItemMutation) ItemVariant() (r string, exists bool) {
+	v := m.item_variant
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemVariant returns the old "item_variant" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemVariant(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemVariant is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemVariant requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemVariant: %w", err)
+	}
+	return oldValue.ItemVariant, nil
+}
+
+// ClearItemVariant clears the value of the "item_variant" field.
+func (m *EventCommerceItemMutation) ClearItemVariant() {
+	m.item_variant = nil
+	m.clearedFields[eventcommerceitem.FieldItemVariant] = struct{}{}
+}
+
+// ItemVariantCleared returns if the "item_variant" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemVariantCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemVariant]
+	return ok
+}
+
+// ResetItemVariant resets all changes to the "item_variant" field.
+func (m *EventCommerceItemMutation) ResetItemVariant() {
+	m.item_variant = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemVariant)
+}
+
+// SetPrice sets the "price" field.
+func (m *EventCommerceItemMutation) SetPrice(f float64) {
+	m.price = &f
+	m.addprice = nil
+}
+
+// Price returns the value of the "price" field in the mutation.
+func (m *EventCommerceItemMutation) Price() (r float64, exists bool) {
+	v := m.price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrice returns the old "price" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldPrice(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrice: %w", err)
+	}
+	return oldValue.Price, nil
+}
+
+// AddPrice adds f to the "price" field.
+func (m *EventCommerceItemMutation) AddPrice(f float64) {
+	if m.addprice != nil {
+		*m.addprice += f
+	} else {
+		m.addprice = &f
+	}
+}
+
+// AddedPrice returns the value that was added to the "price" field in this mutation.
+func (m *EventCommerceItemMutation) AddedPrice() (r float64, exists bool) {
+	v := m.addprice
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPrice clears the value of the "price" field.
+func (m *EventCommerceItemMutation) ClearPrice() {
+	m.price = nil
+	m.addprice = nil
+	m.clearedFields[eventcommerceitem.FieldPrice] = struct{}{}
+}
+
+// PriceCleared returns if the "price" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) PriceCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldPrice]
+	return ok
+}
+
+// ResetPrice resets all changes to the "price" field.
+func (m *EventCommerceItemMutation) ResetPrice() {
+	m.price = nil
+	m.addprice = nil
+	delete(m.clearedFields, eventcommerceitem.FieldPrice)
+}
+
+// SetCurrency sets the "currency" field.
+func (m *EventCommerceItemMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *EventCommerceItemMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (m *EventCommerceItemMutation) ClearCurrency() {
+	m.currency = nil
+	m.clearedFields[eventcommerceitem.FieldCurrency] = struct{}{}
+}
+
+// CurrencyCleared returns if the "currency" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) CurrencyCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldCurrency]
+	return ok
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *EventCommerceItemMutation) ResetCurrency() {
+	m.currency = nil
+	delete(m.clearedFields, eventcommerceitem.FieldCurrency)
+}
+
+// SetQuantity sets the "quantity" field.
+func (m *EventCommerceItemMutation) SetQuantity(i int) {
+	m.quantity = &i
+	m.addquantity = nil
+}
+
+// Quantity returns the value of the "quantity" field in the mutation.
+func (m *EventCommerceItemMutation) Quantity() (r int, exists bool) {
+	v := m.quantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuantity returns the old "quantity" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldQuantity(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuantity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuantity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuantity: %w", err)
+	}
+	return oldValue.Quantity, nil
+}
+
+// AddQuantity adds i to the "quantity" field.
+func (m *EventCommerceItemMutation) AddQuantity(i int) {
+	if m.addquantity != nil {
+		*m.addquantity += i
+	} else {
+		m.addquantity = &i
+	}
+}
+
+// AddedQuantity returns the value that was added to the "quantity" field in this mutation.
+func (m *EventCommerceItemMutation) AddedQuantity() (r int, exists bool) {
+	v := m.addquantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearQuantity clears the value of the "quantity" field.
+func (m *EventCommerceItemMutation) ClearQuantity() {
+	m.quantity = nil
+	m.addquantity = nil
+	m.clearedFields[eventcommerceitem.FieldQuantity] = struct{}{}
+}
+
+// QuantityCleared returns if the "quantity" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) QuantityCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldQuantity]
+	return ok
+}
+
+// ResetQuantity resets all changes to the "quantity" field.
+func (m *EventCommerceItemMutation) ResetQuantity() {
+	m.quantity = nil
+	m.addquantity = nil
+	delete(m.clearedFields, eventcommerceitem.FieldQuantity)
+}
+
+// SetCoupon sets the "coupon" field.
+func (m *EventCommerceItemMutation) SetCoupon(s string) {
+	m.coupon = &s
+}
+
+// Coupon returns the value of the "coupon" field in the mutation.
+func (m *EventCommerceItemMutation) Coupon() (r string, exists bool) {
+	v := m.coupon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoupon returns the old "coupon" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldCoupon(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoupon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoupon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoupon: %w", err)
+	}
+	return oldValue.Coupon, nil
+}
+
+// ClearCoupon clears the value of the "coupon" field.
+func (m *EventCommerceItemMutation) ClearCoupon() {
+	m.coupon = nil
+	m.clearedFields[eventcommerceitem.FieldCoupon] = struct{}{}
+}
+
+// CouponCleared returns if the "coupon" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) CouponCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldCoupon]
+	return ok
+}
+
+// ResetCoupon resets all changes to the "coupon" field.
+func (m *EventCommerceItemMutation) ResetCoupon() {
+	m.coupon = nil
+	delete(m.clearedFields, eventcommerceitem.FieldCoupon)
+}
+
+// SetDiscount sets the "discount" field.
+func (m *EventCommerceItemMutation) SetDiscount(f float64) {
+	m.discount = &f
+	m.adddiscount = nil
+}
+
+// Discount returns the value of the "discount" field in the mutation.
+func (m *EventCommerceItemMutation) Discount() (r float64, exists bool) {
+	v := m.discount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscount returns the old "discount" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldDiscount(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscount: %w", err)
+	}
+	return oldValue.Discount, nil
+}
+
+// AddDiscount adds f to the "discount" field.
+func (m *EventCommerceItemMutation) AddDiscount(f float64) {
+	if m.adddiscount != nil {
+		*m.adddiscount += f
+	} else {
+		m.adddiscount = &f
+	}
+}
+
+// AddedDiscount returns the value that was added to the "discount" field in this mutation.
+func (m *EventCommerceItemMutation) AddedDiscount() (r float64, exists bool) {
+	v := m.adddiscount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDiscount clears the value of the "discount" field.
+func (m *EventCommerceItemMutation) ClearDiscount() {
+	m.discount = nil
+	m.adddiscount = nil
+	m.clearedFields[eventcommerceitem.FieldDiscount] = struct{}{}
+}
+
+// DiscountCleared returns if the "discount" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) DiscountCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldDiscount]
+	return ok
+}
+
+// ResetDiscount resets all changes to the "discount" field.
+func (m *EventCommerceItemMutation) ResetDiscount() {
+	m.discount = nil
+	m.adddiscount = nil
+	delete(m.clearedFields, eventcommerceitem.FieldDiscount)
+}
+
+// SetIndex sets the "index" field.
+func (m *EventCommerceItemMutation) SetIndex(i int) {
+	m.index = &i
+	m.addindex = nil
+}
+
+// Index returns the value of the "index" field in the mutation.
+func (m *EventCommerceItemMutation) Index() (r int, exists bool) {
+	v := m.index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIndex returns the old "index" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldIndex(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIndex: %w", err)
+	}
+	return oldValue.Index, nil
+}
+
+// AddIndex adds i to the "index" field.
+func (m *EventCommerceItemMutation) AddIndex(i int) {
+	if m.addindex != nil {
+		*m.addindex += i
+	} else {
+		m.addindex = &i
+	}
+}
+
+// AddedIndex returns the value that was added to the "index" field in this mutation.
+func (m *EventCommerceItemMutation) AddedIndex() (r int, exists bool) {
+	v := m.addindex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearIndex clears the value of the "index" field.
+func (m *EventCommerceItemMutation) ClearIndex() {
+	m.index = nil
+	m.addindex = nil
+	m.clearedFields[eventcommerceitem.FieldIndex] = struct{}{}
+}
+
+// IndexCleared returns if the "index" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) IndexCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldIndex]
+	return ok
+}
+
+// ResetIndex resets all changes to the "index" field.
+func (m *EventCommerceItemMutation) ResetIndex() {
+	m.index = nil
+	m.addindex = nil
+	delete(m.clearedFields, eventcommerceitem.FieldIndex)
+}
+
+// SetItemListID sets the "item_list_id" field.
+func (m *EventCommerceItemMutation) SetItemListID(s string) {
+	m.item_list_id = &s
+}
+
+// ItemListID returns the value of the "item_list_id" field in the mutation.
+func (m *EventCommerceItemMutation) ItemListID() (r string, exists bool) {
+	v := m.item_list_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemListID returns the old "item_list_id" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemListID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemListID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemListID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemListID: %w", err)
+	}
+	return oldValue.ItemListID, nil
+}
+
+// ClearItemListID clears the value of the "item_list_id" field.
+func (m *EventCommerceItemMutation) ClearItemListID() {
+	m.item_list_id = nil
+	m.clearedFields[eventcommerceitem.FieldItemListID] = struct{}{}
+}
+
+// ItemListIDCleared returns if the "item_list_id" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemListIDCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemListID]
+	return ok
+}
+
+// ResetItemListID resets all changes to the "item_list_id" field.
+func (m *EventCommerceItemMutation) ResetItemListID() {
+	m.item_list_id = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemListID)
+}
+
+// SetItemListName sets the "item_list_name" field.
+func (m *EventCommerceItemMutation) SetItemListName(s string) {
+	m.item_list_name = &s
+}
+
+// ItemListName returns the value of the "item_list_name" field in the mutation.
+func (m *EventCommerceItemMutation) ItemListName() (r string, exists bool) {
+	v := m.item_list_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemListName returns the old "item_list_name" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldItemListName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemListName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemListName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemListName: %w", err)
+	}
+	return oldValue.ItemListName, nil
+}
+
+// ClearItemListName clears the value of the "item_list_name" field.
+func (m *EventCommerceItemMutation) ClearItemListName() {
+	m.item_list_name = nil
+	m.clearedFields[eventcommerceitem.FieldItemListName] = struct{}{}
+}
+
+// ItemListNameCleared returns if the "item_list_name" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) ItemListNameCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldItemListName]
+	return ok
+}
+
+// ResetItemListName resets all changes to the "item_list_name" field.
+func (m *EventCommerceItemMutation) ResetItemListName() {
+	m.item_list_name = nil
+	delete(m.clearedFields, eventcommerceitem.FieldItemListName)
+}
+
+// SetAffiliation sets the "affiliation" field.
+func (m *EventCommerceItemMutation) SetAffiliation(s string) {
+	m.affiliation = &s
+}
+
+// Affiliation returns the value of the "affiliation" field in the mutation.
+func (m *EventCommerceItemMutation) Affiliation() (r string, exists bool) {
+	v := m.affiliation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAffiliation returns the old "affiliation" field's value of the EventCommerceItem entity.
+// If the EventCommerceItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCommerceItemMutation) OldAffiliation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAffiliation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAffiliation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAffiliation: %w", err)
+	}
+	return oldValue.Affiliation, nil
+}
+
+// ClearAffiliation clears the value of the "affiliation" field.
+func (m *EventCommerceItemMutation) ClearAffiliation() {
+	m.affiliation = nil
+	m.clearedFields[eventcommerceitem.FieldAffiliation] = struct{}{}
+}
+
+// AffiliationCleared returns if the "affiliation" field was cleared in this mutation.
+func (m *EventCommerceItemMutation) AffiliationCleared() bool {
+	_, ok := m.clearedFields[eventcommerceitem.FieldAffiliation]
+	return ok
+}
+
+// ResetAffiliation resets all changes to the "affiliation" field.
+func (m *EventCommerceItemMutation) ResetAffiliation() {
+	m.affiliation = nil
+	delete(m.clearedFields, eventcommerceitem.FieldAffiliation)
+}
+
+// ClearEvent clears the "event" edge to the VisitorEvent entity.
+func (m *EventCommerceItemMutation) ClearEvent() {
+	m.clearedevent = true
+	m.clearedFields[eventcommerceitem.FieldEventID] = struct{}{}
+}
+
+// EventCleared reports if the "event" edge to the VisitorEvent entity was cleared.
+func (m *EventCommerceItemMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventIDs returns the "event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *EventCommerceItemMutation) EventIDs() (ids []int64) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEvent resets all changes to the "event" edge.
+func (m *EventCommerceItemMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
+}
+
+// Where appends a list predicates to the EventCommerceItemMutation builder.
+func (m *EventCommerceItemMutation) Where(ps ...predicate.EventCommerceItem) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EventCommerceItemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EventCommerceItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EventCommerceItem, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EventCommerceItemMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EventCommerceItemMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EventCommerceItem).
+func (m *EventCommerceItemMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EventCommerceItemMutation) Fields() []string {
+	fields := make([]string, 0, 17)
+	if m.event != nil {
+		fields = append(fields, eventcommerceitem.FieldEventID)
+	}
+	if m.item_id != nil {
+		fields = append(fields, eventcommerceitem.FieldItemID)
+	}
+	if m.item_name != nil {
+		fields = append(fields, eventcommerceitem.FieldItemName)
+	}
+	if m.item_brand != nil {
+		fields = append(fields, eventcommerceitem.FieldItemBrand)
+	}
+	if m.item_category != nil {
+		fields = append(fields, eventcommerceitem.FieldItemCategory)
+	}
+	if m.item_category_2 != nil {
+		fields = append(fields, eventcommerceitem.FieldItemCategory2)
+	}
+	if m.item_category_3 != nil {
+		fields = append(fields, eventcommerceitem.FieldItemCategory3)
+	}
+	if m.item_variant != nil {
+		fields = append(fields, eventcommerceitem.FieldItemVariant)
+	}
+	if m.price != nil {
+		fields = append(fields, eventcommerceitem.FieldPrice)
+	}
+	if m.currency != nil {
+		fields = append(fields, eventcommerceitem.FieldCurrency)
+	}
+	if m.quantity != nil {
+		fields = append(fields, eventcommerceitem.FieldQuantity)
+	}
+	if m.coupon != nil {
+		fields = append(fields, eventcommerceitem.FieldCoupon)
+	}
+	if m.discount != nil {
+		fields = append(fields, eventcommerceitem.FieldDiscount)
+	}
+	if m.index != nil {
+		fields = append(fields, eventcommerceitem.FieldIndex)
+	}
+	if m.item_list_id != nil {
+		fields = append(fields, eventcommerceitem.FieldItemListID)
+	}
+	if m.item_list_name != nil {
+		fields = append(fields, eventcommerceitem.FieldItemListName)
+	}
+	if m.affiliation != nil {
+		fields = append(fields, eventcommerceitem.FieldAffiliation)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EventCommerceItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case eventcommerceitem.FieldEventID:
+		return m.EventID()
+	case eventcommerceitem.FieldItemID:
+		return m.ItemID()
+	case eventcommerceitem.FieldItemName:
+		return m.ItemName()
+	case eventcommerceitem.FieldItemBrand:
+		return m.ItemBrand()
+	case eventcommerceitem.FieldItemCategory:
+		return m.ItemCategory()
+	case eventcommerceitem.FieldItemCategory2:
+		return m.ItemCategory2()
+	case eventcommerceitem.FieldItemCategory3:
+		return m.ItemCategory3()
+	case eventcommerceitem.FieldItemVariant:
+		return m.ItemVariant()
+	case eventcommerceitem.FieldPrice:
+		return m.Price()
+	case eventcommerceitem.FieldCurrency:
+		return m.Currency()
+	case eventcommerceitem.FieldQuantity:
+		return m.Quantity()
+	case eventcommerceitem.FieldCoupon:
+		return m.Coupon()
+	case eventcommerceitem.FieldDiscount:
+		return m.Discount()
+	case eventcommerceitem.FieldIndex:
+		return m.Index()
+	case eventcommerceitem.FieldItemListID:
+		return m.ItemListID()
+	case eventcommerceitem.FieldItemListName:
+		return m.ItemListName()
+	case eventcommerceitem.FieldAffiliation:
+		return m.Affiliation()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EventCommerceItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case eventcommerceitem.FieldEventID:
+		return m.OldEventID(ctx)
+	case eventcommerceitem.FieldItemID:
+		return m.OldItemID(ctx)
+	case eventcommerceitem.FieldItemName:
+		return m.OldItemName(ctx)
+	case eventcommerceitem.FieldItemBrand:
+		return m.OldItemBrand(ctx)
+	case eventcommerceitem.FieldItemCategory:
+		return m.OldItemCategory(ctx)
+	case eventcommerceitem.FieldItemCategory2:
+		return m.OldItemCategory2(ctx)
+	case eventcommerceitem.FieldItemCategory3:
+		return m.OldItemCategory3(ctx)
+	case eventcommerceitem.FieldItemVariant:
+		return m.OldItemVariant(ctx)
+	case eventcommerceitem.FieldPrice:
+		return m.OldPrice(ctx)
+	case eventcommerceitem.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case eventcommerceitem.FieldQuantity:
+		return m.OldQuantity(ctx)
+	case eventcommerceitem.FieldCoupon:
+		return m.OldCoupon(ctx)
+	case eventcommerceitem.FieldDiscount:
+		return m.OldDiscount(ctx)
+	case eventcommerceitem.FieldIndex:
+		return m.OldIndex(ctx)
+	case eventcommerceitem.FieldItemListID:
+		return m.OldItemListID(ctx)
+	case eventcommerceitem.FieldItemListName:
+		return m.OldItemListName(ctx)
+	case eventcommerceitem.FieldAffiliation:
+		return m.OldAffiliation(ctx)
+	}
+	return nil, fmt.Errorf("unknown EventCommerceItem field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventCommerceItemMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case eventcommerceitem.FieldEventID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case eventcommerceitem.FieldItemID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemID(v)
+		return nil
+	case eventcommerceitem.FieldItemName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemName(v)
+		return nil
+	case eventcommerceitem.FieldItemBrand:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemBrand(v)
+		return nil
+	case eventcommerceitem.FieldItemCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemCategory(v)
+		return nil
+	case eventcommerceitem.FieldItemCategory2:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemCategory2(v)
+		return nil
+	case eventcommerceitem.FieldItemCategory3:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemCategory3(v)
+		return nil
+	case eventcommerceitem.FieldItemVariant:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemVariant(v)
+		return nil
+	case eventcommerceitem.FieldPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrice(v)
+		return nil
+	case eventcommerceitem.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case eventcommerceitem.FieldQuantity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuantity(v)
+		return nil
+	case eventcommerceitem.FieldCoupon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoupon(v)
+		return nil
+	case eventcommerceitem.FieldDiscount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscount(v)
+		return nil
+	case eventcommerceitem.FieldIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIndex(v)
+		return nil
+	case eventcommerceitem.FieldItemListID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemListID(v)
+		return nil
+	case eventcommerceitem.FieldItemListName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemListName(v)
+		return nil
+	case eventcommerceitem.FieldAffiliation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAffiliation(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EventCommerceItemMutation) AddedFields() []string {
+	var fields []string
+	if m.addprice != nil {
+		fields = append(fields, eventcommerceitem.FieldPrice)
+	}
+	if m.addquantity != nil {
+		fields = append(fields, eventcommerceitem.FieldQuantity)
+	}
+	if m.adddiscount != nil {
+		fields = append(fields, eventcommerceitem.FieldDiscount)
+	}
+	if m.addindex != nil {
+		fields = append(fields, eventcommerceitem.FieldIndex)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EventCommerceItemMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case eventcommerceitem.FieldPrice:
+		return m.AddedPrice()
+	case eventcommerceitem.FieldQuantity:
+		return m.AddedQuantity()
+	case eventcommerceitem.FieldDiscount:
+		return m.AddedDiscount()
+	case eventcommerceitem.FieldIndex:
+		return m.AddedIndex()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventCommerceItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case eventcommerceitem.FieldPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPrice(v)
+		return nil
+	case eventcommerceitem.FieldQuantity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuantity(v)
+		return nil
+	case eventcommerceitem.FieldDiscount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDiscount(v)
+		return nil
+	case eventcommerceitem.FieldIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIndex(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EventCommerceItemMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(eventcommerceitem.FieldItemName) {
+		fields = append(fields, eventcommerceitem.FieldItemName)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemBrand) {
+		fields = append(fields, eventcommerceitem.FieldItemBrand)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemCategory) {
+		fields = append(fields, eventcommerceitem.FieldItemCategory)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemCategory2) {
+		fields = append(fields, eventcommerceitem.FieldItemCategory2)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemCategory3) {
+		fields = append(fields, eventcommerceitem.FieldItemCategory3)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemVariant) {
+		fields = append(fields, eventcommerceitem.FieldItemVariant)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldPrice) {
+		fields = append(fields, eventcommerceitem.FieldPrice)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldCurrency) {
+		fields = append(fields, eventcommerceitem.FieldCurrency)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldQuantity) {
+		fields = append(fields, eventcommerceitem.FieldQuantity)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldCoupon) {
+		fields = append(fields, eventcommerceitem.FieldCoupon)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldDiscount) {
+		fields = append(fields, eventcommerceitem.FieldDiscount)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldIndex) {
+		fields = append(fields, eventcommerceitem.FieldIndex)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemListID) {
+		fields = append(fields, eventcommerceitem.FieldItemListID)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldItemListName) {
+		fields = append(fields, eventcommerceitem.FieldItemListName)
+	}
+	if m.FieldCleared(eventcommerceitem.FieldAffiliation) {
+		fields = append(fields, eventcommerceitem.FieldAffiliation)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EventCommerceItemMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EventCommerceItemMutation) ClearField(name string) error {
+	switch name {
+	case eventcommerceitem.FieldItemName:
+		m.ClearItemName()
+		return nil
+	case eventcommerceitem.FieldItemBrand:
+		m.ClearItemBrand()
+		return nil
+	case eventcommerceitem.FieldItemCategory:
+		m.ClearItemCategory()
+		return nil
+	case eventcommerceitem.FieldItemCategory2:
+		m.ClearItemCategory2()
+		return nil
+	case eventcommerceitem.FieldItemCategory3:
+		m.ClearItemCategory3()
+		return nil
+	case eventcommerceitem.FieldItemVariant:
+		m.ClearItemVariant()
+		return nil
+	case eventcommerceitem.FieldPrice:
+		m.ClearPrice()
+		return nil
+	case eventcommerceitem.FieldCurrency:
+		m.ClearCurrency()
+		return nil
+	case eventcommerceitem.FieldQuantity:
+		m.ClearQuantity()
+		return nil
+	case eventcommerceitem.FieldCoupon:
+		m.ClearCoupon()
+		return nil
+	case eventcommerceitem.FieldDiscount:
+		m.ClearDiscount()
+		return nil
+	case eventcommerceitem.FieldIndex:
+		m.ClearIndex()
+		return nil
+	case eventcommerceitem.FieldItemListID:
+		m.ClearItemListID()
+		return nil
+	case eventcommerceitem.FieldItemListName:
+		m.ClearItemListName()
+		return nil
+	case eventcommerceitem.FieldAffiliation:
+		m.ClearAffiliation()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EventCommerceItemMutation) ResetField(name string) error {
+	switch name {
+	case eventcommerceitem.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case eventcommerceitem.FieldItemID:
+		m.ResetItemID()
+		return nil
+	case eventcommerceitem.FieldItemName:
+		m.ResetItemName()
+		return nil
+	case eventcommerceitem.FieldItemBrand:
+		m.ResetItemBrand()
+		return nil
+	case eventcommerceitem.FieldItemCategory:
+		m.ResetItemCategory()
+		return nil
+	case eventcommerceitem.FieldItemCategory2:
+		m.ResetItemCategory2()
+		return nil
+	case eventcommerceitem.FieldItemCategory3:
+		m.ResetItemCategory3()
+		return nil
+	case eventcommerceitem.FieldItemVariant:
+		m.ResetItemVariant()
+		return nil
+	case eventcommerceitem.FieldPrice:
+		m.ResetPrice()
+		return nil
+	case eventcommerceitem.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case eventcommerceitem.FieldQuantity:
+		m.ResetQuantity()
+		return nil
+	case eventcommerceitem.FieldCoupon:
+		m.ResetCoupon()
+		return nil
+	case eventcommerceitem.FieldDiscount:
+		m.ResetDiscount()
+		return nil
+	case eventcommerceitem.FieldIndex:
+		m.ResetIndex()
+		return nil
+	case eventcommerceitem.FieldItemListID:
+		m.ResetItemListID()
+		return nil
+	case eventcommerceitem.FieldItemListName:
+		m.ResetItemListName()
+		return nil
+	case eventcommerceitem.FieldAffiliation:
+		m.ResetAffiliation()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EventCommerceItemMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.event != nil {
+		edges = append(edges, eventcommerceitem.EdgeEvent)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EventCommerceItemMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case eventcommerceitem.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EventCommerceItemMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EventCommerceItemMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EventCommerceItemMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, eventcommerceitem.EdgeEvent)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EventCommerceItemMutation) EdgeCleared(name string) bool {
+	switch name {
+	case eventcommerceitem.EdgeEvent:
+		return m.clearedevent
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EventCommerceItemMutation) ClearEdge(name string) error {
+	switch name {
+	case eventcommerceitem.EdgeEvent:
+		m.ClearEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EventCommerceItemMutation) ResetEdge(name string) error {
+	switch name {
+	case eventcommerceitem.EdgeEvent:
+		m.ResetEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCommerceItem edge %s", name)
+}
+
+// EventCustomPropMutation represents an operation that mutates the EventCustomProp nodes in the graph.
+type EventCustomPropMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	key           *string
+	value         *string
+	clearedFields map[string]struct{}
+	event         *int64
+	clearedevent  bool
+	done          bool
+	oldValue      func(context.Context) (*EventCustomProp, error)
+	predicates    []predicate.EventCustomProp
+}
+
+var _ ent.Mutation = (*EventCustomPropMutation)(nil)
+
+// eventcustompropOption allows management of the mutation configuration using functional options.
+type eventcustompropOption func(*EventCustomPropMutation)
+
+// newEventCustomPropMutation creates new mutation for the EventCustomProp entity.
+func newEventCustomPropMutation(c config, op Op, opts ...eventcustompropOption) *EventCustomPropMutation {
+	m := &EventCustomPropMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEventCustomProp,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEventCustomPropID sets the ID field of the mutation.
+func withEventCustomPropID(id int64) eventcustompropOption {
+	return func(m *EventCustomPropMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EventCustomProp
+		)
+		m.oldValue = func(ctx context.Context) (*EventCustomProp, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EventCustomProp.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEventCustomProp sets the old EventCustomProp of the mutation.
+func withEventCustomProp(node *EventCustomProp) eventcustompropOption {
+	return func(m *EventCustomPropMutation) {
+		m.oldValue = func(context.Context) (*EventCustomProp, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EventCustomPropMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EventCustomPropMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EventCustomProp entities.
+func (m *EventCustomPropMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EventCustomPropMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EventCustomPropMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EventCustomProp.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEventID sets the "event_id" field.
+func (m *EventCustomPropMutation) SetEventID(i int64) {
+	m.event = &i
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *EventCustomPropMutation) EventID() (r int64, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the EventCustomProp entity.
+// If the EventCustomProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCustomPropMutation) OldEventID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *EventCustomPropMutation) ResetEventID() {
+	m.event = nil
+}
+
+// SetKey sets the "key" field.
+func (m *EventCustomPropMutation) SetKey(s string) {
+	m.key = &s
+}
+
+// Key returns the value of the "key" field in the mutation.
+func (m *EventCustomPropMutation) Key() (r string, exists bool) {
+	v := m.key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKey returns the old "key" field's value of the EventCustomProp entity.
+// If the EventCustomProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCustomPropMutation) OldKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKey: %w", err)
+	}
+	return oldValue.Key, nil
+}
+
+// ResetKey resets all changes to the "key" field.
+func (m *EventCustomPropMutation) ResetKey() {
+	m.key = nil
+}
+
+// SetValue sets the "value" field.
+func (m *EventCustomPropMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *EventCustomPropMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the EventCustomProp entity.
+// If the EventCustomProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventCustomPropMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ClearValue clears the value of the "value" field.
+func (m *EventCustomPropMutation) ClearValue() {
+	m.value = nil
+	m.clearedFields[eventcustomprop.FieldValue] = struct{}{}
+}
+
+// ValueCleared returns if the "value" field was cleared in this mutation.
+func (m *EventCustomPropMutation) ValueCleared() bool {
+	_, ok := m.clearedFields[eventcustomprop.FieldValue]
+	return ok
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *EventCustomPropMutation) ResetValue() {
+	m.value = nil
+	delete(m.clearedFields, eventcustomprop.FieldValue)
+}
+
+// ClearEvent clears the "event" edge to the VisitorEvent entity.
+func (m *EventCustomPropMutation) ClearEvent() {
+	m.clearedevent = true
+	m.clearedFields[eventcustomprop.FieldEventID] = struct{}{}
+}
+
+// EventCleared reports if the "event" edge to the VisitorEvent entity was cleared.
+func (m *EventCustomPropMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventIDs returns the "event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *EventCustomPropMutation) EventIDs() (ids []int64) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEvent resets all changes to the "event" edge.
+func (m *EventCustomPropMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
+}
+
+// Where appends a list predicates to the EventCustomPropMutation builder.
+func (m *EventCustomPropMutation) Where(ps ...predicate.EventCustomProp) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EventCustomPropMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EventCustomPropMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EventCustomProp, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EventCustomPropMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EventCustomPropMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EventCustomProp).
+func (m *EventCustomPropMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EventCustomPropMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.event != nil {
+		fields = append(fields, eventcustomprop.FieldEventID)
+	}
+	if m.key != nil {
+		fields = append(fields, eventcustomprop.FieldKey)
+	}
+	if m.value != nil {
+		fields = append(fields, eventcustomprop.FieldValue)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EventCustomPropMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case eventcustomprop.FieldEventID:
+		return m.EventID()
+	case eventcustomprop.FieldKey:
+		return m.Key()
+	case eventcustomprop.FieldValue:
+		return m.Value()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EventCustomPropMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case eventcustomprop.FieldEventID:
+		return m.OldEventID(ctx)
+	case eventcustomprop.FieldKey:
+		return m.OldKey(ctx)
+	case eventcustomprop.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown EventCustomProp field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventCustomPropMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case eventcustomprop.FieldEventID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case eventcustomprop.FieldKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKey(v)
+		return nil
+	case eventcustomprop.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventCustomProp field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EventCustomPropMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EventCustomPropMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventCustomPropMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EventCustomProp numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EventCustomPropMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(eventcustomprop.FieldValue) {
+		fields = append(fields, eventcustomprop.FieldValue)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EventCustomPropMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EventCustomPropMutation) ClearField(name string) error {
+	switch name {
+	case eventcustomprop.FieldValue:
+		m.ClearValue()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCustomProp nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EventCustomPropMutation) ResetField(name string) error {
+	switch name {
+	case eventcustomprop.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case eventcustomprop.FieldKey:
+		m.ResetKey()
+		return nil
+	case eventcustomprop.FieldValue:
+		m.ResetValue()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCustomProp field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EventCustomPropMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.event != nil {
+		edges = append(edges, eventcustomprop.EdgeEvent)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EventCustomPropMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case eventcustomprop.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EventCustomPropMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EventCustomPropMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EventCustomPropMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, eventcustomprop.EdgeEvent)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EventCustomPropMutation) EdgeCleared(name string) bool {
+	switch name {
+	case eventcustomprop.EdgeEvent:
+		return m.clearedevent
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EventCustomPropMutation) ClearEdge(name string) error {
+	switch name {
+	case eventcustomprop.EdgeEvent:
+		m.ClearEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCustomProp unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EventCustomPropMutation) ResetEdge(name string) error {
+	switch name {
+	case eventcustomprop.EdgeEvent:
+		m.ResetEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventCustomProp edge %s", name)
+}
+
+// EventTargetPropMutation represents an operation that mutates the EventTargetProp nodes in the graph.
+type EventTargetPropMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *int64
+	element_type             *string
+	element_id               *string
+	element_name             *string
+	element_text             *string
+	element_class            *string
+	element_selector         *string
+	component                *string
+	page_name                *string
+	button_name              *string
+	button_id                *string
+	href                     *string
+	form_name                *string
+	form_id                  *string
+	form_field               *string
+	form_value_hash          *string
+	form_field_count         *int
+	addform_field_count      *int
+	form_completion_pct      *float64
+	addform_completion_pct   *float64
+	media_type               *string
+	media_id                 *string
+	media_title              *string
+	media_provider           *string
+	media_duration_ms        *int64
+	addmedia_duration_ms     *int64
+	media_current_time_ms    *int64
+	addmedia_current_time_ms *int64
+	media_percent            *float64
+	addmedia_percent         *float64
+	media_quality            *string
+	media_sound_on           *bool
+	media_fullscreen         *bool
+	scroll_percent           *float64
+	addscroll_percent        *float64
+	scroll_direction         *string
+	scroll_depth_px          *int
+	addscroll_depth_px       *int
+	mouse_button             *string
+	click_x                  *int
+	addclick_x               *int
+	click_y                  *int
+	addclick_y               *int
+	element_x                *int
+	addelement_x             *int
+	element_y                *int
+	addelement_y             *int
+	transaction_id           *string
+	currency                 *string
+	value                    *float64
+	addvalue                 *float64
+	tax                      *float64
+	addtax                   *float64
+	shipping                 *float64
+	addshipping              *float64
+	coupon                   *string
+	affiliation              *string
+	payment_type             *string
+	shipping_tier            *string
+	search_term              *string
+	search_results_count     *int
+	addsearch_results_count  *int
+	auth_provider            *string
+	auth_method              *string
+	is_new_user              *bool
+	error_code               *string
+	error_message            *string
+	error_severity           *string
+	error_stack              *string
+	http_status              *int
+	addhttp_status           *int
+	component_name           *string
+	share_platform           *string
+	share_method             *string
+	duration_ms              *int64
+	addduration_ms           *int64
+	feature                  *string
+	priority                 *string
+	clearedFields            map[string]struct{}
+	event                    *int64
+	clearedevent             bool
+	done                     bool
+	oldValue                 func(context.Context) (*EventTargetProp, error)
+	predicates               []predicate.EventTargetProp
+}
+
+var _ ent.Mutation = (*EventTargetPropMutation)(nil)
+
+// eventtargetpropOption allows management of the mutation configuration using functional options.
+type eventtargetpropOption func(*EventTargetPropMutation)
+
+// newEventTargetPropMutation creates new mutation for the EventTargetProp entity.
+func newEventTargetPropMutation(c config, op Op, opts ...eventtargetpropOption) *EventTargetPropMutation {
+	m := &EventTargetPropMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEventTargetProp,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEventTargetPropID sets the ID field of the mutation.
+func withEventTargetPropID(id int64) eventtargetpropOption {
+	return func(m *EventTargetPropMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EventTargetProp
+		)
+		m.oldValue = func(ctx context.Context) (*EventTargetProp, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EventTargetProp.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEventTargetProp sets the old EventTargetProp of the mutation.
+func withEventTargetProp(node *EventTargetProp) eventtargetpropOption {
+	return func(m *EventTargetPropMutation) {
+		m.oldValue = func(context.Context) (*EventTargetProp, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EventTargetPropMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EventTargetPropMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EventTargetProp entities.
+func (m *EventTargetPropMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EventTargetPropMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EventTargetPropMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EventTargetProp.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEventID sets the "event_id" field.
+func (m *EventTargetPropMutation) SetEventID(i int64) {
+	m.event = &i
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *EventTargetPropMutation) EventID() (r int64, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldEventID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *EventTargetPropMutation) ResetEventID() {
+	m.event = nil
+}
+
+// SetElementType sets the "element_type" field.
+func (m *EventTargetPropMutation) SetElementType(s string) {
+	m.element_type = &s
+}
+
+// ElementType returns the value of the "element_type" field in the mutation.
+func (m *EventTargetPropMutation) ElementType() (r string, exists bool) {
+	v := m.element_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementType returns the old "element_type" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementType: %w", err)
+	}
+	return oldValue.ElementType, nil
+}
+
+// ClearElementType clears the value of the "element_type" field.
+func (m *EventTargetPropMutation) ClearElementType() {
+	m.element_type = nil
+	m.clearedFields[eventtargetprop.FieldElementType] = struct{}{}
+}
+
+// ElementTypeCleared returns if the "element_type" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementTypeCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementType]
+	return ok
+}
+
+// ResetElementType resets all changes to the "element_type" field.
+func (m *EventTargetPropMutation) ResetElementType() {
+	m.element_type = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementType)
+}
+
+// SetElementID sets the "element_id" field.
+func (m *EventTargetPropMutation) SetElementID(s string) {
+	m.element_id = &s
+}
+
+// ElementID returns the value of the "element_id" field in the mutation.
+func (m *EventTargetPropMutation) ElementID() (r string, exists bool) {
+	v := m.element_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementID returns the old "element_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementID: %w", err)
+	}
+	return oldValue.ElementID, nil
+}
+
+// ClearElementID clears the value of the "element_id" field.
+func (m *EventTargetPropMutation) ClearElementID() {
+	m.element_id = nil
+	m.clearedFields[eventtargetprop.FieldElementID] = struct{}{}
+}
+
+// ElementIDCleared returns if the "element_id" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementIDCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementID]
+	return ok
+}
+
+// ResetElementID resets all changes to the "element_id" field.
+func (m *EventTargetPropMutation) ResetElementID() {
+	m.element_id = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementID)
+}
+
+// SetElementName sets the "element_name" field.
+func (m *EventTargetPropMutation) SetElementName(s string) {
+	m.element_name = &s
+}
+
+// ElementName returns the value of the "element_name" field in the mutation.
+func (m *EventTargetPropMutation) ElementName() (r string, exists bool) {
+	v := m.element_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementName returns the old "element_name" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementName: %w", err)
+	}
+	return oldValue.ElementName, nil
+}
+
+// ClearElementName clears the value of the "element_name" field.
+func (m *EventTargetPropMutation) ClearElementName() {
+	m.element_name = nil
+	m.clearedFields[eventtargetprop.FieldElementName] = struct{}{}
+}
+
+// ElementNameCleared returns if the "element_name" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementNameCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementName]
+	return ok
+}
+
+// ResetElementName resets all changes to the "element_name" field.
+func (m *EventTargetPropMutation) ResetElementName() {
+	m.element_name = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementName)
+}
+
+// SetElementText sets the "element_text" field.
+func (m *EventTargetPropMutation) SetElementText(s string) {
+	m.element_text = &s
+}
+
+// ElementText returns the value of the "element_text" field in the mutation.
+func (m *EventTargetPropMutation) ElementText() (r string, exists bool) {
+	v := m.element_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementText returns the old "element_text" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementText: %w", err)
+	}
+	return oldValue.ElementText, nil
+}
+
+// ClearElementText clears the value of the "element_text" field.
+func (m *EventTargetPropMutation) ClearElementText() {
+	m.element_text = nil
+	m.clearedFields[eventtargetprop.FieldElementText] = struct{}{}
+}
+
+// ElementTextCleared returns if the "element_text" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementTextCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementText]
+	return ok
+}
+
+// ResetElementText resets all changes to the "element_text" field.
+func (m *EventTargetPropMutation) ResetElementText() {
+	m.element_text = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementText)
+}
+
+// SetElementClass sets the "element_class" field.
+func (m *EventTargetPropMutation) SetElementClass(s string) {
+	m.element_class = &s
+}
+
+// ElementClass returns the value of the "element_class" field in the mutation.
+func (m *EventTargetPropMutation) ElementClass() (r string, exists bool) {
+	v := m.element_class
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementClass returns the old "element_class" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementClass(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementClass is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementClass requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementClass: %w", err)
+	}
+	return oldValue.ElementClass, nil
+}
+
+// ClearElementClass clears the value of the "element_class" field.
+func (m *EventTargetPropMutation) ClearElementClass() {
+	m.element_class = nil
+	m.clearedFields[eventtargetprop.FieldElementClass] = struct{}{}
+}
+
+// ElementClassCleared returns if the "element_class" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementClassCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementClass]
+	return ok
+}
+
+// ResetElementClass resets all changes to the "element_class" field.
+func (m *EventTargetPropMutation) ResetElementClass() {
+	m.element_class = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementClass)
+}
+
+// SetElementSelector sets the "element_selector" field.
+func (m *EventTargetPropMutation) SetElementSelector(s string) {
+	m.element_selector = &s
+}
+
+// ElementSelector returns the value of the "element_selector" field in the mutation.
+func (m *EventTargetPropMutation) ElementSelector() (r string, exists bool) {
+	v := m.element_selector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementSelector returns the old "element_selector" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementSelector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementSelector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementSelector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementSelector: %w", err)
+	}
+	return oldValue.ElementSelector, nil
+}
+
+// ClearElementSelector clears the value of the "element_selector" field.
+func (m *EventTargetPropMutation) ClearElementSelector() {
+	m.element_selector = nil
+	m.clearedFields[eventtargetprop.FieldElementSelector] = struct{}{}
+}
+
+// ElementSelectorCleared returns if the "element_selector" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementSelectorCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementSelector]
+	return ok
+}
+
+// ResetElementSelector resets all changes to the "element_selector" field.
+func (m *EventTargetPropMutation) ResetElementSelector() {
+	m.element_selector = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementSelector)
+}
+
+// SetComponent sets the "component" field.
+func (m *EventTargetPropMutation) SetComponent(s string) {
+	m.component = &s
+}
+
+// Component returns the value of the "component" field in the mutation.
+func (m *EventTargetPropMutation) Component() (r string, exists bool) {
+	v := m.component
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldComponent returns the old "component" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldComponent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldComponent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
+	}
+	return oldValue.Component, nil
+}
+
+// ClearComponent clears the value of the "component" field.
+func (m *EventTargetPropMutation) ClearComponent() {
+	m.component = nil
+	m.clearedFields[eventtargetprop.FieldComponent] = struct{}{}
+}
+
+// ComponentCleared returns if the "component" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ComponentCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldComponent]
+	return ok
+}
+
+// ResetComponent resets all changes to the "component" field.
+func (m *EventTargetPropMutation) ResetComponent() {
+	m.component = nil
+	delete(m.clearedFields, eventtargetprop.FieldComponent)
+}
+
+// SetPageName sets the "page_name" field.
+func (m *EventTargetPropMutation) SetPageName(s string) {
+	m.page_name = &s
+}
+
+// PageName returns the value of the "page_name" field in the mutation.
+func (m *EventTargetPropMutation) PageName() (r string, exists bool) {
+	v := m.page_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPageName returns the old "page_name" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldPageName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPageName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPageName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPageName: %w", err)
+	}
+	return oldValue.PageName, nil
+}
+
+// ClearPageName clears the value of the "page_name" field.
+func (m *EventTargetPropMutation) ClearPageName() {
+	m.page_name = nil
+	m.clearedFields[eventtargetprop.FieldPageName] = struct{}{}
+}
+
+// PageNameCleared returns if the "page_name" field was cleared in this mutation.
+func (m *EventTargetPropMutation) PageNameCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldPageName]
+	return ok
+}
+
+// ResetPageName resets all changes to the "page_name" field.
+func (m *EventTargetPropMutation) ResetPageName() {
+	m.page_name = nil
+	delete(m.clearedFields, eventtargetprop.FieldPageName)
+}
+
+// SetButtonName sets the "button_name" field.
+func (m *EventTargetPropMutation) SetButtonName(s string) {
+	m.button_name = &s
+}
+
+// ButtonName returns the value of the "button_name" field in the mutation.
+func (m *EventTargetPropMutation) ButtonName() (r string, exists bool) {
+	v := m.button_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldButtonName returns the old "button_name" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldButtonName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldButtonName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldButtonName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldButtonName: %w", err)
+	}
+	return oldValue.ButtonName, nil
+}
+
+// ClearButtonName clears the value of the "button_name" field.
+func (m *EventTargetPropMutation) ClearButtonName() {
+	m.button_name = nil
+	m.clearedFields[eventtargetprop.FieldButtonName] = struct{}{}
+}
+
+// ButtonNameCleared returns if the "button_name" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ButtonNameCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldButtonName]
+	return ok
+}
+
+// ResetButtonName resets all changes to the "button_name" field.
+func (m *EventTargetPropMutation) ResetButtonName() {
+	m.button_name = nil
+	delete(m.clearedFields, eventtargetprop.FieldButtonName)
+}
+
+// SetButtonID sets the "button_id" field.
+func (m *EventTargetPropMutation) SetButtonID(s string) {
+	m.button_id = &s
+}
+
+// ButtonID returns the value of the "button_id" field in the mutation.
+func (m *EventTargetPropMutation) ButtonID() (r string, exists bool) {
+	v := m.button_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldButtonID returns the old "button_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldButtonID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldButtonID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldButtonID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldButtonID: %w", err)
+	}
+	return oldValue.ButtonID, nil
+}
+
+// ClearButtonID clears the value of the "button_id" field.
+func (m *EventTargetPropMutation) ClearButtonID() {
+	m.button_id = nil
+	m.clearedFields[eventtargetprop.FieldButtonID] = struct{}{}
+}
+
+// ButtonIDCleared returns if the "button_id" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ButtonIDCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldButtonID]
+	return ok
+}
+
+// ResetButtonID resets all changes to the "button_id" field.
+func (m *EventTargetPropMutation) ResetButtonID() {
+	m.button_id = nil
+	delete(m.clearedFields, eventtargetprop.FieldButtonID)
+}
+
+// SetHref sets the "href" field.
+func (m *EventTargetPropMutation) SetHref(s string) {
+	m.href = &s
+}
+
+// Href returns the value of the "href" field in the mutation.
+func (m *EventTargetPropMutation) Href() (r string, exists bool) {
+	v := m.href
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHref returns the old "href" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldHref(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHref is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHref requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHref: %w", err)
+	}
+	return oldValue.Href, nil
+}
+
+// ClearHref clears the value of the "href" field.
+func (m *EventTargetPropMutation) ClearHref() {
+	m.href = nil
+	m.clearedFields[eventtargetprop.FieldHref] = struct{}{}
+}
+
+// HrefCleared returns if the "href" field was cleared in this mutation.
+func (m *EventTargetPropMutation) HrefCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldHref]
+	return ok
+}
+
+// ResetHref resets all changes to the "href" field.
+func (m *EventTargetPropMutation) ResetHref() {
+	m.href = nil
+	delete(m.clearedFields, eventtargetprop.FieldHref)
+}
+
+// SetFormName sets the "form_name" field.
+func (m *EventTargetPropMutation) SetFormName(s string) {
+	m.form_name = &s
+}
+
+// FormName returns the value of the "form_name" field in the mutation.
+func (m *EventTargetPropMutation) FormName() (r string, exists bool) {
+	v := m.form_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormName returns the old "form_name" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormName: %w", err)
+	}
+	return oldValue.FormName, nil
+}
+
+// ClearFormName clears the value of the "form_name" field.
+func (m *EventTargetPropMutation) ClearFormName() {
+	m.form_name = nil
+	m.clearedFields[eventtargetprop.FieldFormName] = struct{}{}
+}
+
+// FormNameCleared returns if the "form_name" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormNameCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormName]
+	return ok
+}
+
+// ResetFormName resets all changes to the "form_name" field.
+func (m *EventTargetPropMutation) ResetFormName() {
+	m.form_name = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormName)
+}
+
+// SetFormID sets the "form_id" field.
+func (m *EventTargetPropMutation) SetFormID(s string) {
+	m.form_id = &s
+}
+
+// FormID returns the value of the "form_id" field in the mutation.
+func (m *EventTargetPropMutation) FormID() (r string, exists bool) {
+	v := m.form_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormID returns the old "form_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormID: %w", err)
+	}
+	return oldValue.FormID, nil
+}
+
+// ClearFormID clears the value of the "form_id" field.
+func (m *EventTargetPropMutation) ClearFormID() {
+	m.form_id = nil
+	m.clearedFields[eventtargetprop.FieldFormID] = struct{}{}
+}
+
+// FormIDCleared returns if the "form_id" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormIDCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormID]
+	return ok
+}
+
+// ResetFormID resets all changes to the "form_id" field.
+func (m *EventTargetPropMutation) ResetFormID() {
+	m.form_id = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormID)
+}
+
+// SetFormField sets the "form_field" field.
+func (m *EventTargetPropMutation) SetFormField(s string) {
+	m.form_field = &s
+}
+
+// FormField returns the value of the "form_field" field in the mutation.
+func (m *EventTargetPropMutation) FormField() (r string, exists bool) {
+	v := m.form_field
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormField returns the old "form_field" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormField(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormField is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormField requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormField: %w", err)
+	}
+	return oldValue.FormField, nil
+}
+
+// ClearFormField clears the value of the "form_field" field.
+func (m *EventTargetPropMutation) ClearFormField() {
+	m.form_field = nil
+	m.clearedFields[eventtargetprop.FieldFormField] = struct{}{}
+}
+
+// FormFieldCleared returns if the "form_field" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormFieldCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormField]
+	return ok
+}
+
+// ResetFormField resets all changes to the "form_field" field.
+func (m *EventTargetPropMutation) ResetFormField() {
+	m.form_field = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormField)
+}
+
+// SetFormValueHash sets the "form_value_hash" field.
+func (m *EventTargetPropMutation) SetFormValueHash(s string) {
+	m.form_value_hash = &s
+}
+
+// FormValueHash returns the value of the "form_value_hash" field in the mutation.
+func (m *EventTargetPropMutation) FormValueHash() (r string, exists bool) {
+	v := m.form_value_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormValueHash returns the old "form_value_hash" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormValueHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormValueHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormValueHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormValueHash: %w", err)
+	}
+	return oldValue.FormValueHash, nil
+}
+
+// ClearFormValueHash clears the value of the "form_value_hash" field.
+func (m *EventTargetPropMutation) ClearFormValueHash() {
+	m.form_value_hash = nil
+	m.clearedFields[eventtargetprop.FieldFormValueHash] = struct{}{}
+}
+
+// FormValueHashCleared returns if the "form_value_hash" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormValueHashCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormValueHash]
+	return ok
+}
+
+// ResetFormValueHash resets all changes to the "form_value_hash" field.
+func (m *EventTargetPropMutation) ResetFormValueHash() {
+	m.form_value_hash = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormValueHash)
+}
+
+// SetFormFieldCount sets the "form_field_count" field.
+func (m *EventTargetPropMutation) SetFormFieldCount(i int) {
+	m.form_field_count = &i
+	m.addform_field_count = nil
+}
+
+// FormFieldCount returns the value of the "form_field_count" field in the mutation.
+func (m *EventTargetPropMutation) FormFieldCount() (r int, exists bool) {
+	v := m.form_field_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormFieldCount returns the old "form_field_count" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormFieldCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormFieldCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormFieldCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormFieldCount: %w", err)
+	}
+	return oldValue.FormFieldCount, nil
+}
+
+// AddFormFieldCount adds i to the "form_field_count" field.
+func (m *EventTargetPropMutation) AddFormFieldCount(i int) {
+	if m.addform_field_count != nil {
+		*m.addform_field_count += i
+	} else {
+		m.addform_field_count = &i
+	}
+}
+
+// AddedFormFieldCount returns the value that was added to the "form_field_count" field in this mutation.
+func (m *EventTargetPropMutation) AddedFormFieldCount() (r int, exists bool) {
+	v := m.addform_field_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFormFieldCount clears the value of the "form_field_count" field.
+func (m *EventTargetPropMutation) ClearFormFieldCount() {
+	m.form_field_count = nil
+	m.addform_field_count = nil
+	m.clearedFields[eventtargetprop.FieldFormFieldCount] = struct{}{}
+}
+
+// FormFieldCountCleared returns if the "form_field_count" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormFieldCountCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormFieldCount]
+	return ok
+}
+
+// ResetFormFieldCount resets all changes to the "form_field_count" field.
+func (m *EventTargetPropMutation) ResetFormFieldCount() {
+	m.form_field_count = nil
+	m.addform_field_count = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormFieldCount)
+}
+
+// SetFormCompletionPct sets the "form_completion_pct" field.
+func (m *EventTargetPropMutation) SetFormCompletionPct(f float64) {
+	m.form_completion_pct = &f
+	m.addform_completion_pct = nil
+}
+
+// FormCompletionPct returns the value of the "form_completion_pct" field in the mutation.
+func (m *EventTargetPropMutation) FormCompletionPct() (r float64, exists bool) {
+	v := m.form_completion_pct
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormCompletionPct returns the old "form_completion_pct" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFormCompletionPct(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormCompletionPct is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormCompletionPct requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormCompletionPct: %w", err)
+	}
+	return oldValue.FormCompletionPct, nil
+}
+
+// AddFormCompletionPct adds f to the "form_completion_pct" field.
+func (m *EventTargetPropMutation) AddFormCompletionPct(f float64) {
+	if m.addform_completion_pct != nil {
+		*m.addform_completion_pct += f
+	} else {
+		m.addform_completion_pct = &f
+	}
+}
+
+// AddedFormCompletionPct returns the value that was added to the "form_completion_pct" field in this mutation.
+func (m *EventTargetPropMutation) AddedFormCompletionPct() (r float64, exists bool) {
+	v := m.addform_completion_pct
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFormCompletionPct clears the value of the "form_completion_pct" field.
+func (m *EventTargetPropMutation) ClearFormCompletionPct() {
+	m.form_completion_pct = nil
+	m.addform_completion_pct = nil
+	m.clearedFields[eventtargetprop.FieldFormCompletionPct] = struct{}{}
+}
+
+// FormCompletionPctCleared returns if the "form_completion_pct" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FormCompletionPctCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFormCompletionPct]
+	return ok
+}
+
+// ResetFormCompletionPct resets all changes to the "form_completion_pct" field.
+func (m *EventTargetPropMutation) ResetFormCompletionPct() {
+	m.form_completion_pct = nil
+	m.addform_completion_pct = nil
+	delete(m.clearedFields, eventtargetprop.FieldFormCompletionPct)
+}
+
+// SetMediaType sets the "media_type" field.
+func (m *EventTargetPropMutation) SetMediaType(s string) {
+	m.media_type = &s
+}
+
+// MediaType returns the value of the "media_type" field in the mutation.
+func (m *EventTargetPropMutation) MediaType() (r string, exists bool) {
+	v := m.media_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaType returns the old "media_type" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaType: %w", err)
+	}
+	return oldValue.MediaType, nil
+}
+
+// ClearMediaType clears the value of the "media_type" field.
+func (m *EventTargetPropMutation) ClearMediaType() {
+	m.media_type = nil
+	m.clearedFields[eventtargetprop.FieldMediaType] = struct{}{}
+}
+
+// MediaTypeCleared returns if the "media_type" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaTypeCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaType]
+	return ok
+}
+
+// ResetMediaType resets all changes to the "media_type" field.
+func (m *EventTargetPropMutation) ResetMediaType() {
+	m.media_type = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaType)
+}
+
+// SetMediaID sets the "media_id" field.
+func (m *EventTargetPropMutation) SetMediaID(s string) {
+	m.media_id = &s
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *EventTargetPropMutation) MediaID() (r string, exists bool) {
+	v := m.media_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ClearMediaID clears the value of the "media_id" field.
+func (m *EventTargetPropMutation) ClearMediaID() {
+	m.media_id = nil
+	m.clearedFields[eventtargetprop.FieldMediaID] = struct{}{}
+}
+
+// MediaIDCleared returns if the "media_id" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaIDCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaID]
+	return ok
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *EventTargetPropMutation) ResetMediaID() {
+	m.media_id = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaID)
+}
+
+// SetMediaTitle sets the "media_title" field.
+func (m *EventTargetPropMutation) SetMediaTitle(s string) {
+	m.media_title = &s
+}
+
+// MediaTitle returns the value of the "media_title" field in the mutation.
+func (m *EventTargetPropMutation) MediaTitle() (r string, exists bool) {
+	v := m.media_title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaTitle returns the old "media_title" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaTitle: %w", err)
+	}
+	return oldValue.MediaTitle, nil
+}
+
+// ClearMediaTitle clears the value of the "media_title" field.
+func (m *EventTargetPropMutation) ClearMediaTitle() {
+	m.media_title = nil
+	m.clearedFields[eventtargetprop.FieldMediaTitle] = struct{}{}
+}
+
+// MediaTitleCleared returns if the "media_title" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaTitleCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaTitle]
+	return ok
+}
+
+// ResetMediaTitle resets all changes to the "media_title" field.
+func (m *EventTargetPropMutation) ResetMediaTitle() {
+	m.media_title = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaTitle)
+}
+
+// SetMediaProvider sets the "media_provider" field.
+func (m *EventTargetPropMutation) SetMediaProvider(s string) {
+	m.media_provider = &s
+}
+
+// MediaProvider returns the value of the "media_provider" field in the mutation.
+func (m *EventTargetPropMutation) MediaProvider() (r string, exists bool) {
+	v := m.media_provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaProvider returns the old "media_provider" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaProvider: %w", err)
+	}
+	return oldValue.MediaProvider, nil
+}
+
+// ClearMediaProvider clears the value of the "media_provider" field.
+func (m *EventTargetPropMutation) ClearMediaProvider() {
+	m.media_provider = nil
+	m.clearedFields[eventtargetprop.FieldMediaProvider] = struct{}{}
+}
+
+// MediaProviderCleared returns if the "media_provider" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaProviderCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaProvider]
+	return ok
+}
+
+// ResetMediaProvider resets all changes to the "media_provider" field.
+func (m *EventTargetPropMutation) ResetMediaProvider() {
+	m.media_provider = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaProvider)
+}
+
+// SetMediaDurationMs sets the "media_duration_ms" field.
+func (m *EventTargetPropMutation) SetMediaDurationMs(i int64) {
+	m.media_duration_ms = &i
+	m.addmedia_duration_ms = nil
+}
+
+// MediaDurationMs returns the value of the "media_duration_ms" field in the mutation.
+func (m *EventTargetPropMutation) MediaDurationMs() (r int64, exists bool) {
+	v := m.media_duration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaDurationMs returns the old "media_duration_ms" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaDurationMs(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaDurationMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaDurationMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaDurationMs: %w", err)
+	}
+	return oldValue.MediaDurationMs, nil
+}
+
+// AddMediaDurationMs adds i to the "media_duration_ms" field.
+func (m *EventTargetPropMutation) AddMediaDurationMs(i int64) {
+	if m.addmedia_duration_ms != nil {
+		*m.addmedia_duration_ms += i
+	} else {
+		m.addmedia_duration_ms = &i
+	}
+}
+
+// AddedMediaDurationMs returns the value that was added to the "media_duration_ms" field in this mutation.
+func (m *EventTargetPropMutation) AddedMediaDurationMs() (r int64, exists bool) {
+	v := m.addmedia_duration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMediaDurationMs clears the value of the "media_duration_ms" field.
+func (m *EventTargetPropMutation) ClearMediaDurationMs() {
+	m.media_duration_ms = nil
+	m.addmedia_duration_ms = nil
+	m.clearedFields[eventtargetprop.FieldMediaDurationMs] = struct{}{}
+}
+
+// MediaDurationMsCleared returns if the "media_duration_ms" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaDurationMsCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaDurationMs]
+	return ok
+}
+
+// ResetMediaDurationMs resets all changes to the "media_duration_ms" field.
+func (m *EventTargetPropMutation) ResetMediaDurationMs() {
+	m.media_duration_ms = nil
+	m.addmedia_duration_ms = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaDurationMs)
+}
+
+// SetMediaCurrentTimeMs sets the "media_current_time_ms" field.
+func (m *EventTargetPropMutation) SetMediaCurrentTimeMs(i int64) {
+	m.media_current_time_ms = &i
+	m.addmedia_current_time_ms = nil
+}
+
+// MediaCurrentTimeMs returns the value of the "media_current_time_ms" field in the mutation.
+func (m *EventTargetPropMutation) MediaCurrentTimeMs() (r int64, exists bool) {
+	v := m.media_current_time_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaCurrentTimeMs returns the old "media_current_time_ms" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaCurrentTimeMs(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaCurrentTimeMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaCurrentTimeMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaCurrentTimeMs: %w", err)
+	}
+	return oldValue.MediaCurrentTimeMs, nil
+}
+
+// AddMediaCurrentTimeMs adds i to the "media_current_time_ms" field.
+func (m *EventTargetPropMutation) AddMediaCurrentTimeMs(i int64) {
+	if m.addmedia_current_time_ms != nil {
+		*m.addmedia_current_time_ms += i
+	} else {
+		m.addmedia_current_time_ms = &i
+	}
+}
+
+// AddedMediaCurrentTimeMs returns the value that was added to the "media_current_time_ms" field in this mutation.
+func (m *EventTargetPropMutation) AddedMediaCurrentTimeMs() (r int64, exists bool) {
+	v := m.addmedia_current_time_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMediaCurrentTimeMs clears the value of the "media_current_time_ms" field.
+func (m *EventTargetPropMutation) ClearMediaCurrentTimeMs() {
+	m.media_current_time_ms = nil
+	m.addmedia_current_time_ms = nil
+	m.clearedFields[eventtargetprop.FieldMediaCurrentTimeMs] = struct{}{}
+}
+
+// MediaCurrentTimeMsCleared returns if the "media_current_time_ms" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaCurrentTimeMsCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaCurrentTimeMs]
+	return ok
+}
+
+// ResetMediaCurrentTimeMs resets all changes to the "media_current_time_ms" field.
+func (m *EventTargetPropMutation) ResetMediaCurrentTimeMs() {
+	m.media_current_time_ms = nil
+	m.addmedia_current_time_ms = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaCurrentTimeMs)
+}
+
+// SetMediaPercent sets the "media_percent" field.
+func (m *EventTargetPropMutation) SetMediaPercent(f float64) {
+	m.media_percent = &f
+	m.addmedia_percent = nil
+}
+
+// MediaPercent returns the value of the "media_percent" field in the mutation.
+func (m *EventTargetPropMutation) MediaPercent() (r float64, exists bool) {
+	v := m.media_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaPercent returns the old "media_percent" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaPercent(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaPercent: %w", err)
+	}
+	return oldValue.MediaPercent, nil
+}
+
+// AddMediaPercent adds f to the "media_percent" field.
+func (m *EventTargetPropMutation) AddMediaPercent(f float64) {
+	if m.addmedia_percent != nil {
+		*m.addmedia_percent += f
+	} else {
+		m.addmedia_percent = &f
+	}
+}
+
+// AddedMediaPercent returns the value that was added to the "media_percent" field in this mutation.
+func (m *EventTargetPropMutation) AddedMediaPercent() (r float64, exists bool) {
+	v := m.addmedia_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMediaPercent clears the value of the "media_percent" field.
+func (m *EventTargetPropMutation) ClearMediaPercent() {
+	m.media_percent = nil
+	m.addmedia_percent = nil
+	m.clearedFields[eventtargetprop.FieldMediaPercent] = struct{}{}
+}
+
+// MediaPercentCleared returns if the "media_percent" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaPercentCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaPercent]
+	return ok
+}
+
+// ResetMediaPercent resets all changes to the "media_percent" field.
+func (m *EventTargetPropMutation) ResetMediaPercent() {
+	m.media_percent = nil
+	m.addmedia_percent = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaPercent)
+}
+
+// SetMediaQuality sets the "media_quality" field.
+func (m *EventTargetPropMutation) SetMediaQuality(s string) {
+	m.media_quality = &s
+}
+
+// MediaQuality returns the value of the "media_quality" field in the mutation.
+func (m *EventTargetPropMutation) MediaQuality() (r string, exists bool) {
+	v := m.media_quality
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaQuality returns the old "media_quality" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaQuality(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaQuality is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaQuality requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaQuality: %w", err)
+	}
+	return oldValue.MediaQuality, nil
+}
+
+// ClearMediaQuality clears the value of the "media_quality" field.
+func (m *EventTargetPropMutation) ClearMediaQuality() {
+	m.media_quality = nil
+	m.clearedFields[eventtargetprop.FieldMediaQuality] = struct{}{}
+}
+
+// MediaQualityCleared returns if the "media_quality" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaQualityCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaQuality]
+	return ok
+}
+
+// ResetMediaQuality resets all changes to the "media_quality" field.
+func (m *EventTargetPropMutation) ResetMediaQuality() {
+	m.media_quality = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaQuality)
+}
+
+// SetMediaSoundOn sets the "media_sound_on" field.
+func (m *EventTargetPropMutation) SetMediaSoundOn(b bool) {
+	m.media_sound_on = &b
+}
+
+// MediaSoundOn returns the value of the "media_sound_on" field in the mutation.
+func (m *EventTargetPropMutation) MediaSoundOn() (r bool, exists bool) {
+	v := m.media_sound_on
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaSoundOn returns the old "media_sound_on" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaSoundOn(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaSoundOn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaSoundOn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaSoundOn: %w", err)
+	}
+	return oldValue.MediaSoundOn, nil
+}
+
+// ClearMediaSoundOn clears the value of the "media_sound_on" field.
+func (m *EventTargetPropMutation) ClearMediaSoundOn() {
+	m.media_sound_on = nil
+	m.clearedFields[eventtargetprop.FieldMediaSoundOn] = struct{}{}
+}
+
+// MediaSoundOnCleared returns if the "media_sound_on" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaSoundOnCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaSoundOn]
+	return ok
+}
+
+// ResetMediaSoundOn resets all changes to the "media_sound_on" field.
+func (m *EventTargetPropMutation) ResetMediaSoundOn() {
+	m.media_sound_on = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaSoundOn)
+}
+
+// SetMediaFullscreen sets the "media_fullscreen" field.
+func (m *EventTargetPropMutation) SetMediaFullscreen(b bool) {
+	m.media_fullscreen = &b
+}
+
+// MediaFullscreen returns the value of the "media_fullscreen" field in the mutation.
+func (m *EventTargetPropMutation) MediaFullscreen() (r bool, exists bool) {
+	v := m.media_fullscreen
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaFullscreen returns the old "media_fullscreen" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMediaFullscreen(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaFullscreen is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaFullscreen requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaFullscreen: %w", err)
+	}
+	return oldValue.MediaFullscreen, nil
+}
+
+// ClearMediaFullscreen clears the value of the "media_fullscreen" field.
+func (m *EventTargetPropMutation) ClearMediaFullscreen() {
+	m.media_fullscreen = nil
+	m.clearedFields[eventtargetprop.FieldMediaFullscreen] = struct{}{}
+}
+
+// MediaFullscreenCleared returns if the "media_fullscreen" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MediaFullscreenCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMediaFullscreen]
+	return ok
+}
+
+// ResetMediaFullscreen resets all changes to the "media_fullscreen" field.
+func (m *EventTargetPropMutation) ResetMediaFullscreen() {
+	m.media_fullscreen = nil
+	delete(m.clearedFields, eventtargetprop.FieldMediaFullscreen)
+}
+
+// SetScrollPercent sets the "scroll_percent" field.
+func (m *EventTargetPropMutation) SetScrollPercent(f float64) {
+	m.scroll_percent = &f
+	m.addscroll_percent = nil
+}
+
+// ScrollPercent returns the value of the "scroll_percent" field in the mutation.
+func (m *EventTargetPropMutation) ScrollPercent() (r float64, exists bool) {
+	v := m.scroll_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScrollPercent returns the old "scroll_percent" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldScrollPercent(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScrollPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScrollPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScrollPercent: %w", err)
+	}
+	return oldValue.ScrollPercent, nil
+}
+
+// AddScrollPercent adds f to the "scroll_percent" field.
+func (m *EventTargetPropMutation) AddScrollPercent(f float64) {
+	if m.addscroll_percent != nil {
+		*m.addscroll_percent += f
+	} else {
+		m.addscroll_percent = &f
+	}
+}
+
+// AddedScrollPercent returns the value that was added to the "scroll_percent" field in this mutation.
+func (m *EventTargetPropMutation) AddedScrollPercent() (r float64, exists bool) {
+	v := m.addscroll_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearScrollPercent clears the value of the "scroll_percent" field.
+func (m *EventTargetPropMutation) ClearScrollPercent() {
+	m.scroll_percent = nil
+	m.addscroll_percent = nil
+	m.clearedFields[eventtargetprop.FieldScrollPercent] = struct{}{}
+}
+
+// ScrollPercentCleared returns if the "scroll_percent" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ScrollPercentCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldScrollPercent]
+	return ok
+}
+
+// ResetScrollPercent resets all changes to the "scroll_percent" field.
+func (m *EventTargetPropMutation) ResetScrollPercent() {
+	m.scroll_percent = nil
+	m.addscroll_percent = nil
+	delete(m.clearedFields, eventtargetprop.FieldScrollPercent)
+}
+
+// SetScrollDirection sets the "scroll_direction" field.
+func (m *EventTargetPropMutation) SetScrollDirection(s string) {
+	m.scroll_direction = &s
+}
+
+// ScrollDirection returns the value of the "scroll_direction" field in the mutation.
+func (m *EventTargetPropMutation) ScrollDirection() (r string, exists bool) {
+	v := m.scroll_direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScrollDirection returns the old "scroll_direction" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldScrollDirection(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScrollDirection is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScrollDirection requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScrollDirection: %w", err)
+	}
+	return oldValue.ScrollDirection, nil
+}
+
+// ClearScrollDirection clears the value of the "scroll_direction" field.
+func (m *EventTargetPropMutation) ClearScrollDirection() {
+	m.scroll_direction = nil
+	m.clearedFields[eventtargetprop.FieldScrollDirection] = struct{}{}
+}
+
+// ScrollDirectionCleared returns if the "scroll_direction" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ScrollDirectionCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldScrollDirection]
+	return ok
+}
+
+// ResetScrollDirection resets all changes to the "scroll_direction" field.
+func (m *EventTargetPropMutation) ResetScrollDirection() {
+	m.scroll_direction = nil
+	delete(m.clearedFields, eventtargetprop.FieldScrollDirection)
+}
+
+// SetScrollDepthPx sets the "scroll_depth_px" field.
+func (m *EventTargetPropMutation) SetScrollDepthPx(i int) {
+	m.scroll_depth_px = &i
+	m.addscroll_depth_px = nil
+}
+
+// ScrollDepthPx returns the value of the "scroll_depth_px" field in the mutation.
+func (m *EventTargetPropMutation) ScrollDepthPx() (r int, exists bool) {
+	v := m.scroll_depth_px
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScrollDepthPx returns the old "scroll_depth_px" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldScrollDepthPx(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScrollDepthPx is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScrollDepthPx requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScrollDepthPx: %w", err)
+	}
+	return oldValue.ScrollDepthPx, nil
+}
+
+// AddScrollDepthPx adds i to the "scroll_depth_px" field.
+func (m *EventTargetPropMutation) AddScrollDepthPx(i int) {
+	if m.addscroll_depth_px != nil {
+		*m.addscroll_depth_px += i
+	} else {
+		m.addscroll_depth_px = &i
+	}
+}
+
+// AddedScrollDepthPx returns the value that was added to the "scroll_depth_px" field in this mutation.
+func (m *EventTargetPropMutation) AddedScrollDepthPx() (r int, exists bool) {
+	v := m.addscroll_depth_px
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearScrollDepthPx clears the value of the "scroll_depth_px" field.
+func (m *EventTargetPropMutation) ClearScrollDepthPx() {
+	m.scroll_depth_px = nil
+	m.addscroll_depth_px = nil
+	m.clearedFields[eventtargetprop.FieldScrollDepthPx] = struct{}{}
+}
+
+// ScrollDepthPxCleared returns if the "scroll_depth_px" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ScrollDepthPxCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldScrollDepthPx]
+	return ok
+}
+
+// ResetScrollDepthPx resets all changes to the "scroll_depth_px" field.
+func (m *EventTargetPropMutation) ResetScrollDepthPx() {
+	m.scroll_depth_px = nil
+	m.addscroll_depth_px = nil
+	delete(m.clearedFields, eventtargetprop.FieldScrollDepthPx)
+}
+
+// SetMouseButton sets the "mouse_button" field.
+func (m *EventTargetPropMutation) SetMouseButton(s string) {
+	m.mouse_button = &s
+}
+
+// MouseButton returns the value of the "mouse_button" field in the mutation.
+func (m *EventTargetPropMutation) MouseButton() (r string, exists bool) {
+	v := m.mouse_button
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMouseButton returns the old "mouse_button" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldMouseButton(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMouseButton is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMouseButton requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMouseButton: %w", err)
+	}
+	return oldValue.MouseButton, nil
+}
+
+// ClearMouseButton clears the value of the "mouse_button" field.
+func (m *EventTargetPropMutation) ClearMouseButton() {
+	m.mouse_button = nil
+	m.clearedFields[eventtargetprop.FieldMouseButton] = struct{}{}
+}
+
+// MouseButtonCleared returns if the "mouse_button" field was cleared in this mutation.
+func (m *EventTargetPropMutation) MouseButtonCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldMouseButton]
+	return ok
+}
+
+// ResetMouseButton resets all changes to the "mouse_button" field.
+func (m *EventTargetPropMutation) ResetMouseButton() {
+	m.mouse_button = nil
+	delete(m.clearedFields, eventtargetprop.FieldMouseButton)
+}
+
+// SetClickX sets the "click_x" field.
+func (m *EventTargetPropMutation) SetClickX(i int) {
+	m.click_x = &i
+	m.addclick_x = nil
+}
+
+// ClickX returns the value of the "click_x" field in the mutation.
+func (m *EventTargetPropMutation) ClickX() (r int, exists bool) {
+	v := m.click_x
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClickX returns the old "click_x" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldClickX(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClickX is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClickX requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClickX: %w", err)
+	}
+	return oldValue.ClickX, nil
+}
+
+// AddClickX adds i to the "click_x" field.
+func (m *EventTargetPropMutation) AddClickX(i int) {
+	if m.addclick_x != nil {
+		*m.addclick_x += i
+	} else {
+		m.addclick_x = &i
+	}
+}
+
+// AddedClickX returns the value that was added to the "click_x" field in this mutation.
+func (m *EventTargetPropMutation) AddedClickX() (r int, exists bool) {
+	v := m.addclick_x
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearClickX clears the value of the "click_x" field.
+func (m *EventTargetPropMutation) ClearClickX() {
+	m.click_x = nil
+	m.addclick_x = nil
+	m.clearedFields[eventtargetprop.FieldClickX] = struct{}{}
+}
+
+// ClickXCleared returns if the "click_x" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ClickXCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldClickX]
+	return ok
+}
+
+// ResetClickX resets all changes to the "click_x" field.
+func (m *EventTargetPropMutation) ResetClickX() {
+	m.click_x = nil
+	m.addclick_x = nil
+	delete(m.clearedFields, eventtargetprop.FieldClickX)
+}
+
+// SetClickY sets the "click_y" field.
+func (m *EventTargetPropMutation) SetClickY(i int) {
+	m.click_y = &i
+	m.addclick_y = nil
+}
+
+// ClickY returns the value of the "click_y" field in the mutation.
+func (m *EventTargetPropMutation) ClickY() (r int, exists bool) {
+	v := m.click_y
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClickY returns the old "click_y" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldClickY(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClickY is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClickY requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClickY: %w", err)
+	}
+	return oldValue.ClickY, nil
+}
+
+// AddClickY adds i to the "click_y" field.
+func (m *EventTargetPropMutation) AddClickY(i int) {
+	if m.addclick_y != nil {
+		*m.addclick_y += i
+	} else {
+		m.addclick_y = &i
+	}
+}
+
+// AddedClickY returns the value that was added to the "click_y" field in this mutation.
+func (m *EventTargetPropMutation) AddedClickY() (r int, exists bool) {
+	v := m.addclick_y
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearClickY clears the value of the "click_y" field.
+func (m *EventTargetPropMutation) ClearClickY() {
+	m.click_y = nil
+	m.addclick_y = nil
+	m.clearedFields[eventtargetprop.FieldClickY] = struct{}{}
+}
+
+// ClickYCleared returns if the "click_y" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ClickYCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldClickY]
+	return ok
+}
+
+// ResetClickY resets all changes to the "click_y" field.
+func (m *EventTargetPropMutation) ResetClickY() {
+	m.click_y = nil
+	m.addclick_y = nil
+	delete(m.clearedFields, eventtargetprop.FieldClickY)
+}
+
+// SetElementX sets the "element_x" field.
+func (m *EventTargetPropMutation) SetElementX(i int) {
+	m.element_x = &i
+	m.addelement_x = nil
+}
+
+// ElementX returns the value of the "element_x" field in the mutation.
+func (m *EventTargetPropMutation) ElementX() (r int, exists bool) {
+	v := m.element_x
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementX returns the old "element_x" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementX(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementX is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementX requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementX: %w", err)
+	}
+	return oldValue.ElementX, nil
+}
+
+// AddElementX adds i to the "element_x" field.
+func (m *EventTargetPropMutation) AddElementX(i int) {
+	if m.addelement_x != nil {
+		*m.addelement_x += i
+	} else {
+		m.addelement_x = &i
+	}
+}
+
+// AddedElementX returns the value that was added to the "element_x" field in this mutation.
+func (m *EventTargetPropMutation) AddedElementX() (r int, exists bool) {
+	v := m.addelement_x
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearElementX clears the value of the "element_x" field.
+func (m *EventTargetPropMutation) ClearElementX() {
+	m.element_x = nil
+	m.addelement_x = nil
+	m.clearedFields[eventtargetprop.FieldElementX] = struct{}{}
+}
+
+// ElementXCleared returns if the "element_x" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementXCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementX]
+	return ok
+}
+
+// ResetElementX resets all changes to the "element_x" field.
+func (m *EventTargetPropMutation) ResetElementX() {
+	m.element_x = nil
+	m.addelement_x = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementX)
+}
+
+// SetElementY sets the "element_y" field.
+func (m *EventTargetPropMutation) SetElementY(i int) {
+	m.element_y = &i
+	m.addelement_y = nil
+}
+
+// ElementY returns the value of the "element_y" field in the mutation.
+func (m *EventTargetPropMutation) ElementY() (r int, exists bool) {
+	v := m.element_y
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElementY returns the old "element_y" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldElementY(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElementY is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElementY requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElementY: %w", err)
+	}
+	return oldValue.ElementY, nil
+}
+
+// AddElementY adds i to the "element_y" field.
+func (m *EventTargetPropMutation) AddElementY(i int) {
+	if m.addelement_y != nil {
+		*m.addelement_y += i
+	} else {
+		m.addelement_y = &i
+	}
+}
+
+// AddedElementY returns the value that was added to the "element_y" field in this mutation.
+func (m *EventTargetPropMutation) AddedElementY() (r int, exists bool) {
+	v := m.addelement_y
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearElementY clears the value of the "element_y" field.
+func (m *EventTargetPropMutation) ClearElementY() {
+	m.element_y = nil
+	m.addelement_y = nil
+	m.clearedFields[eventtargetprop.FieldElementY] = struct{}{}
+}
+
+// ElementYCleared returns if the "element_y" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ElementYCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldElementY]
+	return ok
+}
+
+// ResetElementY resets all changes to the "element_y" field.
+func (m *EventTargetPropMutation) ResetElementY() {
+	m.element_y = nil
+	m.addelement_y = nil
+	delete(m.clearedFields, eventtargetprop.FieldElementY)
+}
+
+// SetTransactionID sets the "transaction_id" field.
+func (m *EventTargetPropMutation) SetTransactionID(s string) {
+	m.transaction_id = &s
+}
+
+// TransactionID returns the value of the "transaction_id" field in the mutation.
+func (m *EventTargetPropMutation) TransactionID() (r string, exists bool) {
+	v := m.transaction_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionID returns the old "transaction_id" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldTransactionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionID: %w", err)
+	}
+	return oldValue.TransactionID, nil
+}
+
+// ClearTransactionID clears the value of the "transaction_id" field.
+func (m *EventTargetPropMutation) ClearTransactionID() {
+	m.transaction_id = nil
+	m.clearedFields[eventtargetprop.FieldTransactionID] = struct{}{}
+}
+
+// TransactionIDCleared returns if the "transaction_id" field was cleared in this mutation.
+func (m *EventTargetPropMutation) TransactionIDCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldTransactionID]
+	return ok
+}
+
+// ResetTransactionID resets all changes to the "transaction_id" field.
+func (m *EventTargetPropMutation) ResetTransactionID() {
+	m.transaction_id = nil
+	delete(m.clearedFields, eventtargetprop.FieldTransactionID)
+}
+
+// SetCurrency sets the "currency" field.
+func (m *EventTargetPropMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *EventTargetPropMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (m *EventTargetPropMutation) ClearCurrency() {
+	m.currency = nil
+	m.clearedFields[eventtargetprop.FieldCurrency] = struct{}{}
+}
+
+// CurrencyCleared returns if the "currency" field was cleared in this mutation.
+func (m *EventTargetPropMutation) CurrencyCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldCurrency]
+	return ok
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *EventTargetPropMutation) ResetCurrency() {
+	m.currency = nil
+	delete(m.clearedFields, eventtargetprop.FieldCurrency)
+}
+
+// SetValue sets the "value" field.
+func (m *EventTargetPropMutation) SetValue(f float64) {
+	m.value = &f
+	m.addvalue = nil
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *EventTargetPropMutation) Value() (r float64, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldValue(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// AddValue adds f to the "value" field.
+func (m *EventTargetPropMutation) AddValue(f float64) {
+	if m.addvalue != nil {
+		*m.addvalue += f
+	} else {
+		m.addvalue = &f
+	}
+}
+
+// AddedValue returns the value that was added to the "value" field in this mutation.
+func (m *EventTargetPropMutation) AddedValue() (r float64, exists bool) {
+	v := m.addvalue
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearValue clears the value of the "value" field.
+func (m *EventTargetPropMutation) ClearValue() {
+	m.value = nil
+	m.addvalue = nil
+	m.clearedFields[eventtargetprop.FieldValue] = struct{}{}
+}
+
+// ValueCleared returns if the "value" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ValueCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldValue]
+	return ok
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *EventTargetPropMutation) ResetValue() {
+	m.value = nil
+	m.addvalue = nil
+	delete(m.clearedFields, eventtargetprop.FieldValue)
+}
+
+// SetTax sets the "tax" field.
+func (m *EventTargetPropMutation) SetTax(f float64) {
+	m.tax = &f
+	m.addtax = nil
+}
+
+// Tax returns the value of the "tax" field in the mutation.
+func (m *EventTargetPropMutation) Tax() (r float64, exists bool) {
+	v := m.tax
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTax returns the old "tax" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldTax(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTax is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTax requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTax: %w", err)
+	}
+	return oldValue.Tax, nil
+}
+
+// AddTax adds f to the "tax" field.
+func (m *EventTargetPropMutation) AddTax(f float64) {
+	if m.addtax != nil {
+		*m.addtax += f
+	} else {
+		m.addtax = &f
+	}
+}
+
+// AddedTax returns the value that was added to the "tax" field in this mutation.
+func (m *EventTargetPropMutation) AddedTax() (r float64, exists bool) {
+	v := m.addtax
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTax clears the value of the "tax" field.
+func (m *EventTargetPropMutation) ClearTax() {
+	m.tax = nil
+	m.addtax = nil
+	m.clearedFields[eventtargetprop.FieldTax] = struct{}{}
+}
+
+// TaxCleared returns if the "tax" field was cleared in this mutation.
+func (m *EventTargetPropMutation) TaxCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldTax]
+	return ok
+}
+
+// ResetTax resets all changes to the "tax" field.
+func (m *EventTargetPropMutation) ResetTax() {
+	m.tax = nil
+	m.addtax = nil
+	delete(m.clearedFields, eventtargetprop.FieldTax)
+}
+
+// SetShipping sets the "shipping" field.
+func (m *EventTargetPropMutation) SetShipping(f float64) {
+	m.shipping = &f
+	m.addshipping = nil
+}
+
+// Shipping returns the value of the "shipping" field in the mutation.
+func (m *EventTargetPropMutation) Shipping() (r float64, exists bool) {
+	v := m.shipping
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShipping returns the old "shipping" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldShipping(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShipping is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShipping requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShipping: %w", err)
+	}
+	return oldValue.Shipping, nil
+}
+
+// AddShipping adds f to the "shipping" field.
+func (m *EventTargetPropMutation) AddShipping(f float64) {
+	if m.addshipping != nil {
+		*m.addshipping += f
+	} else {
+		m.addshipping = &f
+	}
+}
+
+// AddedShipping returns the value that was added to the "shipping" field in this mutation.
+func (m *EventTargetPropMutation) AddedShipping() (r float64, exists bool) {
+	v := m.addshipping
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearShipping clears the value of the "shipping" field.
+func (m *EventTargetPropMutation) ClearShipping() {
+	m.shipping = nil
+	m.addshipping = nil
+	m.clearedFields[eventtargetprop.FieldShipping] = struct{}{}
+}
+
+// ShippingCleared returns if the "shipping" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ShippingCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldShipping]
+	return ok
+}
+
+// ResetShipping resets all changes to the "shipping" field.
+func (m *EventTargetPropMutation) ResetShipping() {
+	m.shipping = nil
+	m.addshipping = nil
+	delete(m.clearedFields, eventtargetprop.FieldShipping)
+}
+
+// SetCoupon sets the "coupon" field.
+func (m *EventTargetPropMutation) SetCoupon(s string) {
+	m.coupon = &s
+}
+
+// Coupon returns the value of the "coupon" field in the mutation.
+func (m *EventTargetPropMutation) Coupon() (r string, exists bool) {
+	v := m.coupon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoupon returns the old "coupon" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldCoupon(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoupon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoupon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoupon: %w", err)
+	}
+	return oldValue.Coupon, nil
+}
+
+// ClearCoupon clears the value of the "coupon" field.
+func (m *EventTargetPropMutation) ClearCoupon() {
+	m.coupon = nil
+	m.clearedFields[eventtargetprop.FieldCoupon] = struct{}{}
+}
+
+// CouponCleared returns if the "coupon" field was cleared in this mutation.
+func (m *EventTargetPropMutation) CouponCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldCoupon]
+	return ok
+}
+
+// ResetCoupon resets all changes to the "coupon" field.
+func (m *EventTargetPropMutation) ResetCoupon() {
+	m.coupon = nil
+	delete(m.clearedFields, eventtargetprop.FieldCoupon)
+}
+
+// SetAffiliation sets the "affiliation" field.
+func (m *EventTargetPropMutation) SetAffiliation(s string) {
+	m.affiliation = &s
+}
+
+// Affiliation returns the value of the "affiliation" field in the mutation.
+func (m *EventTargetPropMutation) Affiliation() (r string, exists bool) {
+	v := m.affiliation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAffiliation returns the old "affiliation" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldAffiliation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAffiliation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAffiliation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAffiliation: %w", err)
+	}
+	return oldValue.Affiliation, nil
+}
+
+// ClearAffiliation clears the value of the "affiliation" field.
+func (m *EventTargetPropMutation) ClearAffiliation() {
+	m.affiliation = nil
+	m.clearedFields[eventtargetprop.FieldAffiliation] = struct{}{}
+}
+
+// AffiliationCleared returns if the "affiliation" field was cleared in this mutation.
+func (m *EventTargetPropMutation) AffiliationCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldAffiliation]
+	return ok
+}
+
+// ResetAffiliation resets all changes to the "affiliation" field.
+func (m *EventTargetPropMutation) ResetAffiliation() {
+	m.affiliation = nil
+	delete(m.clearedFields, eventtargetprop.FieldAffiliation)
+}
+
+// SetPaymentType sets the "payment_type" field.
+func (m *EventTargetPropMutation) SetPaymentType(s string) {
+	m.payment_type = &s
+}
+
+// PaymentType returns the value of the "payment_type" field in the mutation.
+func (m *EventTargetPropMutation) PaymentType() (r string, exists bool) {
+	v := m.payment_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentType returns the old "payment_type" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldPaymentType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentType: %w", err)
+	}
+	return oldValue.PaymentType, nil
+}
+
+// ClearPaymentType clears the value of the "payment_type" field.
+func (m *EventTargetPropMutation) ClearPaymentType() {
+	m.payment_type = nil
+	m.clearedFields[eventtargetprop.FieldPaymentType] = struct{}{}
+}
+
+// PaymentTypeCleared returns if the "payment_type" field was cleared in this mutation.
+func (m *EventTargetPropMutation) PaymentTypeCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldPaymentType]
+	return ok
+}
+
+// ResetPaymentType resets all changes to the "payment_type" field.
+func (m *EventTargetPropMutation) ResetPaymentType() {
+	m.payment_type = nil
+	delete(m.clearedFields, eventtargetprop.FieldPaymentType)
+}
+
+// SetShippingTier sets the "shipping_tier" field.
+func (m *EventTargetPropMutation) SetShippingTier(s string) {
+	m.shipping_tier = &s
+}
+
+// ShippingTier returns the value of the "shipping_tier" field in the mutation.
+func (m *EventTargetPropMutation) ShippingTier() (r string, exists bool) {
+	v := m.shipping_tier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShippingTier returns the old "shipping_tier" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldShippingTier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShippingTier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShippingTier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShippingTier: %w", err)
+	}
+	return oldValue.ShippingTier, nil
+}
+
+// ClearShippingTier clears the value of the "shipping_tier" field.
+func (m *EventTargetPropMutation) ClearShippingTier() {
+	m.shipping_tier = nil
+	m.clearedFields[eventtargetprop.FieldShippingTier] = struct{}{}
+}
+
+// ShippingTierCleared returns if the "shipping_tier" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ShippingTierCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldShippingTier]
+	return ok
+}
+
+// ResetShippingTier resets all changes to the "shipping_tier" field.
+func (m *EventTargetPropMutation) ResetShippingTier() {
+	m.shipping_tier = nil
+	delete(m.clearedFields, eventtargetprop.FieldShippingTier)
+}
+
+// SetSearchTerm sets the "search_term" field.
+func (m *EventTargetPropMutation) SetSearchTerm(s string) {
+	m.search_term = &s
+}
+
+// SearchTerm returns the value of the "search_term" field in the mutation.
+func (m *EventTargetPropMutation) SearchTerm() (r string, exists bool) {
+	v := m.search_term
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchTerm returns the old "search_term" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldSearchTerm(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchTerm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchTerm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchTerm: %w", err)
+	}
+	return oldValue.SearchTerm, nil
+}
+
+// ClearSearchTerm clears the value of the "search_term" field.
+func (m *EventTargetPropMutation) ClearSearchTerm() {
+	m.search_term = nil
+	m.clearedFields[eventtargetprop.FieldSearchTerm] = struct{}{}
+}
+
+// SearchTermCleared returns if the "search_term" field was cleared in this mutation.
+func (m *EventTargetPropMutation) SearchTermCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldSearchTerm]
+	return ok
+}
+
+// ResetSearchTerm resets all changes to the "search_term" field.
+func (m *EventTargetPropMutation) ResetSearchTerm() {
+	m.search_term = nil
+	delete(m.clearedFields, eventtargetprop.FieldSearchTerm)
+}
+
+// SetSearchResultsCount sets the "search_results_count" field.
+func (m *EventTargetPropMutation) SetSearchResultsCount(i int) {
+	m.search_results_count = &i
+	m.addsearch_results_count = nil
+}
+
+// SearchResultsCount returns the value of the "search_results_count" field in the mutation.
+func (m *EventTargetPropMutation) SearchResultsCount() (r int, exists bool) {
+	v := m.search_results_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSearchResultsCount returns the old "search_results_count" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldSearchResultsCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSearchResultsCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSearchResultsCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSearchResultsCount: %w", err)
+	}
+	return oldValue.SearchResultsCount, nil
+}
+
+// AddSearchResultsCount adds i to the "search_results_count" field.
+func (m *EventTargetPropMutation) AddSearchResultsCount(i int) {
+	if m.addsearch_results_count != nil {
+		*m.addsearch_results_count += i
+	} else {
+		m.addsearch_results_count = &i
+	}
+}
+
+// AddedSearchResultsCount returns the value that was added to the "search_results_count" field in this mutation.
+func (m *EventTargetPropMutation) AddedSearchResultsCount() (r int, exists bool) {
+	v := m.addsearch_results_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSearchResultsCount clears the value of the "search_results_count" field.
+func (m *EventTargetPropMutation) ClearSearchResultsCount() {
+	m.search_results_count = nil
+	m.addsearch_results_count = nil
+	m.clearedFields[eventtargetprop.FieldSearchResultsCount] = struct{}{}
+}
+
+// SearchResultsCountCleared returns if the "search_results_count" field was cleared in this mutation.
+func (m *EventTargetPropMutation) SearchResultsCountCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldSearchResultsCount]
+	return ok
+}
+
+// ResetSearchResultsCount resets all changes to the "search_results_count" field.
+func (m *EventTargetPropMutation) ResetSearchResultsCount() {
+	m.search_results_count = nil
+	m.addsearch_results_count = nil
+	delete(m.clearedFields, eventtargetprop.FieldSearchResultsCount)
+}
+
+// SetAuthProvider sets the "auth_provider" field.
+func (m *EventTargetPropMutation) SetAuthProvider(s string) {
+	m.auth_provider = &s
+}
+
+// AuthProvider returns the value of the "auth_provider" field in the mutation.
+func (m *EventTargetPropMutation) AuthProvider() (r string, exists bool) {
+	v := m.auth_provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthProvider returns the old "auth_provider" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldAuthProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthProvider: %w", err)
+	}
+	return oldValue.AuthProvider, nil
+}
+
+// ClearAuthProvider clears the value of the "auth_provider" field.
+func (m *EventTargetPropMutation) ClearAuthProvider() {
+	m.auth_provider = nil
+	m.clearedFields[eventtargetprop.FieldAuthProvider] = struct{}{}
+}
+
+// AuthProviderCleared returns if the "auth_provider" field was cleared in this mutation.
+func (m *EventTargetPropMutation) AuthProviderCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldAuthProvider]
+	return ok
+}
+
+// ResetAuthProvider resets all changes to the "auth_provider" field.
+func (m *EventTargetPropMutation) ResetAuthProvider() {
+	m.auth_provider = nil
+	delete(m.clearedFields, eventtargetprop.FieldAuthProvider)
+}
+
+// SetAuthMethod sets the "auth_method" field.
+func (m *EventTargetPropMutation) SetAuthMethod(s string) {
+	m.auth_method = &s
+}
+
+// AuthMethod returns the value of the "auth_method" field in the mutation.
+func (m *EventTargetPropMutation) AuthMethod() (r string, exists bool) {
+	v := m.auth_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthMethod returns the old "auth_method" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldAuthMethod(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthMethod: %w", err)
+	}
+	return oldValue.AuthMethod, nil
+}
+
+// ClearAuthMethod clears the value of the "auth_method" field.
+func (m *EventTargetPropMutation) ClearAuthMethod() {
+	m.auth_method = nil
+	m.clearedFields[eventtargetprop.FieldAuthMethod] = struct{}{}
+}
+
+// AuthMethodCleared returns if the "auth_method" field was cleared in this mutation.
+func (m *EventTargetPropMutation) AuthMethodCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldAuthMethod]
+	return ok
+}
+
+// ResetAuthMethod resets all changes to the "auth_method" field.
+func (m *EventTargetPropMutation) ResetAuthMethod() {
+	m.auth_method = nil
+	delete(m.clearedFields, eventtargetprop.FieldAuthMethod)
+}
+
+// SetIsNewUser sets the "is_new_user" field.
+func (m *EventTargetPropMutation) SetIsNewUser(b bool) {
+	m.is_new_user = &b
+}
+
+// IsNewUser returns the value of the "is_new_user" field in the mutation.
+func (m *EventTargetPropMutation) IsNewUser() (r bool, exists bool) {
+	v := m.is_new_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsNewUser returns the old "is_new_user" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldIsNewUser(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsNewUser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsNewUser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsNewUser: %w", err)
+	}
+	return oldValue.IsNewUser, nil
+}
+
+// ClearIsNewUser clears the value of the "is_new_user" field.
+func (m *EventTargetPropMutation) ClearIsNewUser() {
+	m.is_new_user = nil
+	m.clearedFields[eventtargetprop.FieldIsNewUser] = struct{}{}
+}
+
+// IsNewUserCleared returns if the "is_new_user" field was cleared in this mutation.
+func (m *EventTargetPropMutation) IsNewUserCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldIsNewUser]
+	return ok
+}
+
+// ResetIsNewUser resets all changes to the "is_new_user" field.
+func (m *EventTargetPropMutation) ResetIsNewUser() {
+	m.is_new_user = nil
+	delete(m.clearedFields, eventtargetprop.FieldIsNewUser)
+}
+
+// SetErrorCode sets the "error_code" field.
+func (m *EventTargetPropMutation) SetErrorCode(s string) {
+	m.error_code = &s
+}
+
+// ErrorCode returns the value of the "error_code" field in the mutation.
+func (m *EventTargetPropMutation) ErrorCode() (r string, exists bool) {
+	v := m.error_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorCode returns the old "error_code" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldErrorCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorCode: %w", err)
+	}
+	return oldValue.ErrorCode, nil
+}
+
+// ClearErrorCode clears the value of the "error_code" field.
+func (m *EventTargetPropMutation) ClearErrorCode() {
+	m.error_code = nil
+	m.clearedFields[eventtargetprop.FieldErrorCode] = struct{}{}
+}
+
+// ErrorCodeCleared returns if the "error_code" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ErrorCodeCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldErrorCode]
+	return ok
+}
+
+// ResetErrorCode resets all changes to the "error_code" field.
+func (m *EventTargetPropMutation) ResetErrorCode() {
+	m.error_code = nil
+	delete(m.clearedFields, eventtargetprop.FieldErrorCode)
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *EventTargetPropMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *EventTargetPropMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldErrorMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *EventTargetPropMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[eventtargetprop.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *EventTargetPropMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, eventtargetprop.FieldErrorMessage)
+}
+
+// SetErrorSeverity sets the "error_severity" field.
+func (m *EventTargetPropMutation) SetErrorSeverity(s string) {
+	m.error_severity = &s
+}
+
+// ErrorSeverity returns the value of the "error_severity" field in the mutation.
+func (m *EventTargetPropMutation) ErrorSeverity() (r string, exists bool) {
+	v := m.error_severity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorSeverity returns the old "error_severity" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldErrorSeverity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorSeverity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorSeverity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorSeverity: %w", err)
+	}
+	return oldValue.ErrorSeverity, nil
+}
+
+// ClearErrorSeverity clears the value of the "error_severity" field.
+func (m *EventTargetPropMutation) ClearErrorSeverity() {
+	m.error_severity = nil
+	m.clearedFields[eventtargetprop.FieldErrorSeverity] = struct{}{}
+}
+
+// ErrorSeverityCleared returns if the "error_severity" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ErrorSeverityCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldErrorSeverity]
+	return ok
+}
+
+// ResetErrorSeverity resets all changes to the "error_severity" field.
+func (m *EventTargetPropMutation) ResetErrorSeverity() {
+	m.error_severity = nil
+	delete(m.clearedFields, eventtargetprop.FieldErrorSeverity)
+}
+
+// SetErrorStack sets the "error_stack" field.
+func (m *EventTargetPropMutation) SetErrorStack(s string) {
+	m.error_stack = &s
+}
+
+// ErrorStack returns the value of the "error_stack" field in the mutation.
+func (m *EventTargetPropMutation) ErrorStack() (r string, exists bool) {
+	v := m.error_stack
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorStack returns the old "error_stack" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldErrorStack(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorStack is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorStack requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorStack: %w", err)
+	}
+	return oldValue.ErrorStack, nil
+}
+
+// ClearErrorStack clears the value of the "error_stack" field.
+func (m *EventTargetPropMutation) ClearErrorStack() {
+	m.error_stack = nil
+	m.clearedFields[eventtargetprop.FieldErrorStack] = struct{}{}
+}
+
+// ErrorStackCleared returns if the "error_stack" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ErrorStackCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldErrorStack]
+	return ok
+}
+
+// ResetErrorStack resets all changes to the "error_stack" field.
+func (m *EventTargetPropMutation) ResetErrorStack() {
+	m.error_stack = nil
+	delete(m.clearedFields, eventtargetprop.FieldErrorStack)
+}
+
+// SetHTTPStatus sets the "http_status" field.
+func (m *EventTargetPropMutation) SetHTTPStatus(i int) {
+	m.http_status = &i
+	m.addhttp_status = nil
+}
+
+// HTTPStatus returns the value of the "http_status" field in the mutation.
+func (m *EventTargetPropMutation) HTTPStatus() (r int, exists bool) {
+	v := m.http_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHTTPStatus returns the old "http_status" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldHTTPStatus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHTTPStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHTTPStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHTTPStatus: %w", err)
+	}
+	return oldValue.HTTPStatus, nil
+}
+
+// AddHTTPStatus adds i to the "http_status" field.
+func (m *EventTargetPropMutation) AddHTTPStatus(i int) {
+	if m.addhttp_status != nil {
+		*m.addhttp_status += i
+	} else {
+		m.addhttp_status = &i
+	}
+}
+
+// AddedHTTPStatus returns the value that was added to the "http_status" field in this mutation.
+func (m *EventTargetPropMutation) AddedHTTPStatus() (r int, exists bool) {
+	v := m.addhttp_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearHTTPStatus clears the value of the "http_status" field.
+func (m *EventTargetPropMutation) ClearHTTPStatus() {
+	m.http_status = nil
+	m.addhttp_status = nil
+	m.clearedFields[eventtargetprop.FieldHTTPStatus] = struct{}{}
+}
+
+// HTTPStatusCleared returns if the "http_status" field was cleared in this mutation.
+func (m *EventTargetPropMutation) HTTPStatusCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldHTTPStatus]
+	return ok
+}
+
+// ResetHTTPStatus resets all changes to the "http_status" field.
+func (m *EventTargetPropMutation) ResetHTTPStatus() {
+	m.http_status = nil
+	m.addhttp_status = nil
+	delete(m.clearedFields, eventtargetprop.FieldHTTPStatus)
+}
+
+// SetComponentName sets the "component_name" field.
+func (m *EventTargetPropMutation) SetComponentName(s string) {
+	m.component_name = &s
+}
+
+// ComponentName returns the value of the "component_name" field in the mutation.
+func (m *EventTargetPropMutation) ComponentName() (r string, exists bool) {
+	v := m.component_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldComponentName returns the old "component_name" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldComponentName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldComponentName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldComponentName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldComponentName: %w", err)
+	}
+	return oldValue.ComponentName, nil
+}
+
+// ClearComponentName clears the value of the "component_name" field.
+func (m *EventTargetPropMutation) ClearComponentName() {
+	m.component_name = nil
+	m.clearedFields[eventtargetprop.FieldComponentName] = struct{}{}
+}
+
+// ComponentNameCleared returns if the "component_name" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ComponentNameCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldComponentName]
+	return ok
+}
+
+// ResetComponentName resets all changes to the "component_name" field.
+func (m *EventTargetPropMutation) ResetComponentName() {
+	m.component_name = nil
+	delete(m.clearedFields, eventtargetprop.FieldComponentName)
+}
+
+// SetSharePlatform sets the "share_platform" field.
+func (m *EventTargetPropMutation) SetSharePlatform(s string) {
+	m.share_platform = &s
+}
+
+// SharePlatform returns the value of the "share_platform" field in the mutation.
+func (m *EventTargetPropMutation) SharePlatform() (r string, exists bool) {
+	v := m.share_platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSharePlatform returns the old "share_platform" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldSharePlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSharePlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSharePlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSharePlatform: %w", err)
+	}
+	return oldValue.SharePlatform, nil
+}
+
+// ClearSharePlatform clears the value of the "share_platform" field.
+func (m *EventTargetPropMutation) ClearSharePlatform() {
+	m.share_platform = nil
+	m.clearedFields[eventtargetprop.FieldSharePlatform] = struct{}{}
+}
+
+// SharePlatformCleared returns if the "share_platform" field was cleared in this mutation.
+func (m *EventTargetPropMutation) SharePlatformCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldSharePlatform]
+	return ok
+}
+
+// ResetSharePlatform resets all changes to the "share_platform" field.
+func (m *EventTargetPropMutation) ResetSharePlatform() {
+	m.share_platform = nil
+	delete(m.clearedFields, eventtargetprop.FieldSharePlatform)
+}
+
+// SetShareMethod sets the "share_method" field.
+func (m *EventTargetPropMutation) SetShareMethod(s string) {
+	m.share_method = &s
+}
+
+// ShareMethod returns the value of the "share_method" field in the mutation.
+func (m *EventTargetPropMutation) ShareMethod() (r string, exists bool) {
+	v := m.share_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShareMethod returns the old "share_method" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldShareMethod(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShareMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShareMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShareMethod: %w", err)
+	}
+	return oldValue.ShareMethod, nil
+}
+
+// ClearShareMethod clears the value of the "share_method" field.
+func (m *EventTargetPropMutation) ClearShareMethod() {
+	m.share_method = nil
+	m.clearedFields[eventtargetprop.FieldShareMethod] = struct{}{}
+}
+
+// ShareMethodCleared returns if the "share_method" field was cleared in this mutation.
+func (m *EventTargetPropMutation) ShareMethodCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldShareMethod]
+	return ok
+}
+
+// ResetShareMethod resets all changes to the "share_method" field.
+func (m *EventTargetPropMutation) ResetShareMethod() {
+	m.share_method = nil
+	delete(m.clearedFields, eventtargetprop.FieldShareMethod)
+}
+
+// SetDurationMs sets the "duration_ms" field.
+func (m *EventTargetPropMutation) SetDurationMs(i int64) {
+	m.duration_ms = &i
+	m.addduration_ms = nil
+}
+
+// DurationMs returns the value of the "duration_ms" field in the mutation.
+func (m *EventTargetPropMutation) DurationMs() (r int64, exists bool) {
+	v := m.duration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDurationMs returns the old "duration_ms" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldDurationMs(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDurationMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDurationMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDurationMs: %w", err)
+	}
+	return oldValue.DurationMs, nil
+}
+
+// AddDurationMs adds i to the "duration_ms" field.
+func (m *EventTargetPropMutation) AddDurationMs(i int64) {
+	if m.addduration_ms != nil {
+		*m.addduration_ms += i
+	} else {
+		m.addduration_ms = &i
+	}
+}
+
+// AddedDurationMs returns the value that was added to the "duration_ms" field in this mutation.
+func (m *EventTargetPropMutation) AddedDurationMs() (r int64, exists bool) {
+	v := m.addduration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDurationMs clears the value of the "duration_ms" field.
+func (m *EventTargetPropMutation) ClearDurationMs() {
+	m.duration_ms = nil
+	m.addduration_ms = nil
+	m.clearedFields[eventtargetprop.FieldDurationMs] = struct{}{}
+}
+
+// DurationMsCleared returns if the "duration_ms" field was cleared in this mutation.
+func (m *EventTargetPropMutation) DurationMsCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldDurationMs]
+	return ok
+}
+
+// ResetDurationMs resets all changes to the "duration_ms" field.
+func (m *EventTargetPropMutation) ResetDurationMs() {
+	m.duration_ms = nil
+	m.addduration_ms = nil
+	delete(m.clearedFields, eventtargetprop.FieldDurationMs)
+}
+
+// SetFeature sets the "feature" field.
+func (m *EventTargetPropMutation) SetFeature(s string) {
+	m.feature = &s
+}
+
+// Feature returns the value of the "feature" field in the mutation.
+func (m *EventTargetPropMutation) Feature() (r string, exists bool) {
+	v := m.feature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeature returns the old "feature" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldFeature(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeature: %w", err)
+	}
+	return oldValue.Feature, nil
+}
+
+// ClearFeature clears the value of the "feature" field.
+func (m *EventTargetPropMutation) ClearFeature() {
+	m.feature = nil
+	m.clearedFields[eventtargetprop.FieldFeature] = struct{}{}
+}
+
+// FeatureCleared returns if the "feature" field was cleared in this mutation.
+func (m *EventTargetPropMutation) FeatureCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldFeature]
+	return ok
+}
+
+// ResetFeature resets all changes to the "feature" field.
+func (m *EventTargetPropMutation) ResetFeature() {
+	m.feature = nil
+	delete(m.clearedFields, eventtargetprop.FieldFeature)
+}
+
+// SetPriority sets the "priority" field.
+func (m *EventTargetPropMutation) SetPriority(s string) {
+	m.priority = &s
+}
+
+// Priority returns the value of the "priority" field in the mutation.
+func (m *EventTargetPropMutation) Priority() (r string, exists bool) {
+	v := m.priority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriority returns the old "priority" field's value of the EventTargetProp entity.
+// If the EventTargetProp object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetPropMutation) OldPriority(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPriority is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPriority requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriority: %w", err)
+	}
+	return oldValue.Priority, nil
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (m *EventTargetPropMutation) ClearPriority() {
+	m.priority = nil
+	m.clearedFields[eventtargetprop.FieldPriority] = struct{}{}
+}
+
+// PriorityCleared returns if the "priority" field was cleared in this mutation.
+func (m *EventTargetPropMutation) PriorityCleared() bool {
+	_, ok := m.clearedFields[eventtargetprop.FieldPriority]
+	return ok
+}
+
+// ResetPriority resets all changes to the "priority" field.
+func (m *EventTargetPropMutation) ResetPriority() {
+	m.priority = nil
+	delete(m.clearedFields, eventtargetprop.FieldPriority)
+}
+
+// ClearEvent clears the "event" edge to the VisitorEvent entity.
+func (m *EventTargetPropMutation) ClearEvent() {
+	m.clearedevent = true
+	m.clearedFields[eventtargetprop.FieldEventID] = struct{}{}
+}
+
+// EventCleared reports if the "event" edge to the VisitorEvent entity was cleared.
+func (m *EventTargetPropMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventIDs returns the "event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *EventTargetPropMutation) EventIDs() (ids []int64) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEvent resets all changes to the "event" edge.
+func (m *EventTargetPropMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
+}
+
+// Where appends a list predicates to the EventTargetPropMutation builder.
+func (m *EventTargetPropMutation) Where(ps ...predicate.EventTargetProp) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EventTargetPropMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EventTargetPropMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EventTargetProp, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EventTargetPropMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EventTargetPropMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EventTargetProp).
+func (m *EventTargetPropMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EventTargetPropMutation) Fields() []string {
+	fields := make([]string, 0, 61)
+	if m.event != nil {
+		fields = append(fields, eventtargetprop.FieldEventID)
+	}
+	if m.element_type != nil {
+		fields = append(fields, eventtargetprop.FieldElementType)
+	}
+	if m.element_id != nil {
+		fields = append(fields, eventtargetprop.FieldElementID)
+	}
+	if m.element_name != nil {
+		fields = append(fields, eventtargetprop.FieldElementName)
+	}
+	if m.element_text != nil {
+		fields = append(fields, eventtargetprop.FieldElementText)
+	}
+	if m.element_class != nil {
+		fields = append(fields, eventtargetprop.FieldElementClass)
+	}
+	if m.element_selector != nil {
+		fields = append(fields, eventtargetprop.FieldElementSelector)
+	}
+	if m.component != nil {
+		fields = append(fields, eventtargetprop.FieldComponent)
+	}
+	if m.page_name != nil {
+		fields = append(fields, eventtargetprop.FieldPageName)
+	}
+	if m.button_name != nil {
+		fields = append(fields, eventtargetprop.FieldButtonName)
+	}
+	if m.button_id != nil {
+		fields = append(fields, eventtargetprop.FieldButtonID)
+	}
+	if m.href != nil {
+		fields = append(fields, eventtargetprop.FieldHref)
+	}
+	if m.form_name != nil {
+		fields = append(fields, eventtargetprop.FieldFormName)
+	}
+	if m.form_id != nil {
+		fields = append(fields, eventtargetprop.FieldFormID)
+	}
+	if m.form_field != nil {
+		fields = append(fields, eventtargetprop.FieldFormField)
+	}
+	if m.form_value_hash != nil {
+		fields = append(fields, eventtargetprop.FieldFormValueHash)
+	}
+	if m.form_field_count != nil {
+		fields = append(fields, eventtargetprop.FieldFormFieldCount)
+	}
+	if m.form_completion_pct != nil {
+		fields = append(fields, eventtargetprop.FieldFormCompletionPct)
+	}
+	if m.media_type != nil {
+		fields = append(fields, eventtargetprop.FieldMediaType)
+	}
+	if m.media_id != nil {
+		fields = append(fields, eventtargetprop.FieldMediaID)
+	}
+	if m.media_title != nil {
+		fields = append(fields, eventtargetprop.FieldMediaTitle)
+	}
+	if m.media_provider != nil {
+		fields = append(fields, eventtargetprop.FieldMediaProvider)
+	}
+	if m.media_duration_ms != nil {
+		fields = append(fields, eventtargetprop.FieldMediaDurationMs)
+	}
+	if m.media_current_time_ms != nil {
+		fields = append(fields, eventtargetprop.FieldMediaCurrentTimeMs)
+	}
+	if m.media_percent != nil {
+		fields = append(fields, eventtargetprop.FieldMediaPercent)
+	}
+	if m.media_quality != nil {
+		fields = append(fields, eventtargetprop.FieldMediaQuality)
+	}
+	if m.media_sound_on != nil {
+		fields = append(fields, eventtargetprop.FieldMediaSoundOn)
+	}
+	if m.media_fullscreen != nil {
+		fields = append(fields, eventtargetprop.FieldMediaFullscreen)
+	}
+	if m.scroll_percent != nil {
+		fields = append(fields, eventtargetprop.FieldScrollPercent)
+	}
+	if m.scroll_direction != nil {
+		fields = append(fields, eventtargetprop.FieldScrollDirection)
+	}
+	if m.scroll_depth_px != nil {
+		fields = append(fields, eventtargetprop.FieldScrollDepthPx)
+	}
+	if m.mouse_button != nil {
+		fields = append(fields, eventtargetprop.FieldMouseButton)
+	}
+	if m.click_x != nil {
+		fields = append(fields, eventtargetprop.FieldClickX)
+	}
+	if m.click_y != nil {
+		fields = append(fields, eventtargetprop.FieldClickY)
+	}
+	if m.element_x != nil {
+		fields = append(fields, eventtargetprop.FieldElementX)
+	}
+	if m.element_y != nil {
+		fields = append(fields, eventtargetprop.FieldElementY)
+	}
+	if m.transaction_id != nil {
+		fields = append(fields, eventtargetprop.FieldTransactionID)
+	}
+	if m.currency != nil {
+		fields = append(fields, eventtargetprop.FieldCurrency)
+	}
+	if m.value != nil {
+		fields = append(fields, eventtargetprop.FieldValue)
+	}
+	if m.tax != nil {
+		fields = append(fields, eventtargetprop.FieldTax)
+	}
+	if m.shipping != nil {
+		fields = append(fields, eventtargetprop.FieldShipping)
+	}
+	if m.coupon != nil {
+		fields = append(fields, eventtargetprop.FieldCoupon)
+	}
+	if m.affiliation != nil {
+		fields = append(fields, eventtargetprop.FieldAffiliation)
+	}
+	if m.payment_type != nil {
+		fields = append(fields, eventtargetprop.FieldPaymentType)
+	}
+	if m.shipping_tier != nil {
+		fields = append(fields, eventtargetprop.FieldShippingTier)
+	}
+	if m.search_term != nil {
+		fields = append(fields, eventtargetprop.FieldSearchTerm)
+	}
+	if m.search_results_count != nil {
+		fields = append(fields, eventtargetprop.FieldSearchResultsCount)
+	}
+	if m.auth_provider != nil {
+		fields = append(fields, eventtargetprop.FieldAuthProvider)
+	}
+	if m.auth_method != nil {
+		fields = append(fields, eventtargetprop.FieldAuthMethod)
+	}
+	if m.is_new_user != nil {
+		fields = append(fields, eventtargetprop.FieldIsNewUser)
+	}
+	if m.error_code != nil {
+		fields = append(fields, eventtargetprop.FieldErrorCode)
+	}
+	if m.error_message != nil {
+		fields = append(fields, eventtargetprop.FieldErrorMessage)
+	}
+	if m.error_severity != nil {
+		fields = append(fields, eventtargetprop.FieldErrorSeverity)
+	}
+	if m.error_stack != nil {
+		fields = append(fields, eventtargetprop.FieldErrorStack)
+	}
+	if m.http_status != nil {
+		fields = append(fields, eventtargetprop.FieldHTTPStatus)
+	}
+	if m.component_name != nil {
+		fields = append(fields, eventtargetprop.FieldComponentName)
+	}
+	if m.share_platform != nil {
+		fields = append(fields, eventtargetprop.FieldSharePlatform)
+	}
+	if m.share_method != nil {
+		fields = append(fields, eventtargetprop.FieldShareMethod)
+	}
+	if m.duration_ms != nil {
+		fields = append(fields, eventtargetprop.FieldDurationMs)
+	}
+	if m.feature != nil {
+		fields = append(fields, eventtargetprop.FieldFeature)
+	}
+	if m.priority != nil {
+		fields = append(fields, eventtargetprop.FieldPriority)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EventTargetPropMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case eventtargetprop.FieldEventID:
+		return m.EventID()
+	case eventtargetprop.FieldElementType:
+		return m.ElementType()
+	case eventtargetprop.FieldElementID:
+		return m.ElementID()
+	case eventtargetprop.FieldElementName:
+		return m.ElementName()
+	case eventtargetprop.FieldElementText:
+		return m.ElementText()
+	case eventtargetprop.FieldElementClass:
+		return m.ElementClass()
+	case eventtargetprop.FieldElementSelector:
+		return m.ElementSelector()
+	case eventtargetprop.FieldComponent:
+		return m.Component()
+	case eventtargetprop.FieldPageName:
+		return m.PageName()
+	case eventtargetprop.FieldButtonName:
+		return m.ButtonName()
+	case eventtargetprop.FieldButtonID:
+		return m.ButtonID()
+	case eventtargetprop.FieldHref:
+		return m.Href()
+	case eventtargetprop.FieldFormName:
+		return m.FormName()
+	case eventtargetprop.FieldFormID:
+		return m.FormID()
+	case eventtargetprop.FieldFormField:
+		return m.FormField()
+	case eventtargetprop.FieldFormValueHash:
+		return m.FormValueHash()
+	case eventtargetprop.FieldFormFieldCount:
+		return m.FormFieldCount()
+	case eventtargetprop.FieldFormCompletionPct:
+		return m.FormCompletionPct()
+	case eventtargetprop.FieldMediaType:
+		return m.MediaType()
+	case eventtargetprop.FieldMediaID:
+		return m.MediaID()
+	case eventtargetprop.FieldMediaTitle:
+		return m.MediaTitle()
+	case eventtargetprop.FieldMediaProvider:
+		return m.MediaProvider()
+	case eventtargetprop.FieldMediaDurationMs:
+		return m.MediaDurationMs()
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		return m.MediaCurrentTimeMs()
+	case eventtargetprop.FieldMediaPercent:
+		return m.MediaPercent()
+	case eventtargetprop.FieldMediaQuality:
+		return m.MediaQuality()
+	case eventtargetprop.FieldMediaSoundOn:
+		return m.MediaSoundOn()
+	case eventtargetprop.FieldMediaFullscreen:
+		return m.MediaFullscreen()
+	case eventtargetprop.FieldScrollPercent:
+		return m.ScrollPercent()
+	case eventtargetprop.FieldScrollDirection:
+		return m.ScrollDirection()
+	case eventtargetprop.FieldScrollDepthPx:
+		return m.ScrollDepthPx()
+	case eventtargetprop.FieldMouseButton:
+		return m.MouseButton()
+	case eventtargetprop.FieldClickX:
+		return m.ClickX()
+	case eventtargetprop.FieldClickY:
+		return m.ClickY()
+	case eventtargetprop.FieldElementX:
+		return m.ElementX()
+	case eventtargetprop.FieldElementY:
+		return m.ElementY()
+	case eventtargetprop.FieldTransactionID:
+		return m.TransactionID()
+	case eventtargetprop.FieldCurrency:
+		return m.Currency()
+	case eventtargetprop.FieldValue:
+		return m.Value()
+	case eventtargetprop.FieldTax:
+		return m.Tax()
+	case eventtargetprop.FieldShipping:
+		return m.Shipping()
+	case eventtargetprop.FieldCoupon:
+		return m.Coupon()
+	case eventtargetprop.FieldAffiliation:
+		return m.Affiliation()
+	case eventtargetprop.FieldPaymentType:
+		return m.PaymentType()
+	case eventtargetprop.FieldShippingTier:
+		return m.ShippingTier()
+	case eventtargetprop.FieldSearchTerm:
+		return m.SearchTerm()
+	case eventtargetprop.FieldSearchResultsCount:
+		return m.SearchResultsCount()
+	case eventtargetprop.FieldAuthProvider:
+		return m.AuthProvider()
+	case eventtargetprop.FieldAuthMethod:
+		return m.AuthMethod()
+	case eventtargetprop.FieldIsNewUser:
+		return m.IsNewUser()
+	case eventtargetprop.FieldErrorCode:
+		return m.ErrorCode()
+	case eventtargetprop.FieldErrorMessage:
+		return m.ErrorMessage()
+	case eventtargetprop.FieldErrorSeverity:
+		return m.ErrorSeverity()
+	case eventtargetprop.FieldErrorStack:
+		return m.ErrorStack()
+	case eventtargetprop.FieldHTTPStatus:
+		return m.HTTPStatus()
+	case eventtargetprop.FieldComponentName:
+		return m.ComponentName()
+	case eventtargetprop.FieldSharePlatform:
+		return m.SharePlatform()
+	case eventtargetprop.FieldShareMethod:
+		return m.ShareMethod()
+	case eventtargetprop.FieldDurationMs:
+		return m.DurationMs()
+	case eventtargetprop.FieldFeature:
+		return m.Feature()
+	case eventtargetprop.FieldPriority:
+		return m.Priority()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EventTargetPropMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case eventtargetprop.FieldEventID:
+		return m.OldEventID(ctx)
+	case eventtargetprop.FieldElementType:
+		return m.OldElementType(ctx)
+	case eventtargetprop.FieldElementID:
+		return m.OldElementID(ctx)
+	case eventtargetprop.FieldElementName:
+		return m.OldElementName(ctx)
+	case eventtargetprop.FieldElementText:
+		return m.OldElementText(ctx)
+	case eventtargetprop.FieldElementClass:
+		return m.OldElementClass(ctx)
+	case eventtargetprop.FieldElementSelector:
+		return m.OldElementSelector(ctx)
+	case eventtargetprop.FieldComponent:
+		return m.OldComponent(ctx)
+	case eventtargetprop.FieldPageName:
+		return m.OldPageName(ctx)
+	case eventtargetprop.FieldButtonName:
+		return m.OldButtonName(ctx)
+	case eventtargetprop.FieldButtonID:
+		return m.OldButtonID(ctx)
+	case eventtargetprop.FieldHref:
+		return m.OldHref(ctx)
+	case eventtargetprop.FieldFormName:
+		return m.OldFormName(ctx)
+	case eventtargetprop.FieldFormID:
+		return m.OldFormID(ctx)
+	case eventtargetprop.FieldFormField:
+		return m.OldFormField(ctx)
+	case eventtargetprop.FieldFormValueHash:
+		return m.OldFormValueHash(ctx)
+	case eventtargetprop.FieldFormFieldCount:
+		return m.OldFormFieldCount(ctx)
+	case eventtargetprop.FieldFormCompletionPct:
+		return m.OldFormCompletionPct(ctx)
+	case eventtargetprop.FieldMediaType:
+		return m.OldMediaType(ctx)
+	case eventtargetprop.FieldMediaID:
+		return m.OldMediaID(ctx)
+	case eventtargetprop.FieldMediaTitle:
+		return m.OldMediaTitle(ctx)
+	case eventtargetprop.FieldMediaProvider:
+		return m.OldMediaProvider(ctx)
+	case eventtargetprop.FieldMediaDurationMs:
+		return m.OldMediaDurationMs(ctx)
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		return m.OldMediaCurrentTimeMs(ctx)
+	case eventtargetprop.FieldMediaPercent:
+		return m.OldMediaPercent(ctx)
+	case eventtargetprop.FieldMediaQuality:
+		return m.OldMediaQuality(ctx)
+	case eventtargetprop.FieldMediaSoundOn:
+		return m.OldMediaSoundOn(ctx)
+	case eventtargetprop.FieldMediaFullscreen:
+		return m.OldMediaFullscreen(ctx)
+	case eventtargetprop.FieldScrollPercent:
+		return m.OldScrollPercent(ctx)
+	case eventtargetprop.FieldScrollDirection:
+		return m.OldScrollDirection(ctx)
+	case eventtargetprop.FieldScrollDepthPx:
+		return m.OldScrollDepthPx(ctx)
+	case eventtargetprop.FieldMouseButton:
+		return m.OldMouseButton(ctx)
+	case eventtargetprop.FieldClickX:
+		return m.OldClickX(ctx)
+	case eventtargetprop.FieldClickY:
+		return m.OldClickY(ctx)
+	case eventtargetprop.FieldElementX:
+		return m.OldElementX(ctx)
+	case eventtargetprop.FieldElementY:
+		return m.OldElementY(ctx)
+	case eventtargetprop.FieldTransactionID:
+		return m.OldTransactionID(ctx)
+	case eventtargetprop.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case eventtargetprop.FieldValue:
+		return m.OldValue(ctx)
+	case eventtargetprop.FieldTax:
+		return m.OldTax(ctx)
+	case eventtargetprop.FieldShipping:
+		return m.OldShipping(ctx)
+	case eventtargetprop.FieldCoupon:
+		return m.OldCoupon(ctx)
+	case eventtargetprop.FieldAffiliation:
+		return m.OldAffiliation(ctx)
+	case eventtargetprop.FieldPaymentType:
+		return m.OldPaymentType(ctx)
+	case eventtargetprop.FieldShippingTier:
+		return m.OldShippingTier(ctx)
+	case eventtargetprop.FieldSearchTerm:
+		return m.OldSearchTerm(ctx)
+	case eventtargetprop.FieldSearchResultsCount:
+		return m.OldSearchResultsCount(ctx)
+	case eventtargetprop.FieldAuthProvider:
+		return m.OldAuthProvider(ctx)
+	case eventtargetprop.FieldAuthMethod:
+		return m.OldAuthMethod(ctx)
+	case eventtargetprop.FieldIsNewUser:
+		return m.OldIsNewUser(ctx)
+	case eventtargetprop.FieldErrorCode:
+		return m.OldErrorCode(ctx)
+	case eventtargetprop.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case eventtargetprop.FieldErrorSeverity:
+		return m.OldErrorSeverity(ctx)
+	case eventtargetprop.FieldErrorStack:
+		return m.OldErrorStack(ctx)
+	case eventtargetprop.FieldHTTPStatus:
+		return m.OldHTTPStatus(ctx)
+	case eventtargetprop.FieldComponentName:
+		return m.OldComponentName(ctx)
+	case eventtargetprop.FieldSharePlatform:
+		return m.OldSharePlatform(ctx)
+	case eventtargetprop.FieldShareMethod:
+		return m.OldShareMethod(ctx)
+	case eventtargetprop.FieldDurationMs:
+		return m.OldDurationMs(ctx)
+	case eventtargetprop.FieldFeature:
+		return m.OldFeature(ctx)
+	case eventtargetprop.FieldPriority:
+		return m.OldPriority(ctx)
+	}
+	return nil, fmt.Errorf("unknown EventTargetProp field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventTargetPropMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case eventtargetprop.FieldEventID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case eventtargetprop.FieldElementType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementType(v)
+		return nil
+	case eventtargetprop.FieldElementID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementID(v)
+		return nil
+	case eventtargetprop.FieldElementName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementName(v)
+		return nil
+	case eventtargetprop.FieldElementText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementText(v)
+		return nil
+	case eventtargetprop.FieldElementClass:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementClass(v)
+		return nil
+	case eventtargetprop.FieldElementSelector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementSelector(v)
+		return nil
+	case eventtargetprop.FieldComponent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetComponent(v)
+		return nil
+	case eventtargetprop.FieldPageName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPageName(v)
+		return nil
+	case eventtargetprop.FieldButtonName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetButtonName(v)
+		return nil
+	case eventtargetprop.FieldButtonID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetButtonID(v)
+		return nil
+	case eventtargetprop.FieldHref:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHref(v)
+		return nil
+	case eventtargetprop.FieldFormName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormName(v)
+		return nil
+	case eventtargetprop.FieldFormID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormID(v)
+		return nil
+	case eventtargetprop.FieldFormField:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormField(v)
+		return nil
+	case eventtargetprop.FieldFormValueHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormValueHash(v)
+		return nil
+	case eventtargetprop.FieldFormFieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormFieldCount(v)
+		return nil
+	case eventtargetprop.FieldFormCompletionPct:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormCompletionPct(v)
+		return nil
+	case eventtargetprop.FieldMediaType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaType(v)
+		return nil
+	case eventtargetprop.FieldMediaID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
+	case eventtargetprop.FieldMediaTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaTitle(v)
+		return nil
+	case eventtargetprop.FieldMediaProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaProvider(v)
+		return nil
+	case eventtargetprop.FieldMediaDurationMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaDurationMs(v)
+		return nil
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaCurrentTimeMs(v)
+		return nil
+	case eventtargetprop.FieldMediaPercent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaPercent(v)
+		return nil
+	case eventtargetprop.FieldMediaQuality:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaQuality(v)
+		return nil
+	case eventtargetprop.FieldMediaSoundOn:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaSoundOn(v)
+		return nil
+	case eventtargetprop.FieldMediaFullscreen:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaFullscreen(v)
+		return nil
+	case eventtargetprop.FieldScrollPercent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScrollPercent(v)
+		return nil
+	case eventtargetprop.FieldScrollDirection:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScrollDirection(v)
+		return nil
+	case eventtargetprop.FieldScrollDepthPx:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScrollDepthPx(v)
+		return nil
+	case eventtargetprop.FieldMouseButton:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMouseButton(v)
+		return nil
+	case eventtargetprop.FieldClickX:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClickX(v)
+		return nil
+	case eventtargetprop.FieldClickY:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClickY(v)
+		return nil
+	case eventtargetprop.FieldElementX:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementX(v)
+		return nil
+	case eventtargetprop.FieldElementY:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElementY(v)
+		return nil
+	case eventtargetprop.FieldTransactionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionID(v)
+		return nil
+	case eventtargetprop.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case eventtargetprop.FieldValue:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	case eventtargetprop.FieldTax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTax(v)
+		return nil
+	case eventtargetprop.FieldShipping:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShipping(v)
+		return nil
+	case eventtargetprop.FieldCoupon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoupon(v)
+		return nil
+	case eventtargetprop.FieldAffiliation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAffiliation(v)
+		return nil
+	case eventtargetprop.FieldPaymentType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentType(v)
+		return nil
+	case eventtargetprop.FieldShippingTier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShippingTier(v)
+		return nil
+	case eventtargetprop.FieldSearchTerm:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchTerm(v)
+		return nil
+	case eventtargetprop.FieldSearchResultsCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSearchResultsCount(v)
+		return nil
+	case eventtargetprop.FieldAuthProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthProvider(v)
+		return nil
+	case eventtargetprop.FieldAuthMethod:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthMethod(v)
+		return nil
+	case eventtargetprop.FieldIsNewUser:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsNewUser(v)
+		return nil
+	case eventtargetprop.FieldErrorCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorCode(v)
+		return nil
+	case eventtargetprop.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case eventtargetprop.FieldErrorSeverity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorSeverity(v)
+		return nil
+	case eventtargetprop.FieldErrorStack:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorStack(v)
+		return nil
+	case eventtargetprop.FieldHTTPStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHTTPStatus(v)
+		return nil
+	case eventtargetprop.FieldComponentName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetComponentName(v)
+		return nil
+	case eventtargetprop.FieldSharePlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSharePlatform(v)
+		return nil
+	case eventtargetprop.FieldShareMethod:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShareMethod(v)
+		return nil
+	case eventtargetprop.FieldDurationMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDurationMs(v)
+		return nil
+	case eventtargetprop.FieldFeature:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeature(v)
+		return nil
+	case eventtargetprop.FieldPriority:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriority(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EventTargetPropMutation) AddedFields() []string {
+	var fields []string
+	if m.addform_field_count != nil {
+		fields = append(fields, eventtargetprop.FieldFormFieldCount)
+	}
+	if m.addform_completion_pct != nil {
+		fields = append(fields, eventtargetprop.FieldFormCompletionPct)
+	}
+	if m.addmedia_duration_ms != nil {
+		fields = append(fields, eventtargetprop.FieldMediaDurationMs)
+	}
+	if m.addmedia_current_time_ms != nil {
+		fields = append(fields, eventtargetprop.FieldMediaCurrentTimeMs)
+	}
+	if m.addmedia_percent != nil {
+		fields = append(fields, eventtargetprop.FieldMediaPercent)
+	}
+	if m.addscroll_percent != nil {
+		fields = append(fields, eventtargetprop.FieldScrollPercent)
+	}
+	if m.addscroll_depth_px != nil {
+		fields = append(fields, eventtargetprop.FieldScrollDepthPx)
+	}
+	if m.addclick_x != nil {
+		fields = append(fields, eventtargetprop.FieldClickX)
+	}
+	if m.addclick_y != nil {
+		fields = append(fields, eventtargetprop.FieldClickY)
+	}
+	if m.addelement_x != nil {
+		fields = append(fields, eventtargetprop.FieldElementX)
+	}
+	if m.addelement_y != nil {
+		fields = append(fields, eventtargetprop.FieldElementY)
+	}
+	if m.addvalue != nil {
+		fields = append(fields, eventtargetprop.FieldValue)
+	}
+	if m.addtax != nil {
+		fields = append(fields, eventtargetprop.FieldTax)
+	}
+	if m.addshipping != nil {
+		fields = append(fields, eventtargetprop.FieldShipping)
+	}
+	if m.addsearch_results_count != nil {
+		fields = append(fields, eventtargetprop.FieldSearchResultsCount)
+	}
+	if m.addhttp_status != nil {
+		fields = append(fields, eventtargetprop.FieldHTTPStatus)
+	}
+	if m.addduration_ms != nil {
+		fields = append(fields, eventtargetprop.FieldDurationMs)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EventTargetPropMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case eventtargetprop.FieldFormFieldCount:
+		return m.AddedFormFieldCount()
+	case eventtargetprop.FieldFormCompletionPct:
+		return m.AddedFormCompletionPct()
+	case eventtargetprop.FieldMediaDurationMs:
+		return m.AddedMediaDurationMs()
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		return m.AddedMediaCurrentTimeMs()
+	case eventtargetprop.FieldMediaPercent:
+		return m.AddedMediaPercent()
+	case eventtargetprop.FieldScrollPercent:
+		return m.AddedScrollPercent()
+	case eventtargetprop.FieldScrollDepthPx:
+		return m.AddedScrollDepthPx()
+	case eventtargetprop.FieldClickX:
+		return m.AddedClickX()
+	case eventtargetprop.FieldClickY:
+		return m.AddedClickY()
+	case eventtargetprop.FieldElementX:
+		return m.AddedElementX()
+	case eventtargetprop.FieldElementY:
+		return m.AddedElementY()
+	case eventtargetprop.FieldValue:
+		return m.AddedValue()
+	case eventtargetprop.FieldTax:
+		return m.AddedTax()
+	case eventtargetprop.FieldShipping:
+		return m.AddedShipping()
+	case eventtargetprop.FieldSearchResultsCount:
+		return m.AddedSearchResultsCount()
+	case eventtargetprop.FieldHTTPStatus:
+		return m.AddedHTTPStatus()
+	case eventtargetprop.FieldDurationMs:
+		return m.AddedDurationMs()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventTargetPropMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case eventtargetprop.FieldFormFieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFormFieldCount(v)
+		return nil
+	case eventtargetprop.FieldFormCompletionPct:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFormCompletionPct(v)
+		return nil
+	case eventtargetprop.FieldMediaDurationMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMediaDurationMs(v)
+		return nil
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMediaCurrentTimeMs(v)
+		return nil
+	case eventtargetprop.FieldMediaPercent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMediaPercent(v)
+		return nil
+	case eventtargetprop.FieldScrollPercent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScrollPercent(v)
+		return nil
+	case eventtargetprop.FieldScrollDepthPx:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScrollDepthPx(v)
+		return nil
+	case eventtargetprop.FieldClickX:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClickX(v)
+		return nil
+	case eventtargetprop.FieldClickY:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClickY(v)
+		return nil
+	case eventtargetprop.FieldElementX:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddElementX(v)
+		return nil
+	case eventtargetprop.FieldElementY:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddElementY(v)
+		return nil
+	case eventtargetprop.FieldValue:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddValue(v)
+		return nil
+	case eventtargetprop.FieldTax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTax(v)
+		return nil
+	case eventtargetprop.FieldShipping:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddShipping(v)
+		return nil
+	case eventtargetprop.FieldSearchResultsCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSearchResultsCount(v)
+		return nil
+	case eventtargetprop.FieldHTTPStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHTTPStatus(v)
+		return nil
+	case eventtargetprop.FieldDurationMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDurationMs(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EventTargetPropMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(eventtargetprop.FieldElementType) {
+		fields = append(fields, eventtargetprop.FieldElementType)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementID) {
+		fields = append(fields, eventtargetprop.FieldElementID)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementName) {
+		fields = append(fields, eventtargetprop.FieldElementName)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementText) {
+		fields = append(fields, eventtargetprop.FieldElementText)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementClass) {
+		fields = append(fields, eventtargetprop.FieldElementClass)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementSelector) {
+		fields = append(fields, eventtargetprop.FieldElementSelector)
+	}
+	if m.FieldCleared(eventtargetprop.FieldComponent) {
+		fields = append(fields, eventtargetprop.FieldComponent)
+	}
+	if m.FieldCleared(eventtargetprop.FieldPageName) {
+		fields = append(fields, eventtargetprop.FieldPageName)
+	}
+	if m.FieldCleared(eventtargetprop.FieldButtonName) {
+		fields = append(fields, eventtargetprop.FieldButtonName)
+	}
+	if m.FieldCleared(eventtargetprop.FieldButtonID) {
+		fields = append(fields, eventtargetprop.FieldButtonID)
+	}
+	if m.FieldCleared(eventtargetprop.FieldHref) {
+		fields = append(fields, eventtargetprop.FieldHref)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormName) {
+		fields = append(fields, eventtargetprop.FieldFormName)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormID) {
+		fields = append(fields, eventtargetprop.FieldFormID)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormField) {
+		fields = append(fields, eventtargetprop.FieldFormField)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormValueHash) {
+		fields = append(fields, eventtargetprop.FieldFormValueHash)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormFieldCount) {
+		fields = append(fields, eventtargetprop.FieldFormFieldCount)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFormCompletionPct) {
+		fields = append(fields, eventtargetprop.FieldFormCompletionPct)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaType) {
+		fields = append(fields, eventtargetprop.FieldMediaType)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaID) {
+		fields = append(fields, eventtargetprop.FieldMediaID)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaTitle) {
+		fields = append(fields, eventtargetprop.FieldMediaTitle)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaProvider) {
+		fields = append(fields, eventtargetprop.FieldMediaProvider)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaDurationMs) {
+		fields = append(fields, eventtargetprop.FieldMediaDurationMs)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaCurrentTimeMs) {
+		fields = append(fields, eventtargetprop.FieldMediaCurrentTimeMs)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaPercent) {
+		fields = append(fields, eventtargetprop.FieldMediaPercent)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaQuality) {
+		fields = append(fields, eventtargetprop.FieldMediaQuality)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaSoundOn) {
+		fields = append(fields, eventtargetprop.FieldMediaSoundOn)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMediaFullscreen) {
+		fields = append(fields, eventtargetprop.FieldMediaFullscreen)
+	}
+	if m.FieldCleared(eventtargetprop.FieldScrollPercent) {
+		fields = append(fields, eventtargetprop.FieldScrollPercent)
+	}
+	if m.FieldCleared(eventtargetprop.FieldScrollDirection) {
+		fields = append(fields, eventtargetprop.FieldScrollDirection)
+	}
+	if m.FieldCleared(eventtargetprop.FieldScrollDepthPx) {
+		fields = append(fields, eventtargetprop.FieldScrollDepthPx)
+	}
+	if m.FieldCleared(eventtargetprop.FieldMouseButton) {
+		fields = append(fields, eventtargetprop.FieldMouseButton)
+	}
+	if m.FieldCleared(eventtargetprop.FieldClickX) {
+		fields = append(fields, eventtargetprop.FieldClickX)
+	}
+	if m.FieldCleared(eventtargetprop.FieldClickY) {
+		fields = append(fields, eventtargetprop.FieldClickY)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementX) {
+		fields = append(fields, eventtargetprop.FieldElementX)
+	}
+	if m.FieldCleared(eventtargetprop.FieldElementY) {
+		fields = append(fields, eventtargetprop.FieldElementY)
+	}
+	if m.FieldCleared(eventtargetprop.FieldTransactionID) {
+		fields = append(fields, eventtargetprop.FieldTransactionID)
+	}
+	if m.FieldCleared(eventtargetprop.FieldCurrency) {
+		fields = append(fields, eventtargetprop.FieldCurrency)
+	}
+	if m.FieldCleared(eventtargetprop.FieldValue) {
+		fields = append(fields, eventtargetprop.FieldValue)
+	}
+	if m.FieldCleared(eventtargetprop.FieldTax) {
+		fields = append(fields, eventtargetprop.FieldTax)
+	}
+	if m.FieldCleared(eventtargetprop.FieldShipping) {
+		fields = append(fields, eventtargetprop.FieldShipping)
+	}
+	if m.FieldCleared(eventtargetprop.FieldCoupon) {
+		fields = append(fields, eventtargetprop.FieldCoupon)
+	}
+	if m.FieldCleared(eventtargetprop.FieldAffiliation) {
+		fields = append(fields, eventtargetprop.FieldAffiliation)
+	}
+	if m.FieldCleared(eventtargetprop.FieldPaymentType) {
+		fields = append(fields, eventtargetprop.FieldPaymentType)
+	}
+	if m.FieldCleared(eventtargetprop.FieldShippingTier) {
+		fields = append(fields, eventtargetprop.FieldShippingTier)
+	}
+	if m.FieldCleared(eventtargetprop.FieldSearchTerm) {
+		fields = append(fields, eventtargetprop.FieldSearchTerm)
+	}
+	if m.FieldCleared(eventtargetprop.FieldSearchResultsCount) {
+		fields = append(fields, eventtargetprop.FieldSearchResultsCount)
+	}
+	if m.FieldCleared(eventtargetprop.FieldAuthProvider) {
+		fields = append(fields, eventtargetprop.FieldAuthProvider)
+	}
+	if m.FieldCleared(eventtargetprop.FieldAuthMethod) {
+		fields = append(fields, eventtargetprop.FieldAuthMethod)
+	}
+	if m.FieldCleared(eventtargetprop.FieldIsNewUser) {
+		fields = append(fields, eventtargetprop.FieldIsNewUser)
+	}
+	if m.FieldCleared(eventtargetprop.FieldErrorCode) {
+		fields = append(fields, eventtargetprop.FieldErrorCode)
+	}
+	if m.FieldCleared(eventtargetprop.FieldErrorMessage) {
+		fields = append(fields, eventtargetprop.FieldErrorMessage)
+	}
+	if m.FieldCleared(eventtargetprop.FieldErrorSeverity) {
+		fields = append(fields, eventtargetprop.FieldErrorSeverity)
+	}
+	if m.FieldCleared(eventtargetprop.FieldErrorStack) {
+		fields = append(fields, eventtargetprop.FieldErrorStack)
+	}
+	if m.FieldCleared(eventtargetprop.FieldHTTPStatus) {
+		fields = append(fields, eventtargetprop.FieldHTTPStatus)
+	}
+	if m.FieldCleared(eventtargetprop.FieldComponentName) {
+		fields = append(fields, eventtargetprop.FieldComponentName)
+	}
+	if m.FieldCleared(eventtargetprop.FieldSharePlatform) {
+		fields = append(fields, eventtargetprop.FieldSharePlatform)
+	}
+	if m.FieldCleared(eventtargetprop.FieldShareMethod) {
+		fields = append(fields, eventtargetprop.FieldShareMethod)
+	}
+	if m.FieldCleared(eventtargetprop.FieldDurationMs) {
+		fields = append(fields, eventtargetprop.FieldDurationMs)
+	}
+	if m.FieldCleared(eventtargetprop.FieldFeature) {
+		fields = append(fields, eventtargetprop.FieldFeature)
+	}
+	if m.FieldCleared(eventtargetprop.FieldPriority) {
+		fields = append(fields, eventtargetprop.FieldPriority)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EventTargetPropMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EventTargetPropMutation) ClearField(name string) error {
+	switch name {
+	case eventtargetprop.FieldElementType:
+		m.ClearElementType()
+		return nil
+	case eventtargetprop.FieldElementID:
+		m.ClearElementID()
+		return nil
+	case eventtargetprop.FieldElementName:
+		m.ClearElementName()
+		return nil
+	case eventtargetprop.FieldElementText:
+		m.ClearElementText()
+		return nil
+	case eventtargetprop.FieldElementClass:
+		m.ClearElementClass()
+		return nil
+	case eventtargetprop.FieldElementSelector:
+		m.ClearElementSelector()
+		return nil
+	case eventtargetprop.FieldComponent:
+		m.ClearComponent()
+		return nil
+	case eventtargetprop.FieldPageName:
+		m.ClearPageName()
+		return nil
+	case eventtargetprop.FieldButtonName:
+		m.ClearButtonName()
+		return nil
+	case eventtargetprop.FieldButtonID:
+		m.ClearButtonID()
+		return nil
+	case eventtargetprop.FieldHref:
+		m.ClearHref()
+		return nil
+	case eventtargetprop.FieldFormName:
+		m.ClearFormName()
+		return nil
+	case eventtargetprop.FieldFormID:
+		m.ClearFormID()
+		return nil
+	case eventtargetprop.FieldFormField:
+		m.ClearFormField()
+		return nil
+	case eventtargetprop.FieldFormValueHash:
+		m.ClearFormValueHash()
+		return nil
+	case eventtargetprop.FieldFormFieldCount:
+		m.ClearFormFieldCount()
+		return nil
+	case eventtargetprop.FieldFormCompletionPct:
+		m.ClearFormCompletionPct()
+		return nil
+	case eventtargetprop.FieldMediaType:
+		m.ClearMediaType()
+		return nil
+	case eventtargetprop.FieldMediaID:
+		m.ClearMediaID()
+		return nil
+	case eventtargetprop.FieldMediaTitle:
+		m.ClearMediaTitle()
+		return nil
+	case eventtargetprop.FieldMediaProvider:
+		m.ClearMediaProvider()
+		return nil
+	case eventtargetprop.FieldMediaDurationMs:
+		m.ClearMediaDurationMs()
+		return nil
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		m.ClearMediaCurrentTimeMs()
+		return nil
+	case eventtargetprop.FieldMediaPercent:
+		m.ClearMediaPercent()
+		return nil
+	case eventtargetprop.FieldMediaQuality:
+		m.ClearMediaQuality()
+		return nil
+	case eventtargetprop.FieldMediaSoundOn:
+		m.ClearMediaSoundOn()
+		return nil
+	case eventtargetprop.FieldMediaFullscreen:
+		m.ClearMediaFullscreen()
+		return nil
+	case eventtargetprop.FieldScrollPercent:
+		m.ClearScrollPercent()
+		return nil
+	case eventtargetprop.FieldScrollDirection:
+		m.ClearScrollDirection()
+		return nil
+	case eventtargetprop.FieldScrollDepthPx:
+		m.ClearScrollDepthPx()
+		return nil
+	case eventtargetprop.FieldMouseButton:
+		m.ClearMouseButton()
+		return nil
+	case eventtargetprop.FieldClickX:
+		m.ClearClickX()
+		return nil
+	case eventtargetprop.FieldClickY:
+		m.ClearClickY()
+		return nil
+	case eventtargetprop.FieldElementX:
+		m.ClearElementX()
+		return nil
+	case eventtargetprop.FieldElementY:
+		m.ClearElementY()
+		return nil
+	case eventtargetprop.FieldTransactionID:
+		m.ClearTransactionID()
+		return nil
+	case eventtargetprop.FieldCurrency:
+		m.ClearCurrency()
+		return nil
+	case eventtargetprop.FieldValue:
+		m.ClearValue()
+		return nil
+	case eventtargetprop.FieldTax:
+		m.ClearTax()
+		return nil
+	case eventtargetprop.FieldShipping:
+		m.ClearShipping()
+		return nil
+	case eventtargetprop.FieldCoupon:
+		m.ClearCoupon()
+		return nil
+	case eventtargetprop.FieldAffiliation:
+		m.ClearAffiliation()
+		return nil
+	case eventtargetprop.FieldPaymentType:
+		m.ClearPaymentType()
+		return nil
+	case eventtargetprop.FieldShippingTier:
+		m.ClearShippingTier()
+		return nil
+	case eventtargetprop.FieldSearchTerm:
+		m.ClearSearchTerm()
+		return nil
+	case eventtargetprop.FieldSearchResultsCount:
+		m.ClearSearchResultsCount()
+		return nil
+	case eventtargetprop.FieldAuthProvider:
+		m.ClearAuthProvider()
+		return nil
+	case eventtargetprop.FieldAuthMethod:
+		m.ClearAuthMethod()
+		return nil
+	case eventtargetprop.FieldIsNewUser:
+		m.ClearIsNewUser()
+		return nil
+	case eventtargetprop.FieldErrorCode:
+		m.ClearErrorCode()
+		return nil
+	case eventtargetprop.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case eventtargetprop.FieldErrorSeverity:
+		m.ClearErrorSeverity()
+		return nil
+	case eventtargetprop.FieldErrorStack:
+		m.ClearErrorStack()
+		return nil
+	case eventtargetprop.FieldHTTPStatus:
+		m.ClearHTTPStatus()
+		return nil
+	case eventtargetprop.FieldComponentName:
+		m.ClearComponentName()
+		return nil
+	case eventtargetprop.FieldSharePlatform:
+		m.ClearSharePlatform()
+		return nil
+	case eventtargetprop.FieldShareMethod:
+		m.ClearShareMethod()
+		return nil
+	case eventtargetprop.FieldDurationMs:
+		m.ClearDurationMs()
+		return nil
+	case eventtargetprop.FieldFeature:
+		m.ClearFeature()
+		return nil
+	case eventtargetprop.FieldPriority:
+		m.ClearPriority()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EventTargetPropMutation) ResetField(name string) error {
+	switch name {
+	case eventtargetprop.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case eventtargetprop.FieldElementType:
+		m.ResetElementType()
+		return nil
+	case eventtargetprop.FieldElementID:
+		m.ResetElementID()
+		return nil
+	case eventtargetprop.FieldElementName:
+		m.ResetElementName()
+		return nil
+	case eventtargetprop.FieldElementText:
+		m.ResetElementText()
+		return nil
+	case eventtargetprop.FieldElementClass:
+		m.ResetElementClass()
+		return nil
+	case eventtargetprop.FieldElementSelector:
+		m.ResetElementSelector()
+		return nil
+	case eventtargetprop.FieldComponent:
+		m.ResetComponent()
+		return nil
+	case eventtargetprop.FieldPageName:
+		m.ResetPageName()
+		return nil
+	case eventtargetprop.FieldButtonName:
+		m.ResetButtonName()
+		return nil
+	case eventtargetprop.FieldButtonID:
+		m.ResetButtonID()
+		return nil
+	case eventtargetprop.FieldHref:
+		m.ResetHref()
+		return nil
+	case eventtargetprop.FieldFormName:
+		m.ResetFormName()
+		return nil
+	case eventtargetprop.FieldFormID:
+		m.ResetFormID()
+		return nil
+	case eventtargetprop.FieldFormField:
+		m.ResetFormField()
+		return nil
+	case eventtargetprop.FieldFormValueHash:
+		m.ResetFormValueHash()
+		return nil
+	case eventtargetprop.FieldFormFieldCount:
+		m.ResetFormFieldCount()
+		return nil
+	case eventtargetprop.FieldFormCompletionPct:
+		m.ResetFormCompletionPct()
+		return nil
+	case eventtargetprop.FieldMediaType:
+		m.ResetMediaType()
+		return nil
+	case eventtargetprop.FieldMediaID:
+		m.ResetMediaID()
+		return nil
+	case eventtargetprop.FieldMediaTitle:
+		m.ResetMediaTitle()
+		return nil
+	case eventtargetprop.FieldMediaProvider:
+		m.ResetMediaProvider()
+		return nil
+	case eventtargetprop.FieldMediaDurationMs:
+		m.ResetMediaDurationMs()
+		return nil
+	case eventtargetprop.FieldMediaCurrentTimeMs:
+		m.ResetMediaCurrentTimeMs()
+		return nil
+	case eventtargetprop.FieldMediaPercent:
+		m.ResetMediaPercent()
+		return nil
+	case eventtargetprop.FieldMediaQuality:
+		m.ResetMediaQuality()
+		return nil
+	case eventtargetprop.FieldMediaSoundOn:
+		m.ResetMediaSoundOn()
+		return nil
+	case eventtargetprop.FieldMediaFullscreen:
+		m.ResetMediaFullscreen()
+		return nil
+	case eventtargetprop.FieldScrollPercent:
+		m.ResetScrollPercent()
+		return nil
+	case eventtargetprop.FieldScrollDirection:
+		m.ResetScrollDirection()
+		return nil
+	case eventtargetprop.FieldScrollDepthPx:
+		m.ResetScrollDepthPx()
+		return nil
+	case eventtargetprop.FieldMouseButton:
+		m.ResetMouseButton()
+		return nil
+	case eventtargetprop.FieldClickX:
+		m.ResetClickX()
+		return nil
+	case eventtargetprop.FieldClickY:
+		m.ResetClickY()
+		return nil
+	case eventtargetprop.FieldElementX:
+		m.ResetElementX()
+		return nil
+	case eventtargetprop.FieldElementY:
+		m.ResetElementY()
+		return nil
+	case eventtargetprop.FieldTransactionID:
+		m.ResetTransactionID()
+		return nil
+	case eventtargetprop.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case eventtargetprop.FieldValue:
+		m.ResetValue()
+		return nil
+	case eventtargetprop.FieldTax:
+		m.ResetTax()
+		return nil
+	case eventtargetprop.FieldShipping:
+		m.ResetShipping()
+		return nil
+	case eventtargetprop.FieldCoupon:
+		m.ResetCoupon()
+		return nil
+	case eventtargetprop.FieldAffiliation:
+		m.ResetAffiliation()
+		return nil
+	case eventtargetprop.FieldPaymentType:
+		m.ResetPaymentType()
+		return nil
+	case eventtargetprop.FieldShippingTier:
+		m.ResetShippingTier()
+		return nil
+	case eventtargetprop.FieldSearchTerm:
+		m.ResetSearchTerm()
+		return nil
+	case eventtargetprop.FieldSearchResultsCount:
+		m.ResetSearchResultsCount()
+		return nil
+	case eventtargetprop.FieldAuthProvider:
+		m.ResetAuthProvider()
+		return nil
+	case eventtargetprop.FieldAuthMethod:
+		m.ResetAuthMethod()
+		return nil
+	case eventtargetprop.FieldIsNewUser:
+		m.ResetIsNewUser()
+		return nil
+	case eventtargetprop.FieldErrorCode:
+		m.ResetErrorCode()
+		return nil
+	case eventtargetprop.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case eventtargetprop.FieldErrorSeverity:
+		m.ResetErrorSeverity()
+		return nil
+	case eventtargetprop.FieldErrorStack:
+		m.ResetErrorStack()
+		return nil
+	case eventtargetprop.FieldHTTPStatus:
+		m.ResetHTTPStatus()
+		return nil
+	case eventtargetprop.FieldComponentName:
+		m.ResetComponentName()
+		return nil
+	case eventtargetprop.FieldSharePlatform:
+		m.ResetSharePlatform()
+		return nil
+	case eventtargetprop.FieldShareMethod:
+		m.ResetShareMethod()
+		return nil
+	case eventtargetprop.FieldDurationMs:
+		m.ResetDurationMs()
+		return nil
+	case eventtargetprop.FieldFeature:
+		m.ResetFeature()
+		return nil
+	case eventtargetprop.FieldPriority:
+		m.ResetPriority()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EventTargetPropMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.event != nil {
+		edges = append(edges, eventtargetprop.EdgeEvent)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EventTargetPropMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case eventtargetprop.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EventTargetPropMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EventTargetPropMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EventTargetPropMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, eventtargetprop.EdgeEvent)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EventTargetPropMutation) EdgeCleared(name string) bool {
+	switch name {
+	case eventtargetprop.EdgeEvent:
+		return m.clearedevent
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EventTargetPropMutation) ClearEdge(name string) error {
+	switch name {
+	case eventtargetprop.EdgeEvent:
+		m.ClearEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EventTargetPropMutation) ResetEdge(name string) error {
+	switch name {
+	case eventtargetprop.EdgeEvent:
+		m.ResetEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetProp edge %s", name)
+}
+
+// EventTargetSearchFilterMutation represents an operation that mutates the EventTargetSearchFilter nodes in the graph.
+type EventTargetSearchFilterMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	key           *string
+	value         *string
+	clearedFields map[string]struct{}
+	event         *int64
+	clearedevent  bool
+	done          bool
+	oldValue      func(context.Context) (*EventTargetSearchFilter, error)
+	predicates    []predicate.EventTargetSearchFilter
+}
+
+var _ ent.Mutation = (*EventTargetSearchFilterMutation)(nil)
+
+// eventtargetsearchfilterOption allows management of the mutation configuration using functional options.
+type eventtargetsearchfilterOption func(*EventTargetSearchFilterMutation)
+
+// newEventTargetSearchFilterMutation creates new mutation for the EventTargetSearchFilter entity.
+func newEventTargetSearchFilterMutation(c config, op Op, opts ...eventtargetsearchfilterOption) *EventTargetSearchFilterMutation {
+	m := &EventTargetSearchFilterMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEventTargetSearchFilter,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEventTargetSearchFilterID sets the ID field of the mutation.
+func withEventTargetSearchFilterID(id int64) eventtargetsearchfilterOption {
+	return func(m *EventTargetSearchFilterMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EventTargetSearchFilter
+		)
+		m.oldValue = func(ctx context.Context) (*EventTargetSearchFilter, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EventTargetSearchFilter.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEventTargetSearchFilter sets the old EventTargetSearchFilter of the mutation.
+func withEventTargetSearchFilter(node *EventTargetSearchFilter) eventtargetsearchfilterOption {
+	return func(m *EventTargetSearchFilterMutation) {
+		m.oldValue = func(context.Context) (*EventTargetSearchFilter, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EventTargetSearchFilterMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EventTargetSearchFilterMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EventTargetSearchFilter entities.
+func (m *EventTargetSearchFilterMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EventTargetSearchFilterMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EventTargetSearchFilterMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EventTargetSearchFilter.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEventID sets the "event_id" field.
+func (m *EventTargetSearchFilterMutation) SetEventID(i int64) {
+	m.event = &i
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *EventTargetSearchFilterMutation) EventID() (r int64, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the EventTargetSearchFilter entity.
+// If the EventTargetSearchFilter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetSearchFilterMutation) OldEventID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *EventTargetSearchFilterMutation) ResetEventID() {
+	m.event = nil
+}
+
+// SetKey sets the "key" field.
+func (m *EventTargetSearchFilterMutation) SetKey(s string) {
+	m.key = &s
+}
+
+// Key returns the value of the "key" field in the mutation.
+func (m *EventTargetSearchFilterMutation) Key() (r string, exists bool) {
+	v := m.key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKey returns the old "key" field's value of the EventTargetSearchFilter entity.
+// If the EventTargetSearchFilter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetSearchFilterMutation) OldKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKey: %w", err)
+	}
+	return oldValue.Key, nil
+}
+
+// ResetKey resets all changes to the "key" field.
+func (m *EventTargetSearchFilterMutation) ResetKey() {
+	m.key = nil
+}
+
+// SetValue sets the "value" field.
+func (m *EventTargetSearchFilterMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *EventTargetSearchFilterMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the EventTargetSearchFilter entity.
+// If the EventTargetSearchFilter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventTargetSearchFilterMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ClearValue clears the value of the "value" field.
+func (m *EventTargetSearchFilterMutation) ClearValue() {
+	m.value = nil
+	m.clearedFields[eventtargetsearchfilter.FieldValue] = struct{}{}
+}
+
+// ValueCleared returns if the "value" field was cleared in this mutation.
+func (m *EventTargetSearchFilterMutation) ValueCleared() bool {
+	_, ok := m.clearedFields[eventtargetsearchfilter.FieldValue]
+	return ok
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *EventTargetSearchFilterMutation) ResetValue() {
+	m.value = nil
+	delete(m.clearedFields, eventtargetsearchfilter.FieldValue)
+}
+
+// ClearEvent clears the "event" edge to the VisitorEvent entity.
+func (m *EventTargetSearchFilterMutation) ClearEvent() {
+	m.clearedevent = true
+	m.clearedFields[eventtargetsearchfilter.FieldEventID] = struct{}{}
+}
+
+// EventCleared reports if the "event" edge to the VisitorEvent entity was cleared.
+func (m *EventTargetSearchFilterMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventIDs returns the "event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *EventTargetSearchFilterMutation) EventIDs() (ids []int64) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEvent resets all changes to the "event" edge.
+func (m *EventTargetSearchFilterMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
+}
+
+// Where appends a list predicates to the EventTargetSearchFilterMutation builder.
+func (m *EventTargetSearchFilterMutation) Where(ps ...predicate.EventTargetSearchFilter) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EventTargetSearchFilterMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EventTargetSearchFilterMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EventTargetSearchFilter, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EventTargetSearchFilterMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EventTargetSearchFilterMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EventTargetSearchFilter).
+func (m *EventTargetSearchFilterMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EventTargetSearchFilterMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.event != nil {
+		fields = append(fields, eventtargetsearchfilter.FieldEventID)
+	}
+	if m.key != nil {
+		fields = append(fields, eventtargetsearchfilter.FieldKey)
+	}
+	if m.value != nil {
+		fields = append(fields, eventtargetsearchfilter.FieldValue)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EventTargetSearchFilterMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case eventtargetsearchfilter.FieldEventID:
+		return m.EventID()
+	case eventtargetsearchfilter.FieldKey:
+		return m.Key()
+	case eventtargetsearchfilter.FieldValue:
+		return m.Value()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EventTargetSearchFilterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case eventtargetsearchfilter.FieldEventID:
+		return m.OldEventID(ctx)
+	case eventtargetsearchfilter.FieldKey:
+		return m.OldKey(ctx)
+	case eventtargetsearchfilter.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown EventTargetSearchFilter field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventTargetSearchFilterMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case eventtargetsearchfilter.FieldEventID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case eventtargetsearchfilter.FieldKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKey(v)
+		return nil
+	case eventtargetsearchfilter.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EventTargetSearchFilterMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EventTargetSearchFilterMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EventTargetSearchFilterMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EventTargetSearchFilterMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(eventtargetsearchfilter.FieldValue) {
+		fields = append(fields, eventtargetsearchfilter.FieldValue)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EventTargetSearchFilterMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EventTargetSearchFilterMutation) ClearField(name string) error {
+	switch name {
+	case eventtargetsearchfilter.FieldValue:
+		m.ClearValue()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EventTargetSearchFilterMutation) ResetField(name string) error {
+	switch name {
+	case eventtargetsearchfilter.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case eventtargetsearchfilter.FieldKey:
+		m.ResetKey()
+		return nil
+	case eventtargetsearchfilter.FieldValue:
+		m.ResetValue()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EventTargetSearchFilterMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.event != nil {
+		edges = append(edges, eventtargetsearchfilter.EdgeEvent)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EventTargetSearchFilterMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case eventtargetsearchfilter.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EventTargetSearchFilterMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EventTargetSearchFilterMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EventTargetSearchFilterMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, eventtargetsearchfilter.EdgeEvent)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EventTargetSearchFilterMutation) EdgeCleared(name string) bool {
+	switch name {
+	case eventtargetsearchfilter.EdgeEvent:
+		return m.clearedevent
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EventTargetSearchFilterMutation) ClearEdge(name string) error {
+	switch name {
+	case eventtargetsearchfilter.EdgeEvent:
+		m.ClearEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EventTargetSearchFilterMutation) ResetEdge(name string) error {
+	switch name {
+	case eventtargetsearchfilter.EdgeEvent:
+		m.ResetEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown EventTargetSearchFilter edge %s", name)
 }
 
 // PageViewMutation represents an operation that mutates the PageView nodes in the graph.
@@ -5622,23 +13697,46 @@ func (m *VisitorConsentMutation) ResetEdge(name string) error {
 // VisitorEventMutation represents an operation that mutates the VisitorEvent nodes in the graph.
 type VisitorEventMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int64
-	uuid             *string
-	session_id       *int64
-	addsession_id    *int64
-	visitor_id       *int64
-	addvisitor_id    *int64
-	device_id        *int64
-	adddevice_id     *int64
-	event_name       *string
-	event_properties *map[string]interface{}
-	created_at       *time.Time
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*VisitorEvent, error)
-	predicates       []predicate.VisitorEvent
+	op                     Op
+	typ                    string
+	id                     *int64
+	uuid                   *string
+	session_id             *int64
+	addsession_id          *int64
+	visitor_id             *int64
+	addvisitor_id          *int64
+	device_id              *int64
+	adddevice_id           *int64
+	page_id                *int64
+	addpage_id             *int64
+	event_type             *string
+	event_category         *string
+	event_name             *string
+	occurred_at            *time.Time
+	server_received_at     *time.Time
+	sequence               *int
+	addsequence            *int
+	schema_version         *string
+	sdk_name               *string
+	sdk_version            *string
+	created_at             *time.Time
+	clearedFields          map[string]struct{}
+	custom_props           map[int64]struct{}
+	removedcustom_props    map[int64]struct{}
+	clearedcustom_props    bool
+	platform_clicks        *int64
+	clearedplatform_clicks bool
+	target_props           *int64
+	clearedtarget_props    bool
+	commerce_items         map[int64]struct{}
+	removedcommerce_items  map[int64]struct{}
+	clearedcommerce_items  bool
+	search_filters         map[int64]struct{}
+	removedsearch_filters  map[int64]struct{}
+	clearedsearch_filters  bool
+	done                   bool
+	oldValue               func(context.Context) (*VisitorEvent, error)
+	predicates             []predicate.VisitorEvent
 }
 
 var _ ent.Mutation = (*VisitorEventMutation)(nil)
@@ -5949,6 +14047,134 @@ func (m *VisitorEventMutation) ResetDeviceID() {
 	m.adddevice_id = nil
 }
 
+// SetPageID sets the "page_id" field.
+func (m *VisitorEventMutation) SetPageID(i int64) {
+	m.page_id = &i
+	m.addpage_id = nil
+}
+
+// PageID returns the value of the "page_id" field in the mutation.
+func (m *VisitorEventMutation) PageID() (r int64, exists bool) {
+	v := m.page_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPageID returns the old "page_id" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldPageID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPageID: %w", err)
+	}
+	return oldValue.PageID, nil
+}
+
+// AddPageID adds i to the "page_id" field.
+func (m *VisitorEventMutation) AddPageID(i int64) {
+	if m.addpage_id != nil {
+		*m.addpage_id += i
+	} else {
+		m.addpage_id = &i
+	}
+}
+
+// AddedPageID returns the value that was added to the "page_id" field in this mutation.
+func (m *VisitorEventMutation) AddedPageID() (r int64, exists bool) {
+	v := m.addpage_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPageID resets all changes to the "page_id" field.
+func (m *VisitorEventMutation) ResetPageID() {
+	m.page_id = nil
+	m.addpage_id = nil
+}
+
+// SetEventType sets the "event_type" field.
+func (m *VisitorEventMutation) SetEventType(s string) {
+	m.event_type = &s
+}
+
+// EventType returns the value of the "event_type" field in the mutation.
+func (m *VisitorEventMutation) EventType() (r string, exists bool) {
+	v := m.event_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventType returns the old "event_type" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldEventType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventType: %w", err)
+	}
+	return oldValue.EventType, nil
+}
+
+// ResetEventType resets all changes to the "event_type" field.
+func (m *VisitorEventMutation) ResetEventType() {
+	m.event_type = nil
+}
+
+// SetEventCategory sets the "event_category" field.
+func (m *VisitorEventMutation) SetEventCategory(s string) {
+	m.event_category = &s
+}
+
+// EventCategory returns the value of the "event_category" field in the mutation.
+func (m *VisitorEventMutation) EventCategory() (r string, exists bool) {
+	v := m.event_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventCategory returns the old "event_category" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldEventCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventCategory: %w", err)
+	}
+	return oldValue.EventCategory, nil
+}
+
+// ResetEventCategory resets all changes to the "event_category" field.
+func (m *VisitorEventMutation) ResetEventCategory() {
+	m.event_category = nil
+}
+
 // SetEventName sets the "event_name" field.
 func (m *VisitorEventMutation) SetEventName(s string) {
 	m.event_name = &s
@@ -5985,53 +14211,305 @@ func (m *VisitorEventMutation) ResetEventName() {
 	m.event_name = nil
 }
 
-// SetEventProperties sets the "event_properties" field.
-func (m *VisitorEventMutation) SetEventProperties(value map[string]interface{}) {
-	m.event_properties = &value
+// SetOccurredAt sets the "occurred_at" field.
+func (m *VisitorEventMutation) SetOccurredAt(t time.Time) {
+	m.occurred_at = &t
 }
 
-// EventProperties returns the value of the "event_properties" field in the mutation.
-func (m *VisitorEventMutation) EventProperties() (r map[string]interface{}, exists bool) {
-	v := m.event_properties
+// OccurredAt returns the value of the "occurred_at" field in the mutation.
+func (m *VisitorEventMutation) OccurredAt() (r time.Time, exists bool) {
+	v := m.occurred_at
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEventProperties returns the old "event_properties" field's value of the VisitorEvent entity.
+// OldOccurredAt returns the old "occurred_at" field's value of the VisitorEvent entity.
 // If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VisitorEventMutation) OldEventProperties(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *VisitorEventMutation) OldOccurredAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEventProperties is only allowed on UpdateOne operations")
+		return v, errors.New("OldOccurredAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEventProperties requires an ID field in the mutation")
+		return v, errors.New("OldOccurredAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEventProperties: %w", err)
+		return v, fmt.Errorf("querying old value for OldOccurredAt: %w", err)
 	}
-	return oldValue.EventProperties, nil
+	return oldValue.OccurredAt, nil
 }
 
-// ClearEventProperties clears the value of the "event_properties" field.
-func (m *VisitorEventMutation) ClearEventProperties() {
-	m.event_properties = nil
-	m.clearedFields[visitorevent.FieldEventProperties] = struct{}{}
+// ClearOccurredAt clears the value of the "occurred_at" field.
+func (m *VisitorEventMutation) ClearOccurredAt() {
+	m.occurred_at = nil
+	m.clearedFields[visitorevent.FieldOccurredAt] = struct{}{}
 }
 
-// EventPropertiesCleared returns if the "event_properties" field was cleared in this mutation.
-func (m *VisitorEventMutation) EventPropertiesCleared() bool {
-	_, ok := m.clearedFields[visitorevent.FieldEventProperties]
+// OccurredAtCleared returns if the "occurred_at" field was cleared in this mutation.
+func (m *VisitorEventMutation) OccurredAtCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldOccurredAt]
 	return ok
 }
 
-// ResetEventProperties resets all changes to the "event_properties" field.
-func (m *VisitorEventMutation) ResetEventProperties() {
-	m.event_properties = nil
-	delete(m.clearedFields, visitorevent.FieldEventProperties)
+// ResetOccurredAt resets all changes to the "occurred_at" field.
+func (m *VisitorEventMutation) ResetOccurredAt() {
+	m.occurred_at = nil
+	delete(m.clearedFields, visitorevent.FieldOccurredAt)
+}
+
+// SetServerReceivedAt sets the "server_received_at" field.
+func (m *VisitorEventMutation) SetServerReceivedAt(t time.Time) {
+	m.server_received_at = &t
+}
+
+// ServerReceivedAt returns the value of the "server_received_at" field in the mutation.
+func (m *VisitorEventMutation) ServerReceivedAt() (r time.Time, exists bool) {
+	v := m.server_received_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldServerReceivedAt returns the old "server_received_at" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldServerReceivedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldServerReceivedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldServerReceivedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldServerReceivedAt: %w", err)
+	}
+	return oldValue.ServerReceivedAt, nil
+}
+
+// ClearServerReceivedAt clears the value of the "server_received_at" field.
+func (m *VisitorEventMutation) ClearServerReceivedAt() {
+	m.server_received_at = nil
+	m.clearedFields[visitorevent.FieldServerReceivedAt] = struct{}{}
+}
+
+// ServerReceivedAtCleared returns if the "server_received_at" field was cleared in this mutation.
+func (m *VisitorEventMutation) ServerReceivedAtCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldServerReceivedAt]
+	return ok
+}
+
+// ResetServerReceivedAt resets all changes to the "server_received_at" field.
+func (m *VisitorEventMutation) ResetServerReceivedAt() {
+	m.server_received_at = nil
+	delete(m.clearedFields, visitorevent.FieldServerReceivedAt)
+}
+
+// SetSequence sets the "sequence" field.
+func (m *VisitorEventMutation) SetSequence(i int) {
+	m.sequence = &i
+	m.addsequence = nil
+}
+
+// Sequence returns the value of the "sequence" field in the mutation.
+func (m *VisitorEventMutation) Sequence() (r int, exists bool) {
+	v := m.sequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSequence returns the old "sequence" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldSequence(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSequence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSequence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSequence: %w", err)
+	}
+	return oldValue.Sequence, nil
+}
+
+// AddSequence adds i to the "sequence" field.
+func (m *VisitorEventMutation) AddSequence(i int) {
+	if m.addsequence != nil {
+		*m.addsequence += i
+	} else {
+		m.addsequence = &i
+	}
+}
+
+// AddedSequence returns the value that was added to the "sequence" field in this mutation.
+func (m *VisitorEventMutation) AddedSequence() (r int, exists bool) {
+	v := m.addsequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSequence resets all changes to the "sequence" field.
+func (m *VisitorEventMutation) ResetSequence() {
+	m.sequence = nil
+	m.addsequence = nil
+}
+
+// SetSchemaVersion sets the "schema_version" field.
+func (m *VisitorEventMutation) SetSchemaVersion(s string) {
+	m.schema_version = &s
+}
+
+// SchemaVersion returns the value of the "schema_version" field in the mutation.
+func (m *VisitorEventMutation) SchemaVersion() (r string, exists bool) {
+	v := m.schema_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaVersion returns the old "schema_version" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldSchemaVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSchemaVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSchemaVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaVersion: %w", err)
+	}
+	return oldValue.SchemaVersion, nil
+}
+
+// ClearSchemaVersion clears the value of the "schema_version" field.
+func (m *VisitorEventMutation) ClearSchemaVersion() {
+	m.schema_version = nil
+	m.clearedFields[visitorevent.FieldSchemaVersion] = struct{}{}
+}
+
+// SchemaVersionCleared returns if the "schema_version" field was cleared in this mutation.
+func (m *VisitorEventMutation) SchemaVersionCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldSchemaVersion]
+	return ok
+}
+
+// ResetSchemaVersion resets all changes to the "schema_version" field.
+func (m *VisitorEventMutation) ResetSchemaVersion() {
+	m.schema_version = nil
+	delete(m.clearedFields, visitorevent.FieldSchemaVersion)
+}
+
+// SetSdkName sets the "sdk_name" field.
+func (m *VisitorEventMutation) SetSdkName(s string) {
+	m.sdk_name = &s
+}
+
+// SdkName returns the value of the "sdk_name" field in the mutation.
+func (m *VisitorEventMutation) SdkName() (r string, exists bool) {
+	v := m.sdk_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSdkName returns the old "sdk_name" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldSdkName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSdkName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSdkName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSdkName: %w", err)
+	}
+	return oldValue.SdkName, nil
+}
+
+// ClearSdkName clears the value of the "sdk_name" field.
+func (m *VisitorEventMutation) ClearSdkName() {
+	m.sdk_name = nil
+	m.clearedFields[visitorevent.FieldSdkName] = struct{}{}
+}
+
+// SdkNameCleared returns if the "sdk_name" field was cleared in this mutation.
+func (m *VisitorEventMutation) SdkNameCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldSdkName]
+	return ok
+}
+
+// ResetSdkName resets all changes to the "sdk_name" field.
+func (m *VisitorEventMutation) ResetSdkName() {
+	m.sdk_name = nil
+	delete(m.clearedFields, visitorevent.FieldSdkName)
+}
+
+// SetSdkVersion sets the "sdk_version" field.
+func (m *VisitorEventMutation) SetSdkVersion(s string) {
+	m.sdk_version = &s
+}
+
+// SdkVersion returns the value of the "sdk_version" field in the mutation.
+func (m *VisitorEventMutation) SdkVersion() (r string, exists bool) {
+	v := m.sdk_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSdkVersion returns the old "sdk_version" field's value of the VisitorEvent entity.
+// If the VisitorEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorEventMutation) OldSdkVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSdkVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSdkVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSdkVersion: %w", err)
+	}
+	return oldValue.SdkVersion, nil
+}
+
+// ClearSdkVersion clears the value of the "sdk_version" field.
+func (m *VisitorEventMutation) ClearSdkVersion() {
+	m.sdk_version = nil
+	m.clearedFields[visitorevent.FieldSdkVersion] = struct{}{}
+}
+
+// SdkVersionCleared returns if the "sdk_version" field was cleared in this mutation.
+func (m *VisitorEventMutation) SdkVersionCleared() bool {
+	_, ok := m.clearedFields[visitorevent.FieldSdkVersion]
+	return ok
+}
+
+// ResetSdkVersion resets all changes to the "sdk_version" field.
+func (m *VisitorEventMutation) ResetSdkVersion() {
+	m.sdk_version = nil
+	delete(m.clearedFields, visitorevent.FieldSdkVersion)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -6070,6 +14548,246 @@ func (m *VisitorEventMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// AddCustomPropIDs adds the "custom_props" edge to the EventCustomProp entity by ids.
+func (m *VisitorEventMutation) AddCustomPropIDs(ids ...int64) {
+	if m.custom_props == nil {
+		m.custom_props = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.custom_props[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCustomProps clears the "custom_props" edge to the EventCustomProp entity.
+func (m *VisitorEventMutation) ClearCustomProps() {
+	m.clearedcustom_props = true
+}
+
+// CustomPropsCleared reports if the "custom_props" edge to the EventCustomProp entity was cleared.
+func (m *VisitorEventMutation) CustomPropsCleared() bool {
+	return m.clearedcustom_props
+}
+
+// RemoveCustomPropIDs removes the "custom_props" edge to the EventCustomProp entity by IDs.
+func (m *VisitorEventMutation) RemoveCustomPropIDs(ids ...int64) {
+	if m.removedcustom_props == nil {
+		m.removedcustom_props = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.custom_props, ids[i])
+		m.removedcustom_props[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCustomProps returns the removed IDs of the "custom_props" edge to the EventCustomProp entity.
+func (m *VisitorEventMutation) RemovedCustomPropsIDs() (ids []int64) {
+	for id := range m.removedcustom_props {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CustomPropsIDs returns the "custom_props" edge IDs in the mutation.
+func (m *VisitorEventMutation) CustomPropsIDs() (ids []int64) {
+	for id := range m.custom_props {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCustomProps resets all changes to the "custom_props" edge.
+func (m *VisitorEventMutation) ResetCustomProps() {
+	m.custom_props = nil
+	m.clearedcustom_props = false
+	m.removedcustom_props = nil
+}
+
+// SetPlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by id.
+func (m *VisitorEventMutation) SetPlatformClicksID(id int64) {
+	m.platform_clicks = &id
+}
+
+// ClearPlatformClicks clears the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (m *VisitorEventMutation) ClearPlatformClicks() {
+	m.clearedplatform_clicks = true
+}
+
+// PlatformClicksCleared reports if the "platform_clicks" edge to the VisitorPlatformClick entity was cleared.
+func (m *VisitorEventMutation) PlatformClicksCleared() bool {
+	return m.clearedplatform_clicks
+}
+
+// PlatformClicksID returns the "platform_clicks" edge ID in the mutation.
+func (m *VisitorEventMutation) PlatformClicksID() (id int64, exists bool) {
+	if m.platform_clicks != nil {
+		return *m.platform_clicks, true
+	}
+	return
+}
+
+// PlatformClicksIDs returns the "platform_clicks" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlatformClicksID instead. It exists only for internal usage by the builders.
+func (m *VisitorEventMutation) PlatformClicksIDs() (ids []int64) {
+	if id := m.platform_clicks; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlatformClicks resets all changes to the "platform_clicks" edge.
+func (m *VisitorEventMutation) ResetPlatformClicks() {
+	m.platform_clicks = nil
+	m.clearedplatform_clicks = false
+}
+
+// SetTargetPropsID sets the "target_props" edge to the EventTargetProp entity by id.
+func (m *VisitorEventMutation) SetTargetPropsID(id int64) {
+	m.target_props = &id
+}
+
+// ClearTargetProps clears the "target_props" edge to the EventTargetProp entity.
+func (m *VisitorEventMutation) ClearTargetProps() {
+	m.clearedtarget_props = true
+}
+
+// TargetPropsCleared reports if the "target_props" edge to the EventTargetProp entity was cleared.
+func (m *VisitorEventMutation) TargetPropsCleared() bool {
+	return m.clearedtarget_props
+}
+
+// TargetPropsID returns the "target_props" edge ID in the mutation.
+func (m *VisitorEventMutation) TargetPropsID() (id int64, exists bool) {
+	if m.target_props != nil {
+		return *m.target_props, true
+	}
+	return
+}
+
+// TargetPropsIDs returns the "target_props" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TargetPropsID instead. It exists only for internal usage by the builders.
+func (m *VisitorEventMutation) TargetPropsIDs() (ids []int64) {
+	if id := m.target_props; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTargetProps resets all changes to the "target_props" edge.
+func (m *VisitorEventMutation) ResetTargetProps() {
+	m.target_props = nil
+	m.clearedtarget_props = false
+}
+
+// AddCommerceItemIDs adds the "commerce_items" edge to the EventCommerceItem entity by ids.
+func (m *VisitorEventMutation) AddCommerceItemIDs(ids ...int64) {
+	if m.commerce_items == nil {
+		m.commerce_items = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.commerce_items[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCommerceItems clears the "commerce_items" edge to the EventCommerceItem entity.
+func (m *VisitorEventMutation) ClearCommerceItems() {
+	m.clearedcommerce_items = true
+}
+
+// CommerceItemsCleared reports if the "commerce_items" edge to the EventCommerceItem entity was cleared.
+func (m *VisitorEventMutation) CommerceItemsCleared() bool {
+	return m.clearedcommerce_items
+}
+
+// RemoveCommerceItemIDs removes the "commerce_items" edge to the EventCommerceItem entity by IDs.
+func (m *VisitorEventMutation) RemoveCommerceItemIDs(ids ...int64) {
+	if m.removedcommerce_items == nil {
+		m.removedcommerce_items = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.commerce_items, ids[i])
+		m.removedcommerce_items[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCommerceItems returns the removed IDs of the "commerce_items" edge to the EventCommerceItem entity.
+func (m *VisitorEventMutation) RemovedCommerceItemsIDs() (ids []int64) {
+	for id := range m.removedcommerce_items {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CommerceItemsIDs returns the "commerce_items" edge IDs in the mutation.
+func (m *VisitorEventMutation) CommerceItemsIDs() (ids []int64) {
+	for id := range m.commerce_items {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCommerceItems resets all changes to the "commerce_items" edge.
+func (m *VisitorEventMutation) ResetCommerceItems() {
+	m.commerce_items = nil
+	m.clearedcommerce_items = false
+	m.removedcommerce_items = nil
+}
+
+// AddSearchFilterIDs adds the "search_filters" edge to the EventTargetSearchFilter entity by ids.
+func (m *VisitorEventMutation) AddSearchFilterIDs(ids ...int64) {
+	if m.search_filters == nil {
+		m.search_filters = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.search_filters[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSearchFilters clears the "search_filters" edge to the EventTargetSearchFilter entity.
+func (m *VisitorEventMutation) ClearSearchFilters() {
+	m.clearedsearch_filters = true
+}
+
+// SearchFiltersCleared reports if the "search_filters" edge to the EventTargetSearchFilter entity was cleared.
+func (m *VisitorEventMutation) SearchFiltersCleared() bool {
+	return m.clearedsearch_filters
+}
+
+// RemoveSearchFilterIDs removes the "search_filters" edge to the EventTargetSearchFilter entity by IDs.
+func (m *VisitorEventMutation) RemoveSearchFilterIDs(ids ...int64) {
+	if m.removedsearch_filters == nil {
+		m.removedsearch_filters = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.search_filters, ids[i])
+		m.removedsearch_filters[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSearchFilters returns the removed IDs of the "search_filters" edge to the EventTargetSearchFilter entity.
+func (m *VisitorEventMutation) RemovedSearchFiltersIDs() (ids []int64) {
+	for id := range m.removedsearch_filters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SearchFiltersIDs returns the "search_filters" edge IDs in the mutation.
+func (m *VisitorEventMutation) SearchFiltersIDs() (ids []int64) {
+	for id := range m.search_filters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSearchFilters resets all changes to the "search_filters" edge.
+func (m *VisitorEventMutation) ResetSearchFilters() {
+	m.search_filters = nil
+	m.clearedsearch_filters = false
+	m.removedsearch_filters = nil
+}
+
 // Where appends a list predicates to the VisitorEventMutation builder.
 func (m *VisitorEventMutation) Where(ps ...predicate.VisitorEvent) {
 	m.predicates = append(m.predicates, ps...)
@@ -6104,7 +14822,7 @@ func (m *VisitorEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VisitorEventMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 15)
 	if m.uuid != nil {
 		fields = append(fields, visitorevent.FieldUUID)
 	}
@@ -6117,11 +14835,35 @@ func (m *VisitorEventMutation) Fields() []string {
 	if m.device_id != nil {
 		fields = append(fields, visitorevent.FieldDeviceID)
 	}
+	if m.page_id != nil {
+		fields = append(fields, visitorevent.FieldPageID)
+	}
+	if m.event_type != nil {
+		fields = append(fields, visitorevent.FieldEventType)
+	}
+	if m.event_category != nil {
+		fields = append(fields, visitorevent.FieldEventCategory)
+	}
 	if m.event_name != nil {
 		fields = append(fields, visitorevent.FieldEventName)
 	}
-	if m.event_properties != nil {
-		fields = append(fields, visitorevent.FieldEventProperties)
+	if m.occurred_at != nil {
+		fields = append(fields, visitorevent.FieldOccurredAt)
+	}
+	if m.server_received_at != nil {
+		fields = append(fields, visitorevent.FieldServerReceivedAt)
+	}
+	if m.sequence != nil {
+		fields = append(fields, visitorevent.FieldSequence)
+	}
+	if m.schema_version != nil {
+		fields = append(fields, visitorevent.FieldSchemaVersion)
+	}
+	if m.sdk_name != nil {
+		fields = append(fields, visitorevent.FieldSdkName)
+	}
+	if m.sdk_version != nil {
+		fields = append(fields, visitorevent.FieldSdkVersion)
 	}
 	if m.created_at != nil {
 		fields = append(fields, visitorevent.FieldCreatedAt)
@@ -6142,10 +14884,26 @@ func (m *VisitorEventMutation) Field(name string) (ent.Value, bool) {
 		return m.VisitorID()
 	case visitorevent.FieldDeviceID:
 		return m.DeviceID()
+	case visitorevent.FieldPageID:
+		return m.PageID()
+	case visitorevent.FieldEventType:
+		return m.EventType()
+	case visitorevent.FieldEventCategory:
+		return m.EventCategory()
 	case visitorevent.FieldEventName:
 		return m.EventName()
-	case visitorevent.FieldEventProperties:
-		return m.EventProperties()
+	case visitorevent.FieldOccurredAt:
+		return m.OccurredAt()
+	case visitorevent.FieldServerReceivedAt:
+		return m.ServerReceivedAt()
+	case visitorevent.FieldSequence:
+		return m.Sequence()
+	case visitorevent.FieldSchemaVersion:
+		return m.SchemaVersion()
+	case visitorevent.FieldSdkName:
+		return m.SdkName()
+	case visitorevent.FieldSdkVersion:
+		return m.SdkVersion()
 	case visitorevent.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -6165,10 +14923,26 @@ func (m *VisitorEventMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldVisitorID(ctx)
 	case visitorevent.FieldDeviceID:
 		return m.OldDeviceID(ctx)
+	case visitorevent.FieldPageID:
+		return m.OldPageID(ctx)
+	case visitorevent.FieldEventType:
+		return m.OldEventType(ctx)
+	case visitorevent.FieldEventCategory:
+		return m.OldEventCategory(ctx)
 	case visitorevent.FieldEventName:
 		return m.OldEventName(ctx)
-	case visitorevent.FieldEventProperties:
-		return m.OldEventProperties(ctx)
+	case visitorevent.FieldOccurredAt:
+		return m.OldOccurredAt(ctx)
+	case visitorevent.FieldServerReceivedAt:
+		return m.OldServerReceivedAt(ctx)
+	case visitorevent.FieldSequence:
+		return m.OldSequence(ctx)
+	case visitorevent.FieldSchemaVersion:
+		return m.OldSchemaVersion(ctx)
+	case visitorevent.FieldSdkName:
+		return m.OldSdkName(ctx)
+	case visitorevent.FieldSdkVersion:
+		return m.OldSdkVersion(ctx)
 	case visitorevent.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -6208,6 +14982,27 @@ func (m *VisitorEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeviceID(v)
 		return nil
+	case visitorevent.FieldPageID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPageID(v)
+		return nil
+	case visitorevent.FieldEventType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventType(v)
+		return nil
+	case visitorevent.FieldEventCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventCategory(v)
+		return nil
 	case visitorevent.FieldEventName:
 		v, ok := value.(string)
 		if !ok {
@@ -6215,12 +15010,47 @@ func (m *VisitorEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEventName(v)
 		return nil
-	case visitorevent.FieldEventProperties:
-		v, ok := value.(map[string]interface{})
+	case visitorevent.FieldOccurredAt:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEventProperties(v)
+		m.SetOccurredAt(v)
+		return nil
+	case visitorevent.FieldServerReceivedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetServerReceivedAt(v)
+		return nil
+	case visitorevent.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSequence(v)
+		return nil
+	case visitorevent.FieldSchemaVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaVersion(v)
+		return nil
+	case visitorevent.FieldSdkName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSdkName(v)
+		return nil
+	case visitorevent.FieldSdkVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSdkVersion(v)
 		return nil
 	case visitorevent.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -6246,6 +15076,12 @@ func (m *VisitorEventMutation) AddedFields() []string {
 	if m.adddevice_id != nil {
 		fields = append(fields, visitorevent.FieldDeviceID)
 	}
+	if m.addpage_id != nil {
+		fields = append(fields, visitorevent.FieldPageID)
+	}
+	if m.addsequence != nil {
+		fields = append(fields, visitorevent.FieldSequence)
+	}
 	return fields
 }
 
@@ -6260,6 +15096,10 @@ func (m *VisitorEventMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedVisitorID()
 	case visitorevent.FieldDeviceID:
 		return m.AddedDeviceID()
+	case visitorevent.FieldPageID:
+		return m.AddedPageID()
+	case visitorevent.FieldSequence:
+		return m.AddedSequence()
 	}
 	return nil, false
 }
@@ -6290,6 +15130,20 @@ func (m *VisitorEventMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddDeviceID(v)
 		return nil
+	case visitorevent.FieldPageID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPageID(v)
+		return nil
+	case visitorevent.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSequence(v)
+		return nil
 	}
 	return fmt.Errorf("unknown VisitorEvent numeric field %s", name)
 }
@@ -6298,8 +15152,20 @@ func (m *VisitorEventMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *VisitorEventMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(visitorevent.FieldEventProperties) {
-		fields = append(fields, visitorevent.FieldEventProperties)
+	if m.FieldCleared(visitorevent.FieldOccurredAt) {
+		fields = append(fields, visitorevent.FieldOccurredAt)
+	}
+	if m.FieldCleared(visitorevent.FieldServerReceivedAt) {
+		fields = append(fields, visitorevent.FieldServerReceivedAt)
+	}
+	if m.FieldCleared(visitorevent.FieldSchemaVersion) {
+		fields = append(fields, visitorevent.FieldSchemaVersion)
+	}
+	if m.FieldCleared(visitorevent.FieldSdkName) {
+		fields = append(fields, visitorevent.FieldSdkName)
+	}
+	if m.FieldCleared(visitorevent.FieldSdkVersion) {
+		fields = append(fields, visitorevent.FieldSdkVersion)
 	}
 	return fields
 }
@@ -6315,8 +15181,20 @@ func (m *VisitorEventMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *VisitorEventMutation) ClearField(name string) error {
 	switch name {
-	case visitorevent.FieldEventProperties:
-		m.ClearEventProperties()
+	case visitorevent.FieldOccurredAt:
+		m.ClearOccurredAt()
+		return nil
+	case visitorevent.FieldServerReceivedAt:
+		m.ClearServerReceivedAt()
+		return nil
+	case visitorevent.FieldSchemaVersion:
+		m.ClearSchemaVersion()
+		return nil
+	case visitorevent.FieldSdkName:
+		m.ClearSdkName()
+		return nil
+	case visitorevent.FieldSdkVersion:
+		m.ClearSdkVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown VisitorEvent nullable field %s", name)
@@ -6338,11 +15216,35 @@ func (m *VisitorEventMutation) ResetField(name string) error {
 	case visitorevent.FieldDeviceID:
 		m.ResetDeviceID()
 		return nil
+	case visitorevent.FieldPageID:
+		m.ResetPageID()
+		return nil
+	case visitorevent.FieldEventType:
+		m.ResetEventType()
+		return nil
+	case visitorevent.FieldEventCategory:
+		m.ResetEventCategory()
+		return nil
 	case visitorevent.FieldEventName:
 		m.ResetEventName()
 		return nil
-	case visitorevent.FieldEventProperties:
-		m.ResetEventProperties()
+	case visitorevent.FieldOccurredAt:
+		m.ResetOccurredAt()
+		return nil
+	case visitorevent.FieldServerReceivedAt:
+		m.ResetServerReceivedAt()
+		return nil
+	case visitorevent.FieldSequence:
+		m.ResetSequence()
+		return nil
+	case visitorevent.FieldSchemaVersion:
+		m.ResetSchemaVersion()
+		return nil
+	case visitorevent.FieldSdkName:
+		m.ResetSdkName()
+		return nil
+	case visitorevent.FieldSdkVersion:
+		m.ResetSdkVersion()
 		return nil
 	case visitorevent.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -6353,50 +15255,1661 @@ func (m *VisitorEventMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VisitorEventMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 5)
+	if m.custom_props != nil {
+		edges = append(edges, visitorevent.EdgeCustomProps)
+	}
+	if m.platform_clicks != nil {
+		edges = append(edges, visitorevent.EdgePlatformClicks)
+	}
+	if m.target_props != nil {
+		edges = append(edges, visitorevent.EdgeTargetProps)
+	}
+	if m.commerce_items != nil {
+		edges = append(edges, visitorevent.EdgeCommerceItems)
+	}
+	if m.search_filters != nil {
+		edges = append(edges, visitorevent.EdgeSearchFilters)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *VisitorEventMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case visitorevent.EdgeCustomProps:
+		ids := make([]ent.Value, 0, len(m.custom_props))
+		for id := range m.custom_props {
+			ids = append(ids, id)
+		}
+		return ids
+	case visitorevent.EdgePlatformClicks:
+		if id := m.platform_clicks; id != nil {
+			return []ent.Value{*id}
+		}
+	case visitorevent.EdgeTargetProps:
+		if id := m.target_props; id != nil {
+			return []ent.Value{*id}
+		}
+	case visitorevent.EdgeCommerceItems:
+		ids := make([]ent.Value, 0, len(m.commerce_items))
+		for id := range m.commerce_items {
+			ids = append(ids, id)
+		}
+		return ids
+	case visitorevent.EdgeSearchFilters:
+		ids := make([]ent.Value, 0, len(m.search_filters))
+		for id := range m.search_filters {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VisitorEventMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 5)
+	if m.removedcustom_props != nil {
+		edges = append(edges, visitorevent.EdgeCustomProps)
+	}
+	if m.removedcommerce_items != nil {
+		edges = append(edges, visitorevent.EdgeCommerceItems)
+	}
+	if m.removedsearch_filters != nil {
+		edges = append(edges, visitorevent.EdgeSearchFilters)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *VisitorEventMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case visitorevent.EdgeCustomProps:
+		ids := make([]ent.Value, 0, len(m.removedcustom_props))
+		for id := range m.removedcustom_props {
+			ids = append(ids, id)
+		}
+		return ids
+	case visitorevent.EdgeCommerceItems:
+		ids := make([]ent.Value, 0, len(m.removedcommerce_items))
+		for id := range m.removedcommerce_items {
+			ids = append(ids, id)
+		}
+		return ids
+	case visitorevent.EdgeSearchFilters:
+		ids := make([]ent.Value, 0, len(m.removedsearch_filters))
+		for id := range m.removedsearch_filters {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VisitorEventMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 5)
+	if m.clearedcustom_props {
+		edges = append(edges, visitorevent.EdgeCustomProps)
+	}
+	if m.clearedplatform_clicks {
+		edges = append(edges, visitorevent.EdgePlatformClicks)
+	}
+	if m.clearedtarget_props {
+		edges = append(edges, visitorevent.EdgeTargetProps)
+	}
+	if m.clearedcommerce_items {
+		edges = append(edges, visitorevent.EdgeCommerceItems)
+	}
+	if m.clearedsearch_filters {
+		edges = append(edges, visitorevent.EdgeSearchFilters)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *VisitorEventMutation) EdgeCleared(name string) bool {
+	switch name {
+	case visitorevent.EdgeCustomProps:
+		return m.clearedcustom_props
+	case visitorevent.EdgePlatformClicks:
+		return m.clearedplatform_clicks
+	case visitorevent.EdgeTargetProps:
+		return m.clearedtarget_props
+	case visitorevent.EdgeCommerceItems:
+		return m.clearedcommerce_items
+	case visitorevent.EdgeSearchFilters:
+		return m.clearedsearch_filters
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *VisitorEventMutation) ClearEdge(name string) error {
+	switch name {
+	case visitorevent.EdgePlatformClicks:
+		m.ClearPlatformClicks()
+		return nil
+	case visitorevent.EdgeTargetProps:
+		m.ClearTargetProps()
+		return nil
+	}
 	return fmt.Errorf("unknown VisitorEvent unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *VisitorEventMutation) ResetEdge(name string) error {
+	switch name {
+	case visitorevent.EdgeCustomProps:
+		m.ResetCustomProps()
+		return nil
+	case visitorevent.EdgePlatformClicks:
+		m.ResetPlatformClicks()
+		return nil
+	case visitorevent.EdgeTargetProps:
+		m.ResetTargetProps()
+		return nil
+	case visitorevent.EdgeCommerceItems:
+		m.ResetCommerceItems()
+		return nil
+	case visitorevent.EdgeSearchFilters:
+		m.ResetSearchFilters()
+		return nil
+	}
 	return fmt.Errorf("unknown VisitorEvent edge %s", name)
+}
+
+// VisitorPlatformClickMutation represents an operation that mutates the VisitorPlatformClick nodes in the graph.
+type VisitorPlatformClickMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int64
+	gclid           *string
+	gbraid          *string
+	wbraid          *string
+	dclid           *string
+	fbclid          *string
+	fbp             *string
+	fbc             *string
+	ttclid          *string
+	ttp             *string
+	msclkid         *string
+	twclid          *string
+	li_fat_id       *string
+	sc_cid          *string
+	epik            *string
+	liveramp_ats_id *string
+	clearedFields   map[string]struct{}
+	event           *int64
+	clearedevent    bool
+	done            bool
+	oldValue        func(context.Context) (*VisitorPlatformClick, error)
+	predicates      []predicate.VisitorPlatformClick
+}
+
+var _ ent.Mutation = (*VisitorPlatformClickMutation)(nil)
+
+// visitorplatformclickOption allows management of the mutation configuration using functional options.
+type visitorplatformclickOption func(*VisitorPlatformClickMutation)
+
+// newVisitorPlatformClickMutation creates new mutation for the VisitorPlatformClick entity.
+func newVisitorPlatformClickMutation(c config, op Op, opts ...visitorplatformclickOption) *VisitorPlatformClickMutation {
+	m := &VisitorPlatformClickMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeVisitorPlatformClick,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withVisitorPlatformClickID sets the ID field of the mutation.
+func withVisitorPlatformClickID(id int64) visitorplatformclickOption {
+	return func(m *VisitorPlatformClickMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *VisitorPlatformClick
+		)
+		m.oldValue = func(ctx context.Context) (*VisitorPlatformClick, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().VisitorPlatformClick.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withVisitorPlatformClick sets the old VisitorPlatformClick of the mutation.
+func withVisitorPlatformClick(node *VisitorPlatformClick) visitorplatformclickOption {
+	return func(m *VisitorPlatformClickMutation) {
+		m.oldValue = func(context.Context) (*VisitorPlatformClick, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m VisitorPlatformClickMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m VisitorPlatformClickMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VisitorPlatformClick entities.
+func (m *VisitorPlatformClickMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *VisitorPlatformClickMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *VisitorPlatformClickMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().VisitorPlatformClick.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetEventID sets the "event_id" field.
+func (m *VisitorPlatformClickMutation) SetEventID(i int64) {
+	m.event = &i
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *VisitorPlatformClickMutation) EventID() (r int64, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldEventID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *VisitorPlatformClickMutation) ResetEventID() {
+	m.event = nil
+}
+
+// SetGclid sets the "gclid" field.
+func (m *VisitorPlatformClickMutation) SetGclid(s string) {
+	m.gclid = &s
+}
+
+// Gclid returns the value of the "gclid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Gclid() (r string, exists bool) {
+	v := m.gclid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGclid returns the old "gclid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldGclid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGclid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGclid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGclid: %w", err)
+	}
+	return oldValue.Gclid, nil
+}
+
+// ClearGclid clears the value of the "gclid" field.
+func (m *VisitorPlatformClickMutation) ClearGclid() {
+	m.gclid = nil
+	m.clearedFields[visitorplatformclick.FieldGclid] = struct{}{}
+}
+
+// GclidCleared returns if the "gclid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) GclidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldGclid]
+	return ok
+}
+
+// ResetGclid resets all changes to the "gclid" field.
+func (m *VisitorPlatformClickMutation) ResetGclid() {
+	m.gclid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldGclid)
+}
+
+// SetGbraid sets the "gbraid" field.
+func (m *VisitorPlatformClickMutation) SetGbraid(s string) {
+	m.gbraid = &s
+}
+
+// Gbraid returns the value of the "gbraid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Gbraid() (r string, exists bool) {
+	v := m.gbraid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGbraid returns the old "gbraid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldGbraid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGbraid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGbraid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGbraid: %w", err)
+	}
+	return oldValue.Gbraid, nil
+}
+
+// ClearGbraid clears the value of the "gbraid" field.
+func (m *VisitorPlatformClickMutation) ClearGbraid() {
+	m.gbraid = nil
+	m.clearedFields[visitorplatformclick.FieldGbraid] = struct{}{}
+}
+
+// GbraidCleared returns if the "gbraid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) GbraidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldGbraid]
+	return ok
+}
+
+// ResetGbraid resets all changes to the "gbraid" field.
+func (m *VisitorPlatformClickMutation) ResetGbraid() {
+	m.gbraid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldGbraid)
+}
+
+// SetWbraid sets the "wbraid" field.
+func (m *VisitorPlatformClickMutation) SetWbraid(s string) {
+	m.wbraid = &s
+}
+
+// Wbraid returns the value of the "wbraid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Wbraid() (r string, exists bool) {
+	v := m.wbraid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWbraid returns the old "wbraid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldWbraid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWbraid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWbraid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWbraid: %w", err)
+	}
+	return oldValue.Wbraid, nil
+}
+
+// ClearWbraid clears the value of the "wbraid" field.
+func (m *VisitorPlatformClickMutation) ClearWbraid() {
+	m.wbraid = nil
+	m.clearedFields[visitorplatformclick.FieldWbraid] = struct{}{}
+}
+
+// WbraidCleared returns if the "wbraid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) WbraidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldWbraid]
+	return ok
+}
+
+// ResetWbraid resets all changes to the "wbraid" field.
+func (m *VisitorPlatformClickMutation) ResetWbraid() {
+	m.wbraid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldWbraid)
+}
+
+// SetDclid sets the "dclid" field.
+func (m *VisitorPlatformClickMutation) SetDclid(s string) {
+	m.dclid = &s
+}
+
+// Dclid returns the value of the "dclid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Dclid() (r string, exists bool) {
+	v := m.dclid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDclid returns the old "dclid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldDclid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDclid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDclid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDclid: %w", err)
+	}
+	return oldValue.Dclid, nil
+}
+
+// ClearDclid clears the value of the "dclid" field.
+func (m *VisitorPlatformClickMutation) ClearDclid() {
+	m.dclid = nil
+	m.clearedFields[visitorplatformclick.FieldDclid] = struct{}{}
+}
+
+// DclidCleared returns if the "dclid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) DclidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldDclid]
+	return ok
+}
+
+// ResetDclid resets all changes to the "dclid" field.
+func (m *VisitorPlatformClickMutation) ResetDclid() {
+	m.dclid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldDclid)
+}
+
+// SetFbclid sets the "fbclid" field.
+func (m *VisitorPlatformClickMutation) SetFbclid(s string) {
+	m.fbclid = &s
+}
+
+// Fbclid returns the value of the "fbclid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Fbclid() (r string, exists bool) {
+	v := m.fbclid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFbclid returns the old "fbclid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldFbclid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFbclid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFbclid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFbclid: %w", err)
+	}
+	return oldValue.Fbclid, nil
+}
+
+// ClearFbclid clears the value of the "fbclid" field.
+func (m *VisitorPlatformClickMutation) ClearFbclid() {
+	m.fbclid = nil
+	m.clearedFields[visitorplatformclick.FieldFbclid] = struct{}{}
+}
+
+// FbclidCleared returns if the "fbclid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) FbclidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldFbclid]
+	return ok
+}
+
+// ResetFbclid resets all changes to the "fbclid" field.
+func (m *VisitorPlatformClickMutation) ResetFbclid() {
+	m.fbclid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldFbclid)
+}
+
+// SetFbp sets the "fbp" field.
+func (m *VisitorPlatformClickMutation) SetFbp(s string) {
+	m.fbp = &s
+}
+
+// Fbp returns the value of the "fbp" field in the mutation.
+func (m *VisitorPlatformClickMutation) Fbp() (r string, exists bool) {
+	v := m.fbp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFbp returns the old "fbp" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldFbp(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFbp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFbp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFbp: %w", err)
+	}
+	return oldValue.Fbp, nil
+}
+
+// ClearFbp clears the value of the "fbp" field.
+func (m *VisitorPlatformClickMutation) ClearFbp() {
+	m.fbp = nil
+	m.clearedFields[visitorplatformclick.FieldFbp] = struct{}{}
+}
+
+// FbpCleared returns if the "fbp" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) FbpCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldFbp]
+	return ok
+}
+
+// ResetFbp resets all changes to the "fbp" field.
+func (m *VisitorPlatformClickMutation) ResetFbp() {
+	m.fbp = nil
+	delete(m.clearedFields, visitorplatformclick.FieldFbp)
+}
+
+// SetFbc sets the "fbc" field.
+func (m *VisitorPlatformClickMutation) SetFbc(s string) {
+	m.fbc = &s
+}
+
+// Fbc returns the value of the "fbc" field in the mutation.
+func (m *VisitorPlatformClickMutation) Fbc() (r string, exists bool) {
+	v := m.fbc
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFbc returns the old "fbc" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldFbc(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFbc is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFbc requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFbc: %w", err)
+	}
+	return oldValue.Fbc, nil
+}
+
+// ClearFbc clears the value of the "fbc" field.
+func (m *VisitorPlatformClickMutation) ClearFbc() {
+	m.fbc = nil
+	m.clearedFields[visitorplatformclick.FieldFbc] = struct{}{}
+}
+
+// FbcCleared returns if the "fbc" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) FbcCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldFbc]
+	return ok
+}
+
+// ResetFbc resets all changes to the "fbc" field.
+func (m *VisitorPlatformClickMutation) ResetFbc() {
+	m.fbc = nil
+	delete(m.clearedFields, visitorplatformclick.FieldFbc)
+}
+
+// SetTtclid sets the "ttclid" field.
+func (m *VisitorPlatformClickMutation) SetTtclid(s string) {
+	m.ttclid = &s
+}
+
+// Ttclid returns the value of the "ttclid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Ttclid() (r string, exists bool) {
+	v := m.ttclid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTtclid returns the old "ttclid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldTtclid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTtclid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTtclid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTtclid: %w", err)
+	}
+	return oldValue.Ttclid, nil
+}
+
+// ClearTtclid clears the value of the "ttclid" field.
+func (m *VisitorPlatformClickMutation) ClearTtclid() {
+	m.ttclid = nil
+	m.clearedFields[visitorplatformclick.FieldTtclid] = struct{}{}
+}
+
+// TtclidCleared returns if the "ttclid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) TtclidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldTtclid]
+	return ok
+}
+
+// ResetTtclid resets all changes to the "ttclid" field.
+func (m *VisitorPlatformClickMutation) ResetTtclid() {
+	m.ttclid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldTtclid)
+}
+
+// SetTtp sets the "ttp" field.
+func (m *VisitorPlatformClickMutation) SetTtp(s string) {
+	m.ttp = &s
+}
+
+// Ttp returns the value of the "ttp" field in the mutation.
+func (m *VisitorPlatformClickMutation) Ttp() (r string, exists bool) {
+	v := m.ttp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTtp returns the old "ttp" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldTtp(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTtp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTtp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTtp: %w", err)
+	}
+	return oldValue.Ttp, nil
+}
+
+// ClearTtp clears the value of the "ttp" field.
+func (m *VisitorPlatformClickMutation) ClearTtp() {
+	m.ttp = nil
+	m.clearedFields[visitorplatformclick.FieldTtp] = struct{}{}
+}
+
+// TtpCleared returns if the "ttp" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) TtpCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldTtp]
+	return ok
+}
+
+// ResetTtp resets all changes to the "ttp" field.
+func (m *VisitorPlatformClickMutation) ResetTtp() {
+	m.ttp = nil
+	delete(m.clearedFields, visitorplatformclick.FieldTtp)
+}
+
+// SetMsclkid sets the "msclkid" field.
+func (m *VisitorPlatformClickMutation) SetMsclkid(s string) {
+	m.msclkid = &s
+}
+
+// Msclkid returns the value of the "msclkid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Msclkid() (r string, exists bool) {
+	v := m.msclkid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMsclkid returns the old "msclkid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldMsclkid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMsclkid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMsclkid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMsclkid: %w", err)
+	}
+	return oldValue.Msclkid, nil
+}
+
+// ClearMsclkid clears the value of the "msclkid" field.
+func (m *VisitorPlatformClickMutation) ClearMsclkid() {
+	m.msclkid = nil
+	m.clearedFields[visitorplatformclick.FieldMsclkid] = struct{}{}
+}
+
+// MsclkidCleared returns if the "msclkid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) MsclkidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldMsclkid]
+	return ok
+}
+
+// ResetMsclkid resets all changes to the "msclkid" field.
+func (m *VisitorPlatformClickMutation) ResetMsclkid() {
+	m.msclkid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldMsclkid)
+}
+
+// SetTwclid sets the "twclid" field.
+func (m *VisitorPlatformClickMutation) SetTwclid(s string) {
+	m.twclid = &s
+}
+
+// Twclid returns the value of the "twclid" field in the mutation.
+func (m *VisitorPlatformClickMutation) Twclid() (r string, exists bool) {
+	v := m.twclid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTwclid returns the old "twclid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldTwclid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTwclid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTwclid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTwclid: %w", err)
+	}
+	return oldValue.Twclid, nil
+}
+
+// ClearTwclid clears the value of the "twclid" field.
+func (m *VisitorPlatformClickMutation) ClearTwclid() {
+	m.twclid = nil
+	m.clearedFields[visitorplatformclick.FieldTwclid] = struct{}{}
+}
+
+// TwclidCleared returns if the "twclid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) TwclidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldTwclid]
+	return ok
+}
+
+// ResetTwclid resets all changes to the "twclid" field.
+func (m *VisitorPlatformClickMutation) ResetTwclid() {
+	m.twclid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldTwclid)
+}
+
+// SetLiFatID sets the "li_fat_id" field.
+func (m *VisitorPlatformClickMutation) SetLiFatID(s string) {
+	m.li_fat_id = &s
+}
+
+// LiFatID returns the value of the "li_fat_id" field in the mutation.
+func (m *VisitorPlatformClickMutation) LiFatID() (r string, exists bool) {
+	v := m.li_fat_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiFatID returns the old "li_fat_id" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldLiFatID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiFatID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiFatID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiFatID: %w", err)
+	}
+	return oldValue.LiFatID, nil
+}
+
+// ClearLiFatID clears the value of the "li_fat_id" field.
+func (m *VisitorPlatformClickMutation) ClearLiFatID() {
+	m.li_fat_id = nil
+	m.clearedFields[visitorplatformclick.FieldLiFatID] = struct{}{}
+}
+
+// LiFatIDCleared returns if the "li_fat_id" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) LiFatIDCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldLiFatID]
+	return ok
+}
+
+// ResetLiFatID resets all changes to the "li_fat_id" field.
+func (m *VisitorPlatformClickMutation) ResetLiFatID() {
+	m.li_fat_id = nil
+	delete(m.clearedFields, visitorplatformclick.FieldLiFatID)
+}
+
+// SetScCid sets the "sc_cid" field.
+func (m *VisitorPlatformClickMutation) SetScCid(s string) {
+	m.sc_cid = &s
+}
+
+// ScCid returns the value of the "sc_cid" field in the mutation.
+func (m *VisitorPlatformClickMutation) ScCid() (r string, exists bool) {
+	v := m.sc_cid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScCid returns the old "sc_cid" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldScCid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScCid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScCid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScCid: %w", err)
+	}
+	return oldValue.ScCid, nil
+}
+
+// ClearScCid clears the value of the "sc_cid" field.
+func (m *VisitorPlatformClickMutation) ClearScCid() {
+	m.sc_cid = nil
+	m.clearedFields[visitorplatformclick.FieldScCid] = struct{}{}
+}
+
+// ScCidCleared returns if the "sc_cid" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) ScCidCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldScCid]
+	return ok
+}
+
+// ResetScCid resets all changes to the "sc_cid" field.
+func (m *VisitorPlatformClickMutation) ResetScCid() {
+	m.sc_cid = nil
+	delete(m.clearedFields, visitorplatformclick.FieldScCid)
+}
+
+// SetEpik sets the "epik" field.
+func (m *VisitorPlatformClickMutation) SetEpik(s string) {
+	m.epik = &s
+}
+
+// Epik returns the value of the "epik" field in the mutation.
+func (m *VisitorPlatformClickMutation) Epik() (r string, exists bool) {
+	v := m.epik
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEpik returns the old "epik" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldEpik(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEpik is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEpik requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEpik: %w", err)
+	}
+	return oldValue.Epik, nil
+}
+
+// ClearEpik clears the value of the "epik" field.
+func (m *VisitorPlatformClickMutation) ClearEpik() {
+	m.epik = nil
+	m.clearedFields[visitorplatformclick.FieldEpik] = struct{}{}
+}
+
+// EpikCleared returns if the "epik" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) EpikCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldEpik]
+	return ok
+}
+
+// ResetEpik resets all changes to the "epik" field.
+func (m *VisitorPlatformClickMutation) ResetEpik() {
+	m.epik = nil
+	delete(m.clearedFields, visitorplatformclick.FieldEpik)
+}
+
+// SetLiverampAtsID sets the "liveramp_ats_id" field.
+func (m *VisitorPlatformClickMutation) SetLiverampAtsID(s string) {
+	m.liveramp_ats_id = &s
+}
+
+// LiverampAtsID returns the value of the "liveramp_ats_id" field in the mutation.
+func (m *VisitorPlatformClickMutation) LiverampAtsID() (r string, exists bool) {
+	v := m.liveramp_ats_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiverampAtsID returns the old "liveramp_ats_id" field's value of the VisitorPlatformClick entity.
+// If the VisitorPlatformClick object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorPlatformClickMutation) OldLiverampAtsID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiverampAtsID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiverampAtsID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiverampAtsID: %w", err)
+	}
+	return oldValue.LiverampAtsID, nil
+}
+
+// ClearLiverampAtsID clears the value of the "liveramp_ats_id" field.
+func (m *VisitorPlatformClickMutation) ClearLiverampAtsID() {
+	m.liveramp_ats_id = nil
+	m.clearedFields[visitorplatformclick.FieldLiverampAtsID] = struct{}{}
+}
+
+// LiverampAtsIDCleared returns if the "liveramp_ats_id" field was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) LiverampAtsIDCleared() bool {
+	_, ok := m.clearedFields[visitorplatformclick.FieldLiverampAtsID]
+	return ok
+}
+
+// ResetLiverampAtsID resets all changes to the "liveramp_ats_id" field.
+func (m *VisitorPlatformClickMutation) ResetLiverampAtsID() {
+	m.liveramp_ats_id = nil
+	delete(m.clearedFields, visitorplatformclick.FieldLiverampAtsID)
+}
+
+// ClearEvent clears the "event" edge to the VisitorEvent entity.
+func (m *VisitorPlatformClickMutation) ClearEvent() {
+	m.clearedevent = true
+	m.clearedFields[visitorplatformclick.FieldEventID] = struct{}{}
+}
+
+// EventCleared reports if the "event" edge to the VisitorEvent entity was cleared.
+func (m *VisitorPlatformClickMutation) EventCleared() bool {
+	return m.clearedevent
+}
+
+// EventIDs returns the "event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EventID instead. It exists only for internal usage by the builders.
+func (m *VisitorPlatformClickMutation) EventIDs() (ids []int64) {
+	if id := m.event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEvent resets all changes to the "event" edge.
+func (m *VisitorPlatformClickMutation) ResetEvent() {
+	m.event = nil
+	m.clearedevent = false
+}
+
+// Where appends a list predicates to the VisitorPlatformClickMutation builder.
+func (m *VisitorPlatformClickMutation) Where(ps ...predicate.VisitorPlatformClick) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the VisitorPlatformClickMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *VisitorPlatformClickMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.VisitorPlatformClick, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *VisitorPlatformClickMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *VisitorPlatformClickMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (VisitorPlatformClick).
+func (m *VisitorPlatformClickMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *VisitorPlatformClickMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.event != nil {
+		fields = append(fields, visitorplatformclick.FieldEventID)
+	}
+	if m.gclid != nil {
+		fields = append(fields, visitorplatformclick.FieldGclid)
+	}
+	if m.gbraid != nil {
+		fields = append(fields, visitorplatformclick.FieldGbraid)
+	}
+	if m.wbraid != nil {
+		fields = append(fields, visitorplatformclick.FieldWbraid)
+	}
+	if m.dclid != nil {
+		fields = append(fields, visitorplatformclick.FieldDclid)
+	}
+	if m.fbclid != nil {
+		fields = append(fields, visitorplatformclick.FieldFbclid)
+	}
+	if m.fbp != nil {
+		fields = append(fields, visitorplatformclick.FieldFbp)
+	}
+	if m.fbc != nil {
+		fields = append(fields, visitorplatformclick.FieldFbc)
+	}
+	if m.ttclid != nil {
+		fields = append(fields, visitorplatformclick.FieldTtclid)
+	}
+	if m.ttp != nil {
+		fields = append(fields, visitorplatformclick.FieldTtp)
+	}
+	if m.msclkid != nil {
+		fields = append(fields, visitorplatformclick.FieldMsclkid)
+	}
+	if m.twclid != nil {
+		fields = append(fields, visitorplatformclick.FieldTwclid)
+	}
+	if m.li_fat_id != nil {
+		fields = append(fields, visitorplatformclick.FieldLiFatID)
+	}
+	if m.sc_cid != nil {
+		fields = append(fields, visitorplatformclick.FieldScCid)
+	}
+	if m.epik != nil {
+		fields = append(fields, visitorplatformclick.FieldEpik)
+	}
+	if m.liveramp_ats_id != nil {
+		fields = append(fields, visitorplatformclick.FieldLiverampAtsID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *VisitorPlatformClickMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case visitorplatformclick.FieldEventID:
+		return m.EventID()
+	case visitorplatformclick.FieldGclid:
+		return m.Gclid()
+	case visitorplatformclick.FieldGbraid:
+		return m.Gbraid()
+	case visitorplatformclick.FieldWbraid:
+		return m.Wbraid()
+	case visitorplatformclick.FieldDclid:
+		return m.Dclid()
+	case visitorplatformclick.FieldFbclid:
+		return m.Fbclid()
+	case visitorplatformclick.FieldFbp:
+		return m.Fbp()
+	case visitorplatformclick.FieldFbc:
+		return m.Fbc()
+	case visitorplatformclick.FieldTtclid:
+		return m.Ttclid()
+	case visitorplatformclick.FieldTtp:
+		return m.Ttp()
+	case visitorplatformclick.FieldMsclkid:
+		return m.Msclkid()
+	case visitorplatformclick.FieldTwclid:
+		return m.Twclid()
+	case visitorplatformclick.FieldLiFatID:
+		return m.LiFatID()
+	case visitorplatformclick.FieldScCid:
+		return m.ScCid()
+	case visitorplatformclick.FieldEpik:
+		return m.Epik()
+	case visitorplatformclick.FieldLiverampAtsID:
+		return m.LiverampAtsID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *VisitorPlatformClickMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case visitorplatformclick.FieldEventID:
+		return m.OldEventID(ctx)
+	case visitorplatformclick.FieldGclid:
+		return m.OldGclid(ctx)
+	case visitorplatformclick.FieldGbraid:
+		return m.OldGbraid(ctx)
+	case visitorplatformclick.FieldWbraid:
+		return m.OldWbraid(ctx)
+	case visitorplatformclick.FieldDclid:
+		return m.OldDclid(ctx)
+	case visitorplatformclick.FieldFbclid:
+		return m.OldFbclid(ctx)
+	case visitorplatformclick.FieldFbp:
+		return m.OldFbp(ctx)
+	case visitorplatformclick.FieldFbc:
+		return m.OldFbc(ctx)
+	case visitorplatformclick.FieldTtclid:
+		return m.OldTtclid(ctx)
+	case visitorplatformclick.FieldTtp:
+		return m.OldTtp(ctx)
+	case visitorplatformclick.FieldMsclkid:
+		return m.OldMsclkid(ctx)
+	case visitorplatformclick.FieldTwclid:
+		return m.OldTwclid(ctx)
+	case visitorplatformclick.FieldLiFatID:
+		return m.OldLiFatID(ctx)
+	case visitorplatformclick.FieldScCid:
+		return m.OldScCid(ctx)
+	case visitorplatformclick.FieldEpik:
+		return m.OldEpik(ctx)
+	case visitorplatformclick.FieldLiverampAtsID:
+		return m.OldLiverampAtsID(ctx)
+	}
+	return nil, fmt.Errorf("unknown VisitorPlatformClick field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorPlatformClickMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case visitorplatformclick.FieldEventID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case visitorplatformclick.FieldGclid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGclid(v)
+		return nil
+	case visitorplatformclick.FieldGbraid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGbraid(v)
+		return nil
+	case visitorplatformclick.FieldWbraid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWbraid(v)
+		return nil
+	case visitorplatformclick.FieldDclid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDclid(v)
+		return nil
+	case visitorplatformclick.FieldFbclid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFbclid(v)
+		return nil
+	case visitorplatformclick.FieldFbp:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFbp(v)
+		return nil
+	case visitorplatformclick.FieldFbc:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFbc(v)
+		return nil
+	case visitorplatformclick.FieldTtclid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTtclid(v)
+		return nil
+	case visitorplatformclick.FieldTtp:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTtp(v)
+		return nil
+	case visitorplatformclick.FieldMsclkid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMsclkid(v)
+		return nil
+	case visitorplatformclick.FieldTwclid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTwclid(v)
+		return nil
+	case visitorplatformclick.FieldLiFatID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiFatID(v)
+		return nil
+	case visitorplatformclick.FieldScCid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScCid(v)
+		return nil
+	case visitorplatformclick.FieldEpik:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEpik(v)
+		return nil
+	case visitorplatformclick.FieldLiverampAtsID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiverampAtsID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *VisitorPlatformClickMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *VisitorPlatformClickMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *VisitorPlatformClickMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *VisitorPlatformClickMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(visitorplatformclick.FieldGclid) {
+		fields = append(fields, visitorplatformclick.FieldGclid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldGbraid) {
+		fields = append(fields, visitorplatformclick.FieldGbraid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldWbraid) {
+		fields = append(fields, visitorplatformclick.FieldWbraid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldDclid) {
+		fields = append(fields, visitorplatformclick.FieldDclid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldFbclid) {
+		fields = append(fields, visitorplatformclick.FieldFbclid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldFbp) {
+		fields = append(fields, visitorplatformclick.FieldFbp)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldFbc) {
+		fields = append(fields, visitorplatformclick.FieldFbc)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldTtclid) {
+		fields = append(fields, visitorplatformclick.FieldTtclid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldTtp) {
+		fields = append(fields, visitorplatformclick.FieldTtp)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldMsclkid) {
+		fields = append(fields, visitorplatformclick.FieldMsclkid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldTwclid) {
+		fields = append(fields, visitorplatformclick.FieldTwclid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldLiFatID) {
+		fields = append(fields, visitorplatformclick.FieldLiFatID)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldScCid) {
+		fields = append(fields, visitorplatformclick.FieldScCid)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldEpik) {
+		fields = append(fields, visitorplatformclick.FieldEpik)
+	}
+	if m.FieldCleared(visitorplatformclick.FieldLiverampAtsID) {
+		fields = append(fields, visitorplatformclick.FieldLiverampAtsID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *VisitorPlatformClickMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *VisitorPlatformClickMutation) ClearField(name string) error {
+	switch name {
+	case visitorplatformclick.FieldGclid:
+		m.ClearGclid()
+		return nil
+	case visitorplatformclick.FieldGbraid:
+		m.ClearGbraid()
+		return nil
+	case visitorplatformclick.FieldWbraid:
+		m.ClearWbraid()
+		return nil
+	case visitorplatformclick.FieldDclid:
+		m.ClearDclid()
+		return nil
+	case visitorplatformclick.FieldFbclid:
+		m.ClearFbclid()
+		return nil
+	case visitorplatformclick.FieldFbp:
+		m.ClearFbp()
+		return nil
+	case visitorplatformclick.FieldFbc:
+		m.ClearFbc()
+		return nil
+	case visitorplatformclick.FieldTtclid:
+		m.ClearTtclid()
+		return nil
+	case visitorplatformclick.FieldTtp:
+		m.ClearTtp()
+		return nil
+	case visitorplatformclick.FieldMsclkid:
+		m.ClearMsclkid()
+		return nil
+	case visitorplatformclick.FieldTwclid:
+		m.ClearTwclid()
+		return nil
+	case visitorplatformclick.FieldLiFatID:
+		m.ClearLiFatID()
+		return nil
+	case visitorplatformclick.FieldScCid:
+		m.ClearScCid()
+		return nil
+	case visitorplatformclick.FieldEpik:
+		m.ClearEpik()
+		return nil
+	case visitorplatformclick.FieldLiverampAtsID:
+		m.ClearLiverampAtsID()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *VisitorPlatformClickMutation) ResetField(name string) error {
+	switch name {
+	case visitorplatformclick.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case visitorplatformclick.FieldGclid:
+		m.ResetGclid()
+		return nil
+	case visitorplatformclick.FieldGbraid:
+		m.ResetGbraid()
+		return nil
+	case visitorplatformclick.FieldWbraid:
+		m.ResetWbraid()
+		return nil
+	case visitorplatformclick.FieldDclid:
+		m.ResetDclid()
+		return nil
+	case visitorplatformclick.FieldFbclid:
+		m.ResetFbclid()
+		return nil
+	case visitorplatformclick.FieldFbp:
+		m.ResetFbp()
+		return nil
+	case visitorplatformclick.FieldFbc:
+		m.ResetFbc()
+		return nil
+	case visitorplatformclick.FieldTtclid:
+		m.ResetTtclid()
+		return nil
+	case visitorplatformclick.FieldTtp:
+		m.ResetTtp()
+		return nil
+	case visitorplatformclick.FieldMsclkid:
+		m.ResetMsclkid()
+		return nil
+	case visitorplatformclick.FieldTwclid:
+		m.ResetTwclid()
+		return nil
+	case visitorplatformclick.FieldLiFatID:
+		m.ResetLiFatID()
+		return nil
+	case visitorplatformclick.FieldScCid:
+		m.ResetScCid()
+		return nil
+	case visitorplatformclick.FieldEpik:
+		m.ResetEpik()
+		return nil
+	case visitorplatformclick.FieldLiverampAtsID:
+		m.ResetLiverampAtsID()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *VisitorPlatformClickMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.event != nil {
+		edges = append(edges, visitorplatformclick.EdgeEvent)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *VisitorPlatformClickMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case visitorplatformclick.EdgeEvent:
+		if id := m.event; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *VisitorPlatformClickMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *VisitorPlatformClickMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *VisitorPlatformClickMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedevent {
+		edges = append(edges, visitorplatformclick.EdgeEvent)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *VisitorPlatformClickMutation) EdgeCleared(name string) bool {
+	switch name {
+	case visitorplatformclick.EdgeEvent:
+		return m.clearedevent
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *VisitorPlatformClickMutation) ClearEdge(name string) error {
+	switch name {
+	case visitorplatformclick.EdgeEvent:
+		m.ClearEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *VisitorPlatformClickMutation) ResetEdge(name string) error {
+	switch name {
+	case visitorplatformclick.EdgeEvent:
+		m.ResetEvent()
+		return nil
+	}
+	return fmt.Errorf("unknown VisitorPlatformClick edge %s", name)
 }
 
 // VisitorSessionMutation represents an operation that mutates the VisitorSession nodes in the graph.

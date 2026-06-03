@@ -9,6 +9,18 @@ import (
 // Device is the predicate function for device builders.
 type Device func(*sql.Selector)
 
+// EventCommerceItem is the predicate function for eventcommerceitem builders.
+type EventCommerceItem func(*sql.Selector)
+
+// EventCustomProp is the predicate function for eventcustomprop builders.
+type EventCustomProp func(*sql.Selector)
+
+// EventTargetProp is the predicate function for eventtargetprop builders.
+type EventTargetProp func(*sql.Selector)
+
+// EventTargetSearchFilter is the predicate function for eventtargetsearchfilter builders.
+type EventTargetSearchFilter func(*sql.Selector)
+
 // PageView is the predicate function for pageview builders.
 type PageView func(*sql.Selector)
 
@@ -26,6 +38,9 @@ type VisitorConsent func(*sql.Selector)
 
 // VisitorEvent is the predicate function for visitorevent builders.
 type VisitorEvent func(*sql.Selector)
+
+// VisitorPlatformClick is the predicate function for visitorplatformclick builders.
+type VisitorPlatformClick func(*sql.Selector)
 
 // VisitorSession is the predicate function for visitorsession builders.
 type VisitorSession func(*sql.Selector)
