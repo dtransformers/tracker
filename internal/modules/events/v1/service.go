@@ -31,8 +31,6 @@ func NewService(repo Repository, visitorsSvc *visitorsv1.Service, logger *slog.L
 }
 
 type CreateEventRequest struct {
-	SessionToken    string `json:"session_token"`
-	FingerprintHash string `json:"fingerprint_hash"`
 	TrackingEvent
 }
 
@@ -48,8 +46,8 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site 
 			sessionID = tracking.Cookies["session_id"]
 		}
 	}
-	if sessionID == "" {
-		return nil, fmt.Errorf("UnAuthoized Request")
+	if sessionID == "" || visitorUUID == "" {
+		return nil, fmt.Errorf("unauthorized request")
 	}
 	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
 	if err != nil {
