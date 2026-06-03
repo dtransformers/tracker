@@ -25,7 +25,6 @@ const (
 	MaxDomainLength = 253 // RFC 1035
 )
 
-// Custom errors for better error handling
 var (
 	ErrInvalidDomain = errors.New("invalid domain format")
 	ErrInvalidName   = errors.New("name must be between 1 and 255 characters")
@@ -34,6 +33,8 @@ var (
 	ErrKeyGeneration = errors.New("failed to generate security key")
 	ErrSiteNotFound  = errors.New("site not found")
 )
+
+const errInvalidUUIDFormat = "invalid UUID format: %w"
 
 // Service handles the business logic for sites.
 type Service struct {
@@ -74,7 +75,6 @@ func NewServiceWithConfig(repo Repository, logger *slog.Logger, cfg ServiceConfi
 		timeout:      cfg.Timeout,
 	}
 }
-
 
 // CreateSite creates a new site with generated security keys.
 func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response, error) {
@@ -140,7 +140,7 @@ func (s *Service) GetSite(ctx context.Context, siteUUID string) (*FullSiteRespon
 	defer cancel()
 
 	if _, err := uuid.Parse(siteUUID); err != nil {
-		return nil, fmt.Errorf("invalid UUID format: %w", err)
+		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
 	site, err := s.repo.GetByUUID(ctx, siteUUID)
@@ -231,7 +231,7 @@ func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateReq
 
 	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
-		return nil, fmt.Errorf("invalid UUID format: %w", err)
+		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
 	// Validate update request
@@ -290,7 +290,7 @@ func (s *Service) DeleteSite(ctx context.Context, siteUUID string) error {
 
 	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
-		return fmt.Errorf("invalid UUID format: %w", err)
+		return fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
 	err := s.repo.Delete(ctx, siteUUID)
@@ -319,7 +319,7 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 
 	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
-		return nil, fmt.Errorf("invalid UUID format: %w", err)
+		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
 	// Generate new keys

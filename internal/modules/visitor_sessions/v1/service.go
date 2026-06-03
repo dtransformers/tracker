@@ -7,7 +7,9 @@ import (
 	"time"
 	"tracking/internal/config"
 	"tracking/internal/ent"
+	"tracking/internal/middlewares"
 	"tracking/pkg/constants"
+	custom_errors "tracking/pkg/errors"
 )
 
 type Service struct {
@@ -28,7 +30,6 @@ func NewService(repo Repository, logger *slog.Logger, appCfg config.AppConfig) *
 		timeout: constants.DefaultServiceTimeout,
 	}
 }
-
 
 func (s *Service) GetByUUID(ctx context.Context, uuid string) (*SessionResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
@@ -207,4 +208,34 @@ func (s *Service) GetVisitorLastSession(ctx context.Context, visitorID int64) (*
 		return nil, err
 	}
 	return sess, nil
+}
+
+func (s *Service) ValidateSessionDetails(ctx context.Context, VisitorUUID string, SessionToken string) (*middlewares.SessionDetails, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	session, err := s.GetSessionByTokenRaw(ctx, SessionToken)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, custom_errors.NewUnauthorizedError(constants.Version, "session not found, please clear cookies")
+		}
+		return nil, err
+	}
+	if session == nil {
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "session not found, please clear cookies")
+	}
+
+	err = s.repo.VerifySessionOwnership(ctx, session.VisitorID, VisitorUUID, session.DeviceID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, custom_errors.NewUnauthorizedError(constants.Version, "session does not belong to this visitor")
+		}
+		return nil, err
+	}
+
+	return &middlewares.SessionDetails{
+		SessionID: int64(session.ID),
+		VisitorID: session.VisitorID,
+		DeviceID:  session.DeviceID,
+	}, nil
 }

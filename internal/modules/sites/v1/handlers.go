@@ -1,20 +1,24 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"tracking/internal/ent"
+	"tracking/pkg/constants"
+	custom_errors "tracking/pkg/errors"
+	"tracking/pkg/httputil"
 )
 
-// Handler handles HTTP requests for sites.
 type Handler struct {
 	service *Service
 	logger  *slog.Logger
 }
 
-// NewHandler creates a new site handler.
 func NewHandler(service *Service, logger *slog.Logger) *Handler {
 	if logger == nil {
 		logger = slog.Default()
@@ -35,19 +39,16 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Param site body CreateRequest true "Site creation request"
 // @Security BasicAuth
 // @Success 201 {object} Response
-// @Failure 400 {object} ErrorResponse
-// @Failure 409 {object} ErrorResponse "Domain already exists"
-// @Failure 500 {object} ErrorResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 409 {object} httputil.ErrorResponse "Domain already exists"
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid request body",
-			Details: err.Error(),
-		})
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "Invalid request body", err))
 		return
 	}
 
@@ -68,7 +69,7 @@ func (h *Handler) Create(c *gin.Context) {
 // @Param tenant_id query int64 false "Filter by Tenant ID"
 // @Security BasicAuth
 // @Success 200 {object} ListResponse
-// @Failure 500 {object} ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites [get]
 func (h *Handler) List(c *gin.Context) {
 	var tenantID *int64
@@ -76,9 +77,7 @@ func (h *Handler) List(c *gin.Context) {
 		tid, err := strconv.ParseInt(tidStr, 10, 64)
 		if err != nil {
 			h.logger.Warn("invalid tenant_id", "error", err)
-			c.JSON(http.StatusBadRequest, ErrorResponse{
-				Error: "Invalid tenant_id format",
-			})
+			httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "Invalid tenant_id format", err))
 			return
 		}
 		tenantID = &tid
@@ -101,9 +100,9 @@ func (h *Handler) List(c *gin.Context) {
 // @Param uuid path string true "Site UUID"
 // @Security BasicAuth
 // @Success 200 {object} Response
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 404 {object} httputil.ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites/{uuid} [get]
 func (h *Handler) Get(c *gin.Context) {
 	uuid := c.Param("uuid")
@@ -127,10 +126,10 @@ func (h *Handler) Get(c *gin.Context) {
 // @Param site body UpdateRequest true "Site update request"
 // @Security BasicAuth
 // @Success 200 {object} Response
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 409 {object} ErrorResponse "Domain already in use"
-// @Failure 500 {object} ErrorResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 404 {object} httputil.ErrorResponse
+// @Failure 409 {object} httputil.ErrorResponse "Domain already in use"
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites/{uuid} [patch]
 func (h *Handler) Update(c *gin.Context) {
 	uuid := c.Param("uuid")
@@ -138,10 +137,7 @@ func (h *Handler) Update(c *gin.Context) {
 	var req UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid request body",
-			Details: err.Error(),
-		})
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "Invalid request parameters", err))
 		return
 	}
 
@@ -161,9 +157,9 @@ func (h *Handler) Update(c *gin.Context) {
 // @Param uuid path string true "Site UUID"
 // @Security BasicAuth
 // @Success 204 "No Content"
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 404 {object} httputil.ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites/{uuid} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	uuid := c.Param("uuid")
@@ -184,9 +180,9 @@ func (h *Handler) Delete(c *gin.Context) {
 // @Param uuid path string true "Site UUID"
 // @Security BasicAuth
 // @Success 200 {object} Response
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 404 {object} httputil.ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/sites/{uuid}/regenerate-keys [post]
 func (h *Handler) RegenerateKeys(c *gin.Context) {
 	uuid := c.Param("uuid")
@@ -202,44 +198,38 @@ func (h *Handler) RegenerateKeys(c *gin.Context) {
 
 // handleError maps service errors to appropriate HTTP responses.
 func (h *Handler) handleError(c *gin.Context, err error) {
-	switch {
-	case err == ErrSiteNotFound:
-		c.JSON(http.StatusNotFound, ErrorResponse{
-			Error: "Site not found",
-		})
-	case err == ErrDomainExists:
-		c.JSON(http.StatusConflict, ErrorResponse{
-			Error: "Domain already exists",
-		})
-	case err == ErrInvalidDomain:
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid domain",
-			Details: err.Error(),
-		})
-	case err == ErrInvalidName:
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Invalid name",
-			Details: err.Error(),
-		})
-	case err == ErrEmptyUpdate:
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "At least one field must be updated",
-		})
-	case err == ErrKeyGeneration:
-		h.logger.Error("key generation failed", "error", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Failed to generate security keys",
-		})
-	default:
-		h.logger.Error("unexpected error", "error", err)
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Internal server error",
-		})
+	if err == nil {
+		return
 	}
-}
 
-// ErrorResponse represents an error response.
-type ErrorResponse struct {
-	Error   string `json:"error"`
-	Details string `json:"details,omitempty"`
+	if ent.IsNotFound(err) || errors.Is(err, ErrSiteNotFound) {
+		httputil.RespondError(c, custom_errors.NewNotFoundError(constants.Version, "Site not found", err))
+		return
+	}
+
+	if errors.Is(err, ErrInvalidDomain) {
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, err.Error(), err))
+		return
+	}
+	if errors.Is(err, ErrInvalidName) {
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, err.Error(), err))
+		return
+	}
+	if errors.Is(err, ErrEmptyUpdate) {
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "At least one field must be updated", err))
+		return
+	}
+	if errors.Is(err, ErrDomainExists) {
+		httputil.RespondError(c, custom_errors.NewConflictError(constants.Version, "Domain already exists", err))
+		return
+	}
+	if errors.Is(err, ErrKeyGeneration) {
+		h.logger.Error("key generation failed", "error", err)
+		httputil.RespondError(c, custom_errors.NewInternalError(constants.Version, "Failed to generate security keys", err))
+		return
+	}
+
+	// Default fallback
+	h.logger.Error("unexpected error", "error", err)
+	httputil.RespondError(c, custom_errors.NewInternalError(constants.Version, "Internal server error", err))
 }

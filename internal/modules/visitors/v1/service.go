@@ -2,7 +2,6 @@ package v1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/url"
@@ -17,6 +16,7 @@ import (
 	sitesv1 "tracking/internal/modules/sites/v1"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 	"tracking/pkg/constants"
+	custom_errors "tracking/pkg/errors"
 )
 
 type Service struct {
@@ -44,28 +44,30 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 	}
 }
 
-
 func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, SessionToken string) (*FullVisitorSessionDetails, error) {
 	session, err := s.sessionSvc.GetSessionByTokenRaw(ctx, SessionToken)
 	if err != nil {
 		return nil, err
 	}
 	if session == nil {
-		return nil, errors.New("session not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "session not found, please clear cookies")
 	}
 	device, err := s.deviceRepo.GetByID(ctx, int(session.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "device not found, please clear cookies")
 	}
 	v, err := s.getVistorByUUID(ctx, VisitorUUID)
 	if err != nil {
 		return nil, err
 	}
 	if v == nil {
-		return nil, errors.New("visitor not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "visitor not found, please clear cookies")
+	}
+	if int(session.VisitorID) != v.ID {
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "session does not belong to this visitor")
 	}
 
 	return toFullSessionDetails(v, device, session), nil
@@ -77,26 +79,64 @@ func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, Se
 		return nil, err
 	}
 	if session == nil {
-		return nil, errors.New("session not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "session not found, please clear cookies")
 	}
 	device, err := s.getDeviceByID(ctx, int(session.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "device not found, please clear cookies")
 	}
 	v, err := s.getVistorByUUID(ctx, VisitorUUID)
 	if err != nil {
 		return nil, err
 	}
 	if v == nil {
-		return nil, errors.New("visitor not found, please clear cookies")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "visitor not found, please clear cookies")
 	}
 	response := toVisitorResponse(v)
 	response.SessionID = session.SessionToken
 	return response, nil
 
+}
+
+func (s *Service) ensureVisitorLastActiveSession(ctx context.Context, visitorID int64, entryPage string) (*ent.VisitorSession, error) {
+	visitorLastActiveSession, err := s.sessionSvc.GetVisitorLastActiveSession(ctx, visitorID)
+	if err != nil {
+		return nil, err
+	}
+	if visitorLastActiveSession != nil {
+		return visitorLastActiveSession, nil
+	}
+
+	visitorLastSession, err := s.sessionSvc.GetVisitorLastSession(ctx, visitorID)
+	visitorError := "visitor does not exist, please clear cookies"
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, custom_errors.NewNotFoundError(constants.Version, visitorError)
+		}
+		return nil, err
+	}
+	if visitorLastSession == nil {
+		return nil, custom_errors.NewNotFoundError(constants.Version, visitorError)
+	}
+
+	return s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
+		UUID:                uuid.New().String(),
+		VisitorID:           visitorID,
+		DeviceID:            int64(visitorLastSession.DeviceID),
+		SessionToken:        uuid.New().String(),
+		StartedAt:           time.Now().UTC(),
+		EntryPage:           entryPage,
+		AcquisitionSource:   visitorLastSession.AcquisitionSource,
+		AcquisitionMedium:   visitorLastSession.AcquisitionMedium,
+		AcquisitionCampaign: visitorLastSession.AcquisitionCampaign,
+		CampaignTerm:        visitorLastSession.CampaignTerm,
+		CampaignContent:     visitorLastSession.CampaignContent,
+		CampaignID:          visitorLastSession.CampaignID,
+		ReferrerHost:        visitorLastSession.ReferrerHost,
+	})
 }
 
 func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID string, entryPage string, site *ent.Site) (*VisitorResponse, error) {
@@ -108,7 +148,7 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		return nil, err
 	}
 	if visitor == nil {
-		return nil, errors.New("visitor not found")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "visitor not found")
 	}
 
 	visitor, err = s.updateVisitor(ctx, visitor)
@@ -116,46 +156,16 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		return nil, err
 	}
 
-	visitorLastActiveSession, err := s.sessionSvc.GetVisitorLastActiveSession(ctx, int64(visitor.ID))
+	visitorLastActiveSession, err := s.ensureVisitorLastActiveSession(ctx, int64(visitor.ID), entryPage)
 	if err != nil {
 		return nil, err
-	}
-	if visitorLastActiveSession == nil {
-		visitorLastSession, err := s.sessionSvc.GetVisitorLastSession(ctx, int64(visitor.ID))
-		if err != nil {
-			if ent.IsNotFound(err) {
-				return nil, errors.New("visitor does not exist, please clear cookies")
-			}
-			return nil, err
-		}
-		if visitorLastSession == nil {
-			return nil, errors.New("visitor does not exist, please clear cookies")
-		}
-		visitorLastActiveSession, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
-			UUID:                uuid.New().String(),
-			VisitorID:           int64(visitor.ID),
-			DeviceID:            int64(visitorLastSession.DeviceID),
-			SessionToken:        uuid.New().String(),
-			StartedAt:           time.Now().UTC(),
-			EntryPage:           entryPage,
-			AcquisitionSource:   visitorLastSession.AcquisitionSource,
-			AcquisitionMedium:   visitorLastSession.AcquisitionMedium,
-			AcquisitionCampaign: visitorLastSession.AcquisitionCampaign,
-			CampaignTerm:        visitorLastSession.CampaignTerm,
-			CampaignContent:     visitorLastSession.CampaignContent,
-			CampaignID:          visitorLastSession.CampaignID,
-			ReferrerHost:        visitorLastSession.ReferrerHost,
-		})
-		if err != nil {
-			return nil, err
-		}
 	}
 	device, err := s.getDeviceByID(ctx, int(visitorLastActiveSession.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found")
+		return nil, custom_errors.NewUnauthorizedError(constants.Version, "device not found")
 	}
 
 	newSession, err := s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
@@ -177,23 +187,10 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		return nil, err
 	}
 	if newSession == nil {
-		return nil, errors.New("failed to create new session")
+		return nil, custom_errors.NewInternalError(constants.Version, "failed to create new session")
 	}
 
-	_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
-		UUID:      uuid.New().String(),
-		VisitorID: int64(visitor.ID),
-		SiteID:    int64(site.ID),
-		SessionID: int64(newSession.ID),
-	})
-	if err != nil {
-		s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
-	} else {
-		err = s.consentsSvc.SetDefaultConsent(ctx, int64(visitor.ID), int64(site.ID))
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to set default visitor consent", "error", err)
-		}
-	}
+	s.linkSiteVisitorAndConsent(ctx, int64(visitor.ID), int64(site.ID), int64(newSession.ID))
 
 	response := toVisitorResponse(visitor)
 	response.SessionID = newSession.SessionToken
@@ -205,13 +202,11 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 		return
 	}
 
-	if tracking.Cookies != nil {
-		if tracking.Cookies["visitor_uuid"] != "" {
-			req.VisitorUUID = tracking.Cookies["visitor_uuid"]
-		}
-		if tracking.Cookies["session_id"] != "" {
-			req.SessionUUID = tracking.Cookies["session_id"]
-		}
+	if tracking.VisitorUUID != "" {
+		req.VisitorUUID = tracking.VisitorUUID
+	}
+	if tracking.SessionUUID != "" {
+		req.SessionUUID = tracking.SessionUUID
 	}
 
 	s.enrichDeviceTracking(req, tracking)
@@ -277,7 +272,7 @@ func (s *Service) resolveVisitorAndDevice(ctx context.Context, req CreateVisitor
 
 	if device == nil {
 		isNewDevice = true
-		v, err = s.createVisitor(ctx, req, isBot)
+		v, err = s.createVisitor(ctx, isBot)
 		if err != nil {
 			return nil, nil, false, err
 		}
@@ -362,11 +357,11 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		s.enrichRequestWithTracking(&req, tracking)
 		isBot = tracking.Bot
-		if req.VisitorUUID != "" && req.SessionUUID != "" {
-			return s.GetExistingSession(ctx, req.VisitorUUID, req.SessionUUID)
+		if tracking.VisitorUUID != "" && tracking.SessionUUID != "" {
+			return s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
 		}
-		if req.VisitorUUID != "" && req.SessionUUID == "" {
-			return s.createNewSessionForVisitor(ctx, req.VisitorUUID, req.EntryPage, site)
+		if tracking.VisitorUUID != "" && tracking.SessionUUID == "" {
+			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
 		}
 	}
 
@@ -383,20 +378,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	}
 
 	if isNewSession && sessionID != 0 {
-		_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
-			UUID:      uuid.New().String(),
-			VisitorID: int64(v.ID),
-			SiteID:    int64(site.ID),
-			SessionID: sessionID,
-		})
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
-		} else {
-			err = s.consentsSvc.SetDefaultConsent(ctx, int64(v.ID), int64(site.ID))
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to set default visitor consent", "error", err)
-			}
-		}
+		s.linkSiteVisitorAndConsent(ctx, int64(v.ID), int64(site.ID), sessionID)
 	}
 
 	res := toVisitorResponse(v)
@@ -433,7 +415,7 @@ func (s *Service) getVistorByUUID(ctx context.Context, visitorUUID string) (*ent
 	return v, nil
 }
 
-func (s *Service) createVisitor(ctx context.Context, req CreateVisitorRequest, isBot bool) (*ent.Visitor, error) {
+func (s *Service) createVisitor(ctx context.Context, isBot bool) (*ent.Visitor, error) {
 
 	v, err := s.repo.Create(ctx, CreateSessionInput{
 		UUID:            uuid.New().String(),
@@ -544,6 +526,28 @@ func toFullSessionDetails(v *ent.Visitor, d *ent.Device, s *ent.VisitorSession) 
 	return &FullVisitorSessionDetails{Visitor: v, Device: d, Session: s}
 }
 
+const (
+	errCreateSiteVisitorLink = "failed to create site visitor link"
+	errSetDefaultConsent     = "failed to set default visitor consent"
+)
+
+func (s *Service) linkSiteVisitorAndConsent(ctx context.Context, visitorID, siteID, sessionID int64) {
+	_, err := s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
+		UUID:      uuid.New().String(),
+		VisitorID: visitorID,
+		SiteID:    siteID,
+		SessionID: sessionID,
+	})
+	if err != nil {
+		s.logger.WarnContext(ctx, errCreateSiteVisitorLink, "error", err)
+	} else {
+		err = s.consentsSvc.SetDefaultConsent(ctx, visitorID, siteID)
+		if err != nil {
+			s.logger.WarnContext(ctx, errSetDefaultConsent, "error", err)
+		}
+	}
+}
+
 func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateVisitorRequest, site *ent.Site) (*ent.VisitorSession, error) {
 	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, sessionToken)
 	if err != nil {
@@ -553,57 +557,17 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 		return session, nil
 	}
 
-	device, err := s.getDevice(ctx, fingerprintHash)
-	if err != nil {
-		return nil, err
+	var isBot bool
+	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
+		isBot = tracking.Bot
 	}
 
-	var v *ent.Visitor
-	if device == nil {
-		var anonID string
-		if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-			if tracking.Cookies != nil {
-				anonID = tracking.Cookies["visitor_uuid"]
-			}
-		}
-		if anonID == "" {
-			anonID = uuid.New().String()
-		}
-		existingV, err := s.getVisitor(ctx, anonID)
-		if err != nil {
-			return nil, err
-		}
-		if existingV != nil {
-			anonID = uuid.New().String()
-		}
+	geo.FingerprintHash = fingerprintHash
+	geo.SessionToken = sessionToken
 
-		geo.FingerprintHash = fingerprintHash
-		geo.SessionToken = sessionToken
-
-		var isBot bool
-		if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-			isBot = tracking.Bot
-		}
-
-		v, err = s.createVisitor(ctx, geo, isBot)
-		if err != nil {
-			return nil, err
-		}
-
-		device, err = s.createDevice(ctx, geo, int64(v.ID))
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		v, err = s.repo.GetByID(ctx, device.VisitorID)
-		if err != nil {
-			return nil, err
-		}
-
-		v, err = s.updateVisitor(ctx, v)
-		if err != nil {
-			return nil, err
-		}
+	v, device, _, err := s.resolveVisitorAndDevice(ctx, geo, isBot)
+	if err != nil {
+		return nil, err
 	}
 
 	geo.FingerprintHash = fingerprintHash
@@ -627,20 +591,7 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 		return nil, err
 	}
 
-	_, err = s.repo.CreateSiteVisitor(ctx, CreateSiteVisitorInput{
-		UUID:      uuid.New().String(),
-		VisitorID: int64(v.ID),
-		SiteID:    int64(site.ID),
-		SessionID: int64(session.ID),
-	})
-	if err != nil {
-		s.logger.WarnContext(ctx, "failed to create site visitor link", "error", err)
-	} else {
-		err = s.consentsSvc.SetDefaultConsent(ctx, int64(v.ID), int64(site.ID))
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to set default visitor consent", "error", err)
-		}
-	}
+	s.linkSiteVisitorAndConsent(ctx, int64(v.ID), int64(site.ID), int64(session.ID))
 
 	return session, nil
 }

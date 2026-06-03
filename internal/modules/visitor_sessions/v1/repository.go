@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 	"tracking/internal/ent"
+	"tracking/internal/ent/device"
+	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorsession"
 )
 
@@ -21,6 +23,7 @@ type Repository interface {
 	Update(ctx context.Context, uuid string, input UpdateSessionInput) (*ent.VisitorSession, error)
 	DeactivateVisitorSessions(ctx context.Context, visitorID int64) error
 	Delete(ctx context.Context, uuid string) error
+	VerifySessionOwnership(ctx context.Context, visitorID int64, visitorUUID string, deviceID int64) error
 }
 
 type entRepository struct {
@@ -219,6 +222,35 @@ func (r *entRepository) Delete(ctx context.Context, uuid string) error {
 	}
 
 	if affected == 0 {
+		return &ent.NotFoundError{}
+	}
+
+	return nil
+}
+
+func (r *entRepository) VerifySessionOwnership(ctx context.Context, visitorID int64, visitorUUID string, deviceID int64) error {
+	visitorExists, err := r.client.Visitor.
+		Query().
+		Where(
+			visitor.ID(int(visitorID)),
+			visitor.UUID(visitorUUID),
+		).
+		Exist(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to query visitor: %w", err)
+	}
+	if !visitorExists {
+		return &ent.NotFoundError{}
+	}
+
+	deviceExists, err := r.client.Device.
+		Query().
+		Where(device.ID(int(deviceID))).
+		Exist(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to query device: %w", err)
+	}
+	if !deviceExists {
 		return &ent.NotFoundError{}
 	}
 

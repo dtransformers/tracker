@@ -13,19 +13,13 @@ import (
 	custom_errors "tracking/pkg/errors"
 )
 
-// ErrorResponse is the shared JSON error envelope used by all handlers.
 type ErrorResponse struct {
+	Status  string `json:"status"`
+	Code    int    `json:"code"`
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`
-	Status  int    `json:"status"`
-	Success bool   `json:"success"`
-	TraceID string `json:"trace_id,omitempty"`
-	Version string `json:"version,omitempty"`
 }
 
-// RespondError converts a typed pkg/errors error into the correct HTTP response.
-// It never exposes internal cause details (stack traces, DB errors, etc.) to the
-// client. Unknown/internal errors are responded to with a generic 500 message.
 func RespondError(c *gin.Context, err error) {
 	if err == nil {
 		return
@@ -35,22 +29,20 @@ func RespondError(c *gin.Context, err error) {
 	if errors.As(err, &httpErr) {
 		status := httpErr.StatusCode()
 		c.JSON(status, ErrorResponse{
-			Error:   httpErr.Error(),
-			Status:  status,
-			Success: false,
+			Status: "error",
+			Code:   status,
+			Error:  httpErr.GetMessage(),
 		})
 		return
 	}
 
-	// Unknown error — return a generic 500 without leaking internals.
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
-		Error:   "Internal server error",
-		Status:  http.StatusInternalServerError,
-		Success: false,
+		Status: "error",
+		Code:   http.StatusInternalServerError,
+		Error:  "Internal server error",
 	})
 }
 
-// FormatBindError produces a client-safe description of a JSON bind or validation error.
 func FormatBindError(err error) string {
 	if err == nil {
 		return "invalid request body"
@@ -66,7 +58,6 @@ func FormatBindError(err error) string {
 		return "Malformed JSON payload"
 	}
 
-	// goccy/go-json type error
 	var goJsonTypeErr *gojson.UnmarshalTypeError
 	if errors.As(err, &goJsonTypeErr) {
 		return fmt.Sprintf("Invalid data type for field: %s", goJsonTypeErr.Field)

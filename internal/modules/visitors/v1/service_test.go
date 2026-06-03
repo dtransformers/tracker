@@ -32,7 +32,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
 	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"
@@ -116,7 +116,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
 	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"
@@ -207,7 +207,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
 	mockConsentsRepo := new(consentsMocks.MockRepository)
 	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
+	consentsSvc := consentsv1.NewService(mockConsentsRepo, nil)
 	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
 
 	pubKey := "test-pub-key"

@@ -8,61 +8,44 @@ import (
 
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
-	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 	"tracking/pkg/constants"
+	custom_errors "tracking/pkg/errors"
 )
 
 type Service struct {
-	repo       Repository
-	sessionSvc *visitor_sessionsv1.Service
-	logger     *slog.Logger
-	timeout    time.Duration
+	repo    Repository
+	logger  *slog.Logger
+	timeout time.Duration
 }
 
-func NewService(repo Repository, sessionSvc *visitor_sessionsv1.Service, logger *slog.Logger) *Service {
+func NewService(repo Repository, logger *slog.Logger) *Service {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &Service{
-		repo:       repo,
-		sessionSvc: sessionSvc,
-		logger:     logger,
-		timeout:    constants.DefaultServiceTimeout,
+		repo:    repo,
+		logger:  logger,
+		timeout: constants.DefaultServiceTimeout,
 	}
 }
-
 
 func (s *Service) UpdateVisitorConsent(ctx context.Context, req UpdateConsentRequest, site *ent.Site) (*UpdateConsentResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	if !req.ConsentType.Valid() {
-		return nil, fmt.Errorf("invalid consent type: %s", req.ConsentType)
+		return nil, custom_errors.NewBadRequestError(constants.Version, fmt.Sprintf("invalid consent type: %s", req.ConsentType))
 	}
 	if !req.Status.Valid() {
-		return nil, fmt.Errorf("invalid consent status: %s", req.Status)
+		return nil, custom_errors.NewBadRequestError(constants.Version, fmt.Sprintf("invalid consent status: %s", req.Status))
 	}
 
-	var sessionToken string
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		if tracking.Cookies != nil {
-			sessionToken = tracking.Cookies["session_id"]
-		}
+	details, ok := middlewares.GetSessionDetails(ctx)
+	if !ok || details == nil {
+		return nil, fmt.Errorf("failed to retrieve session details from context")
 	}
 
-	if sessionToken == "" {
-		return nil, fmt.Errorf("missing session token in cookies")
-	}
-
-	session, err := s.sessionSvc.GetBySessionToken(ctx, sessionToken)
-	if err != nil {
-		return nil, err
-	}
-	if session == nil {
-		return nil, fmt.Errorf("session not found")
-	}
-
-	consent, err := s.repo.SetVisitorConsent(ctx, session.VisitorID, int64(site.ID), string(req.ConsentType), string(req.Status))
+	consent, err := s.repo.SetVisitorConsent(ctx, details.VisitorID, int64(site.ID), string(req.ConsentType), string(req.Status))
 	if err != nil {
 		return nil, fmt.Errorf("failed to update consent: %w", err)
 	}

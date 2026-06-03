@@ -9,7 +9,6 @@ import (
 	"tracking/internal/middlewares"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	"tracking/internal/modules/state"
-	visitorsv1 "tracking/internal/modules/visitors/v1"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,16 +17,17 @@ type Module struct {
 	handler      *Handler
 	service      *Service
 	repo         Repository
-	sitesService *sitesv1.Service
-	logger       *slog.Logger
+	sitesService     *sitesv1.Service
+	sessionValidator middlewares.SessionValidator
+	logger           *slog.Logger
 }
 
-func NewModule(client *ent.Client, visitorsSvc *visitorsv1.Service, sitesService *sitesv1.Service, logger *slog.Logger) *Module {
+func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.Logger) *Module {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	repo := NewRepository(client)
-	svc := NewService(repo, visitorsSvc, logger)
+	svc := NewService(repo, logger)
 	handler := NewHandler(svc, logger)
 
 	return &Module{
@@ -68,7 +68,19 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	events.Use(middlewares.Cors())
 	events.Use(middlewares.Metrics(m.logger))
 	events.Use(middlewares.RequestTracking())
+	events.Use(func(c *gin.Context) {
+		if m.sessionValidator == nil {
+			c.JSON(500, gin.H{"error": "internal error: session validator not configured"})
+			c.Abort()
+			return
+		}
+		middlewares.RequireVisitorAuthentication(m.sessionValidator)(c)
+	})
 
 	events.POST("/custom", m.handler.CreateEvent)
 	events.POST("/pageviews", m.handler.CreatePageView)
+}
+
+func (m *Module) SetSessionValidator(validator middlewares.SessionValidator) {
+	m.sessionValidator = validator
 }

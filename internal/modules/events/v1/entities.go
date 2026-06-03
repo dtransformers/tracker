@@ -361,7 +361,7 @@ type TrackingEvent struct {
 	Category         EventCategory    `json:"category" binding:"required"`
 	Name             string           `json:"name" binding:"required"`
 	OccurredAt       string           `json:"occurred_at" binding:"required"`
-	ServerReceivedAt string           `json:"server_received_at,omitempty,swagger:ignore"`
+	ServerReceivedAt string           `json:"server_received_at,omitempty" swagger:"ignore"`
 	Sequence         int              `json:"sequence"`
 	ClickIds         PlatformClickIds `json:"click_ids"`
 	Target           TargetProps      `json:"target"`

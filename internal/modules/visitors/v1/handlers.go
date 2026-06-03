@@ -6,6 +6,8 @@ import (
 
 	"tracking/internal/config"
 	"tracking/internal/ent"
+	"tracking/pkg/constants"
+	custom_errors "tracking/pkg/errors"
 	"tracking/pkg/httputil"
 
 	"github.com/gin-gonic/gin"
@@ -49,22 +51,19 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
-		c.JSON(http.StatusBadRequest, httputil.ErrorResponse{
-			Error:   "Invalid request body",
-			Details: httputil.FormatBindError(err),
-		})
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "Invalid request body", err))
 		return
 	}
 
 	siteObj, exists := c.Get("site")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, httputil.ErrorResponse{Error: "Unauthorized"})
+		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "Unauthorized"))
 		return
 	}
 
 	site, ok := siteObj.(*ent.Site)
 	if !ok || site == nil || !site.IsActive || site.IsDeleted {
-		c.JSON(http.StatusUnauthorized, httputil.ErrorResponse{Error: "Unauthorized"})
+		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "Unauthorized"))
 		return
 	}
 	response, err := h.service.CreateSession(c.Request.Context(), req, site)

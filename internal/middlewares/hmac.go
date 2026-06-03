@@ -58,21 +58,6 @@ func VerifySite(fn SiteSecretFunc) gin.HandlerFunc {
 	}
 }
 
-
-type HMACConfig struct {
-	GetSecretKey func(publicKey string) (string, error)
-
-	MaxClockSkew time.Duration
-
-	NonceStore NonceStore
-
-	RequireContentInSignature bool
-}
-
-type NonceStore interface {
-	CheckAndStore(publicKey, nonce string, expiry time.Time) bool
-}
-
 func HMAC(config HMACConfig) gin.HandlerFunc {
 	if config.MaxClockSkew == 0 {
 		config.MaxClockSkew = 5 * time.Minute
