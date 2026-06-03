@@ -171,7 +171,7 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		Port:              port,
 		RunMode:           RunMode(runMode),
 		IsDev:             isDev,
-		SessionExpiration: intOrDefault(env, "SESSION_EXPIRATION", 60),
+		SessionExpiration: intOrDefault(env, "SESSION_EXPIRATION", 60*60),
 		VisitorExpiration: intOrDefault(env, "VISITOR_EXPIRATION", 3600*24*365),
 	}
 }

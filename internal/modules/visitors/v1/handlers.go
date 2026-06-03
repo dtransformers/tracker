@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -74,6 +75,8 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	}
 	sessionExpiration := h.appCfg.SessionExpiration
 	visitorExpiration := h.appCfg.VisitorExpiration
+	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_id: ", response.SessionID, "and visitor_uuid: ", response.UUID)
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie("session_id", response.SessionID, sessionExpiration, "/", "", true, true)
 	c.SetCookie("visitor_uuid", response.UUID, visitorExpiration, "/", "", true, true)
 

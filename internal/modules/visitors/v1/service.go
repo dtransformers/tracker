@@ -297,57 +297,97 @@ func (s *Service) resolveVisitorAndDevice(ctx context.Context, req CreateVisitor
 	return v, device, isNewDevice, nil
 }
 
-func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, bool, error) {
-	var sessionID int64
-	var sessionToken string
-	var isNewSession bool
+func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device) (int64, string, bool, error) {
+	if req.SessionToken == "" {
+		req.SessionToken = uuid.New().String()
+	}
 
-	if isNewDevice || req.SessionToken != "" {
-		if req.SessionToken == "" {
-			req.SessionToken = uuid.New().String()
-		}
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, req.SessionToken)
+	if err != nil {
+		return 0, "", false, err
+	}
+	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And Token: `, req.SessionToken, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 
-		session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, req.SessionToken)
+	if session == nil {
+		sess, err := s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
+			UUID:                uuid.New().String(),
+			VisitorID:           int64(v.ID),
+			DeviceID:            int64(device.ID),
+			SessionToken:        req.SessionToken,
+			StartedAt:           time.Now().UTC(),
+			EntryPage:           req.EntryPage,
+			AcquisitionSource:   req.AcquisitionSource,
+			AcquisitionMedium:   req.AcquisitionMedium,
+			AcquisitionCampaign: req.AcquisitionCampaign,
+			CampaignTerm:        req.CampaignTerm,
+			CampaignContent:     req.CampaignContent,
+			CampaignID:          req.CampaignID,
+			ReferrerHost:        req.ReferrerHost,
+		})
 		if err != nil {
 			return 0, "", false, err
 		}
-
-		if session == nil {
-			sess, err := s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
-				UUID:                uuid.New().String(),
-				VisitorID:           int64(v.ID),
-				DeviceID:            int64(device.ID),
-				SessionToken:        req.SessionToken,
-				StartedAt:           time.Now().UTC(),
-				EntryPage:           req.EntryPage,
-				AcquisitionSource:   req.AcquisitionSource,
-				AcquisitionMedium:   req.AcquisitionMedium,
-				AcquisitionCampaign: req.AcquisitionCampaign,
-				CampaignTerm:        req.CampaignTerm,
-				CampaignContent:     req.CampaignContent,
-				CampaignID:          req.CampaignID,
-				ReferrerHost:        req.ReferrerHost,
-			})
-			if err != nil {
-				return 0, "", false, err
-			}
-			sessionID = int64(sess.ID)
-			sessionToken = sess.SessionToken
-			isNewSession = true
-		} else {
-			now := time.Now()
-			sess, err := s.sessionSvc.UpdateSession(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
-				LastActivityAt: &now,
-				ExitPage:       &req.ExitPage,
-			})
-			if err != nil {
-				return 0, "", false, err
-			}
-			sessionID = int64(sess.ID)
-			sessionToken = sess.SessionToken
-		}
+		return int64(sess.ID), sess.SessionToken, true, nil
 	}
-	return sessionID, sessionToken, isNewSession, nil
+
+	now := time.Now()
+	sess, err := s.sessionSvc.UpdateSession(ctx, session.UUID, visitor_sessionsv1.UpdateSessionInput{
+		LastActivityAt: &now,
+		ExitPage:       &req.ExitPage,
+	})
+	if err != nil {
+		return 0, "", false, err
+	}
+	return int64(sess.ID), sess.SessionToken, false, nil
+}
+
+func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device) (int64, string, error) {
+	sess, err := s.sessionSvc.GetVisitorLastActiveSession(ctx, int64(v.ID))
+	if err != nil {
+		return 0, "", err
+	}
+	if sess == nil {
+		sess, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
+			UUID:                uuid.New().String(),
+			VisitorID:           int64(v.ID),
+			DeviceID:            int64(device.ID),
+			SessionToken:        req.SessionToken,
+			StartedAt:           time.Now().UTC(),
+			EntryPage:           req.EntryPage,
+			AcquisitionSource:   req.AcquisitionSource,
+			AcquisitionMedium:   req.AcquisitionMedium,
+			AcquisitionCampaign: req.AcquisitionCampaign,
+			CampaignTerm:        req.CampaignTerm,
+			CampaignContent:     req.CampaignContent,
+			CampaignID:          req.CampaignID,
+			ReferrerHost:        req.ReferrerHost,
+		})
+		if err != nil {
+			return 0, "", err
+		}
+		return int64(sess.ID), sess.SessionToken, nil
+	}
+
+	now := time.Now()
+	sess, err = s.sessionSvc.UpdateSession(ctx, sess.UUID, visitor_sessionsv1.UpdateSessionInput{
+		LastActivityAt: &now,
+	})
+	if err != nil {
+		return 0, "", err
+	}
+	return int64(sess.ID), sess.SessionToken, nil
+}
+
+func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, bool, error) {
+	if isNewDevice || req.SessionToken != "" {
+		return s.getOrCreateSessionForDeviceOrToken(ctx, req, v, device)
+	}
+
+	sessionID, sessionToken, err := s.getOrCreateSessionForActiveVisitor(ctx, req, v, device)
+	if err != nil {
+		return 0, "", false, err
+	}
+	return sessionID, sessionToken, false, nil
 }
 func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, site *ent.Site) (*VisitorResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
@@ -376,15 +416,13 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(`Generating New Session For The Visitor With ID: `, v.ID, `And Token: `, sessionToken, `For A IsNewSession:`, isNewSession, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 	if isNewSession && sessionID != 0 {
 		s.linkSiteVisitorAndConsent(ctx, int64(v.ID), int64(site.ID), sessionID)
 	}
 
 	res := toVisitorResponse(v)
-	if sessionToken != "" {
-		res.SessionID = sessionToken
-	}
+	res.SessionID = sessionToken
 
 	return res, nil
 }
