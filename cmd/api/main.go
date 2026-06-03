@@ -28,12 +28,12 @@ import (
 	"tracking/internal/config"
 	"tracking/internal/database"
 	"tracking/internal/middlewares"
+	"tracking/internal/modules/consents"
+	"tracking/internal/modules/events"
 	"tracking/internal/modules/health"
 	"tracking/internal/modules/sites"
 	"tracking/internal/modules/state"
 	"tracking/internal/modules/visitor_sessions"
-	"tracking/internal/modules/consents"
-	"tracking/internal/modules/events"
 	"tracking/internal/modules/visitors"
 	"tracking/internal/server"
 
@@ -122,7 +122,6 @@ func (app *application) applyMiddlewares(router *gin.Engine) {
 	}))
 	router.Use(gin.Recovery())
 
-	// Handle OPTIONS correctly when routes don't match or no OPTIONS defined
 	router.NoRoute(middlewares.Cors(), func(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "route not found"})
 	})
@@ -134,9 +133,10 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
 
 	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
-	consentsSvc := consents.RegisterV1(router, app.db.Client, sessionSvc, slog.Default())
-	visitorsSvc := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsSvc, slog.Default(), app.cfg.App)
-	events.RegisterV1(router, app.db.Client, visitorsSvc, slog.Default())
+	consentsModule := consents.RegisterV1(router, app.db.Client, slog.Default())
+	visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App)
+	consentsModule.SetSessionValidator(sessionSvc.ValidateSessionDetails)
+	events.RegisterV1(router, app.db.Client, sessionSvc.ValidateSessionDetails, slog.Default())
 
 	app.registerSwaggerRoutes(router)
 }

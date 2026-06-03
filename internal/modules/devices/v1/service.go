@@ -24,23 +24,6 @@ func NewService(repo Repository, logger *slog.Logger) *Service {
 	}
 }
 
-type DeviceResponse struct {
-	UUID            string    `json:"uuid"`
-	VisitorID       int64     `json:"visitor_id"`
-	FingerprintHash string    `json:"fingerprint_hash"`
-	DeviceType      string    `json:"device_type"`
-	OS              string    `json:"os"`
-	AddressIP       string    `json:"address_ip"`
-	Country         string    `json:"country"`
-	Region          string    `json:"region"`
-	City            string    `json:"city"`
-	Browser         string    `json:"browser"`
-	BrowserVersion  string    `json:"browser_version"`
-	Language        string    `json:"language"`
-	Timezone        string    `json:"timezone"`
-	FirstSeenAt     time.Time `json:"first_seen_at"`
-	LastSeenAt      time.Time `json:"last_seen_at"`
-}
 
 func (s *Service) GetByUUID(ctx context.Context, uuid string) (*DeviceResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)

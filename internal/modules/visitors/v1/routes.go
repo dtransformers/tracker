@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"log/slog"
 	"time"
 	"tracking/internal/config"
@@ -48,18 +47,13 @@ func (m *Module) Service() *Service {
 
 func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
+
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: func(publicKey string) (string, error) {
-			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
-			if err != nil {
-				return "", err
-			}
-			return site.SecretKey, nil
-		},
-		NonceStore: state.NewNonceStore(state.Redis),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(middlewares.DefaultSiteSecretFunc(m.sitesService)),
+		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	visitors.Use(VerifyKeys(m.sitesService))
+	visitors.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	visitors.Use(middlewares.RateLimit(1*time.Minute, 600))
 	visitors.Use(middlewares.Validation())
 	visitors.Use(middlewares.Cors())

@@ -166,15 +166,13 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		runMode = "development"
 	}
 	isDev := runMode == "development"
-	SessionExpiration := 1 * 60 // 30 * 60;
-	VisitorExpiration := 3600 * 24 * 365
 	return AppConfig{
 		Host:              mustString(env, "APP_HOST"),
 		Port:              port,
 		RunMode:           RunMode(runMode),
 		IsDev:             isDev,
-		SessionExpiration: SessionExpiration,
-		VisitorExpiration: VisitorExpiration,
+		SessionExpiration: intOrDefault(env, "SESSION_EXPIRATION", 60),
+		VisitorExpiration: intOrDefault(env, "VISITOR_EXPIRATION", 3600*24*365),
 	}
 }
 
@@ -233,9 +231,6 @@ func mustValidPort(env EnvProvider, key string) (int, error) {
 		return constants.DefaultConfig.Port, ErrPortMustBeDefined
 	}
 	v = strings.TrimSpace(v)
-	if !ok {
-		return constants.DefaultConfig.Port, ErrPortMustBeDefined
-	}
 	if v == "" {
 		return constants.DefaultConfig.Port, nil
 	}

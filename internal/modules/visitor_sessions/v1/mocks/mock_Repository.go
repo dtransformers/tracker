@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 	"tracking/internal/ent"
-	"tracking/internal/modules/visitor_sessions/v1"
+	v1 "tracking/internal/modules/visitor_sessions/v1"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -767,6 +767,75 @@ func (_c *MockRepository_Update_Call) Return(visitorSession *ent.VisitorSession,
 }
 
 func (_c *MockRepository_Update_Call) RunAndReturn(run func(ctx context.Context, uuid string, input v1.UpdateSessionInput) (*ent.VisitorSession, error)) *MockRepository_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// VerifySessionOwnership provides a mock function for the type MockRepository
+func (_mock *MockRepository) VerifySessionOwnership(ctx context.Context, visitorID int64, visitorUUID string, deviceID int64) error {
+	ret := _mock.Called(ctx, visitorID, visitorUUID, deviceID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VerifySessionOwnership")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string, int64) error); ok {
+		r0 = returnFunc(ctx, visitorID, visitorUUID, deviceID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockRepository_VerifySessionOwnership_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'VerifySessionOwnership'
+type MockRepository_VerifySessionOwnership_Call struct {
+	*mock.Call
+}
+
+// VerifySessionOwnership is a helper method to define mock.On call
+//   - ctx context.Context
+//   - visitorID int64
+//   - visitorUUID string
+//   - deviceID int64
+func (_e *MockRepository_Expecter) VerifySessionOwnership(ctx interface{}, visitorID interface{}, visitorUUID interface{}, deviceID interface{}) *MockRepository_VerifySessionOwnership_Call {
+	return &MockRepository_VerifySessionOwnership_Call{Call: _e.mock.On("VerifySessionOwnership", ctx, visitorID, visitorUUID, deviceID)}
+}
+
+func (_c *MockRepository_VerifySessionOwnership_Call) Run(run func(ctx context.Context, visitorID int64, visitorUUID string, deviceID int64)) *MockRepository_VerifySessionOwnership_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_VerifySessionOwnership_Call) Return(err error) *MockRepository_VerifySessionOwnership_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockRepository_VerifySessionOwnership_Call) RunAndReturn(run func(ctx context.Context, visitorID int64, visitorUUID string, deviceID int64) error) *MockRepository_VerifySessionOwnership_Call {
 	_c.Call.Return(run)
 	return _c
 }
