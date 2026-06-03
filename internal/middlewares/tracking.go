@@ -23,7 +23,6 @@ type TrackingInfo struct {
 	OriginalIP     string            `json:"original_ip"`
 	ForwardedIPs   []string          `json:"forwarded_ips,omitempty"`
 	UserAgent      string            `json:"user_agent"`
-	DeviceType     string            `json:"device_type"`
 	Browser        string            `json:"browser"`
 	BrowserVersion string            `json:"browser_version"`
 	OS             string            `json:"os"`
@@ -165,7 +164,6 @@ func extractGeolocation(ip string, tracking *TrackingInfo) {
 
 func parseUserAgent(tracking *TrackingInfo) {
 	if tracking.UserAgent == "" {
-		tracking.DeviceType = "unknown"
 		tracking.Browser = "unknown"
 		tracking.OS = "unknown"
 		return
@@ -173,16 +171,7 @@ func parseUserAgent(tracking *TrackingInfo) {
 
 	ua := user_agent.New(tracking.UserAgent)
 
-	if ua.Mobile() {
-		tracking.Mobile = true
-		if ua.Mobile() {
-			tracking.DeviceType = "mobile"
-		} else {
-			tracking.DeviceType = "tablet"
-		}
-	} else {
-		tracking.DeviceType = "desktop"
-	}
+	tracking.Mobile = ua.Mobile()
 
 	browserName, browserVersion := ua.Browser()
 	tracking.Browser = browserName
@@ -253,7 +242,6 @@ func Metrics(logger *slog.Logger) gin.HandlerFunc {
 			attrs = append(attrs,
 				"client_ip", tracking.OriginalIP,
 				"user_agent", tracking.UserAgent,
-				"device_type", tracking.DeviceType,
 				"browser", tracking.Browser,
 				"os", tracking.OS,
 				"mobile", tracking.Mobile,

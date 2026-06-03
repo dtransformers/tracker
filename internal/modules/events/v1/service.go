@@ -9,6 +9,7 @@ import (
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	visitorsv1 "tracking/internal/modules/visitors/v1"
+	"tracking/pkg/constants"
 )
 
 type Service struct {
@@ -26,7 +27,7 @@ func NewService(repo Repository, visitorsSvc *visitorsv1.Service, logger *slog.L
 		repo:        repo,
 		visitorsSvc: visitorsSvc,
 		logger:      logger,
-		timeout:     5 * time.Second,
+		timeout:     constants.DefaultServiceTimeout,
 	}
 }
 
@@ -88,7 +89,7 @@ func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest,
 		}
 	}
 	if sessionID == "" {
-		return nil, fmt.Errorf("UnAuthoized Request")
+		return nil, fmt.Errorf("unauthorized request")
 	}
 	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
 	if err != nil {

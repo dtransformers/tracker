@@ -46,20 +46,27 @@ func (m *Module) Service() *Service {
 	return m.service
 }
 
+// siteSecretFunc returns a SiteSecretFunc backed by the sites service.
+// Using the request context ensures timeouts and cancellations propagate correctly.
+func (m *Module) siteSecretFunc() middlewares.SiteSecretFunc {
+	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
+		site, err := m.sitesService.GetSiteKey(ctx, publicKey)
+		if err != nil {
+			return "", nil, err
+		}
+		return site.SecretKey, site, nil
+	}
+}
+
 func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
+
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: func(publicKey string) (string, error) {
-			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
-			if err != nil {
-				return "", err
-			}
-			return site.SecretKey, nil
-		},
-		NonceStore: state.NewNonceStore(state.Redis),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(m.siteSecretFunc()),
+		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	visitors.Use(VerifyKeys(m.sitesService))
+	visitors.Use(middlewares.VerifySite(m.siteSecretFunc()))
 	visitors.Use(middlewares.RateLimit(1*time.Minute, 600))
 	visitors.Use(middlewares.Validation())
 	visitors.Use(middlewares.Cors())

@@ -7,6 +7,7 @@ import (
 	"time"
 	"tracking/internal/config"
 	"tracking/internal/ent"
+	"tracking/pkg/constants"
 )
 
 type Service struct {
@@ -24,7 +25,7 @@ func NewService(repo Repository, logger *slog.Logger, appCfg config.AppConfig) *
 		repo:    repo,
 		logger:  logger,
 		appCfg:  appCfg,
-		timeout: 5 * time.Second,
+		timeout: constants.DefaultServiceTimeout,
 	}
 }
 

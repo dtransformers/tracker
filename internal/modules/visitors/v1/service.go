@@ -16,6 +16,7 @@ import (
 	devicesv1 "tracking/internal/modules/devices/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
+	"tracking/pkg/constants"
 )
 
 type Service struct {
@@ -39,7 +40,7 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 		sessionSvc:   sessionSvc,
 		consentsSvc:  consentsSvc,
 		logger:       logger,
-		timeout:      5 * time.Second,
+		timeout:      constants.DefaultServiceTimeout,
 	}
 }
 
@@ -148,21 +149,21 @@ func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, Sess
 		return nil, err
 	}
 	if session == nil {
-		return nil, errors.New("session not found,Please Clear Cookies")
+		return nil, errors.New("session not found, please clear cookies")
 	}
 	device, err := s.deviceRepo.GetByID(ctx, int(session.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found,Please Clear Cookies")
+		return nil, errors.New("device not found, please clear cookies")
 	}
 	v, err := s.getVistorByUUID(ctx, VisitorUUID)
 	if err != nil {
 		return nil, err
 	}
 	if v == nil {
-		return nil, errors.New("visitor not found, Please Clear Cookies")
+		return nil, errors.New("visitor not found, please clear cookies")
 	}
 
 	return toFullSessionDetails(v, device, session), nil
@@ -174,21 +175,21 @@ func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, Se
 		return nil, err
 	}
 	if session == nil {
-		return nil, errors.New("session not found,Please Clear Cookies")
+		return nil, errors.New("session not found, please clear cookies")
 	}
 	device, err := s.getDeviceByID(ctx, int(session.DeviceID))
 	if err != nil {
 		return nil, err
 	}
 	if device == nil {
-		return nil, errors.New("device not found,Please Clear Cookies")
+		return nil, errors.New("device not found, please clear cookies")
 	}
 	v, err := s.getVistorByUUID(ctx, VisitorUUID)
 	if err != nil {
 		return nil, err
 	}
 	if v == nil {
-		return nil, errors.New("visitor not found, Please Clear Cookies")
+		return nil, errors.New("visitor not found, please clear cookies")
 	}
 	response := toVisitorResponse(v)
 	response.SessionID = session.SessionToken
@@ -221,12 +222,12 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		visitorLastSession, err := s.sessionSvc.GetVisitorLastSession(ctx, int64(visitor.ID))
 		if err != nil {
 			if ent.IsNotFound(err) {
-				return nil, errors.New("visitor does not exisits, Please Clear Coockies")
+				return nil, errors.New("visitor does not exist, please clear cookies")
 			}
 			return nil, err
 		}
 		if visitorLastSession == nil {
-			return nil, errors.New("visitor does not exisits, Please Clear Coockies")
+			return nil, errors.New("visitor does not exist, please clear cookies")
 		}
 		visitorLastActiveSession, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 			UUID:                uuid.New().String(),
@@ -328,7 +329,11 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 
 func (s *Service) enrichDeviceTracking(req *CreateVisitorRequest, tracking *middlewares.TrackingInfo) {
 	if req.DeviceType == "" {
-		req.DeviceType = tracking.DeviceType
+		if tracking.Mobile {
+			req.DeviceType = "mobile"
+		} else {
+			req.DeviceType = "desktop"
+		}
 	}
 	if req.OS == "" {
 		req.OS = tracking.OS

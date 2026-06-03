@@ -39,43 +39,26 @@ func NewModule(client *ent.Client, sessionSvc *visitor_sessionsv1.Service, sites
 	}
 }
 
+// siteSecretFunc returns a SiteSecretFunc backed by the sites service.
+func (m *Module) siteSecretFunc() middlewares.SiteSecretFunc {
+	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
+		site, err := m.sitesService.GetSiteKey(ctx, publicKey)
+		if err != nil {
+			return "", nil, err
+		}
+		return site.SecretKey, site, nil
+	}
+}
+
 func (m *Module) Register(router *gin.RouterGroup) {
 	consents := router.Group("/consents")
+
 	consents.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: func(publicKey string) (string, error) {
-			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
-			if err != nil {
-				return "", err
-			}
-			return site.SecretKey, nil
-		},
-		NonceStore: state.NewNonceStore(state.Redis),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(m.siteSecretFunc()),
+		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	// Reusing verify keys from visitors if exported, or duplicating here.
-	// We'll assume the middlewares are shared or we use standard middleware.
-	// Since VerifyKeys was in visitors, we need to extract it or move it to middlewares.
-	// Actually we can just copy VerifyKeys logic or create it in middlewares later.
-	// For now, I will omit VerifyKeys if it's not exported, or just use it from visitors.
-	// Let's use it from tracking/internal/modules/visitors/v1 (aliased) or create it here.
-	// It's cleaner to duplicate or use middlewares. For now:
-	consents.Use(func(c *gin.Context) {
-		siteKey := c.GetHeader("X-Api-Key")
-		if siteKey == "" {
-			c.JSON(401, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-		site, err := m.sitesService.GetSiteKey(c.Request.Context(), siteKey)
-		if err != nil || site == nil {
-			c.JSON(401, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-		c.Set("site", site)
-		c.Next()
-	})
-
+	consents.Use(middlewares.VerifySite(m.siteSecretFunc()))
 	consents.Use(middlewares.RateLimit(1*time.Minute, 600))
 	consents.Use(middlewares.Validation())
 	consents.Use(middlewares.Cors())

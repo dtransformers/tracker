@@ -9,6 +9,7 @@ import (
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
+	"tracking/pkg/constants"
 )
 
 type Service struct {
@@ -26,7 +27,7 @@ func NewService(repo Repository, sessionSvc *visitor_sessionsv1.Service, logger 
 		repo:       repo,
 		sessionSvc: sessionSvc,
 		logger:     logger,
-		timeout:    5 * time.Second,
+		timeout:    constants.DefaultServiceTimeout,
 	}
 }
 

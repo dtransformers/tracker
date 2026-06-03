@@ -73,8 +73,7 @@ func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput)
 
 	now := time.Now()
 	eventBuilder.SetServerReceivedAt(now)
-	currentSchemaVersion := "v1.0.0"
-	eventBuilder.SetSchemaVersion(currentSchemaVersion)
+	eventBuilder.SetSchemaVersion(Version)
 	if ev.SdkName != nil {
 		eventBuilder.SetSdkName(*ev.SdkName)
 	}

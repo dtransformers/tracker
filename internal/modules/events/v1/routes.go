@@ -39,36 +39,30 @@ func NewModule(client *ent.Client, visitorsSvc *visitorsv1.Service, sitesService
 	}
 }
 
+func (m *Module) Service() *Service {
+	return m.service
+}
+
+// siteSecretFunc returns a SiteSecretFunc backed by the sites service.
+func (m *Module) siteSecretFunc() middlewares.SiteSecretFunc {
+	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
+		site, err := m.sitesService.GetSiteKey(ctx, publicKey)
+		if err != nil {
+			return "", nil, err
+		}
+		return site.SecretKey, site, nil
+	}
+}
+
 func (m *Module) Register(router *gin.RouterGroup) {
 	events := router.Group("/events")
+
 	events.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: func(publicKey string) (string, error) {
-			site, err := m.sitesService.GetSiteKey(context.Background(), publicKey)
-			if err != nil {
-				return "", err
-			}
-			return site.SecretKey, nil
-		},
-		NonceStore: state.NewNonceStore(state.Redis),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(m.siteSecretFunc()),
+		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	events.Use(func(c *gin.Context) {
-		siteKey := c.GetHeader("X-Api-Key")
-		if siteKey == "" {
-			c.JSON(401, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-		site, err := m.sitesService.GetSiteKey(c.Request.Context(), siteKey)
-		if err != nil || site == nil {
-			c.JSON(401, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-		c.Set("site", site)
-		c.Next()
-	})
-
+	events.Use(middlewares.VerifySite(m.siteSecretFunc()))
 	events.Use(middlewares.RateLimit(1*time.Minute, 600))
 	events.Use(middlewares.Validation())
 	events.Use(middlewares.Cors())
@@ -77,8 +71,4 @@ func (m *Module) Register(router *gin.RouterGroup) {
 
 	events.POST("/custom", m.handler.CreateEvent)
 	events.POST("/pageviews", m.handler.CreatePageView)
-}
-
-func (m *Module) Service() *Service {
-	return m.service
 }

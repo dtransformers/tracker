@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -13,7 +14,50 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"tracking/internal/ent"
 )
+
+// SiteSecretFunc is a function that resolves a site's secret key from its public key.
+// It returns the secret key and any error. Used by HMAC and VerifySite middlewares.
+type SiteSecretFunc func(ctx context.Context, publicKey string) (secretKey string, site *ent.Site, err error)
+
+// HMACSecretKeyFunc builds the GetSecretKey callback used by HMACConfig from a SiteSecretFunc.
+// This eliminates the repeated inline closure across all route registrations.
+func HMACSecretKeyFunc(fn SiteSecretFunc) func(string) (string, error) {
+	return func(publicKey string) (string, error) {
+		secretKey, _, err := fn(context.Background(), publicKey)
+		return secretKey, err
+	}
+}
+
+// VerifySite resolves the site from the public key set by the HMAC middleware,
+// validates it is active/not-deleted, and stores it in the Gin context as "site".
+// This replaces the duplicated inline closure in consents/v1 and events/v1 routes.
+func VerifySite(fn SiteSecretFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		pubKey := c.GetString("publicKey")
+		if pubKey == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing public key"})
+			return
+		}
+
+		_, site, err := fn(c.Request.Context(), pubKey)
+		if err != nil || site == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid site key"})
+			return
+		}
+
+		if !site.IsActive || site.IsDeleted {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Site is inactive or deleted"})
+			return
+		}
+
+		c.Set("site", site)
+		c.Next()
+	}
+}
+
 
 type HMACConfig struct {
 	GetSecretKey func(publicKey string) (string, error)
