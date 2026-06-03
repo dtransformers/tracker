@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -13,20 +14,55 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"tracking/internal/ent"
 )
 
-type HMACConfig struct {
-	GetSecretKey func(publicKey string) (string, error)
-
-	MaxClockSkew time.Duration
-
-	NonceStore NonceStore
-
-	RequireContentInSignature bool
+type SiteProvider interface {
+	GetSiteKey(ctx context.Context, publicKey string) (*ent.Site, error)
 }
 
-type NonceStore interface {
-	CheckAndStore(publicKey, nonce string, expiry time.Time) bool
+type SiteSecretFunc func(ctx context.Context, publicKey string) (secretKey string, site *ent.Site, err error)
+
+func DefaultSiteSecretFunc(provider SiteProvider) SiteSecretFunc {
+	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
+		site, err := provider.GetSiteKey(ctx, publicKey)
+		if err != nil {
+			return "", nil, err
+		}
+		return site.SecretKey, site, nil
+	}
+}
+
+func HMACSecretKeyFunc(fn SiteSecretFunc) func(string) (string, error) {
+	return func(publicKey string) (string, error) {
+		secretKey, _, err := fn(context.Background(), publicKey)
+		return secretKey, err
+	}
+}
+
+func VerifySite(fn SiteSecretFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		pubKey := c.GetString("publicKey")
+		if pubKey == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing public key"})
+			return
+		}
+
+		_, site, err := fn(c.Request.Context(), pubKey)
+		if err != nil || site == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid site key"})
+			return
+		}
+
+		if !site.IsActive || site.IsDeleted {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Site is inactive or deleted"})
+			return
+		}
+
+		c.Set("site", site)
+		c.Next()
+	}
 }
 
 func HMAC(config HMACConfig) gin.HandlerFunc {

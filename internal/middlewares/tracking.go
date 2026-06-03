@@ -19,30 +19,6 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-type TrackingInfo struct {
-	OriginalIP     string            `json:"original_ip"`
-	ForwardedIPs   []string          `json:"forwarded_ips,omitempty"`
-	UserAgent      string            `json:"user_agent"`
-	DeviceType     string            `json:"device_type"`
-	Browser        string            `json:"browser"`
-	BrowserVersion string            `json:"browser_version"`
-	OS             string            `json:"os"`
-	Platform       string            `json:"platform"`
-	Mobile         bool              `json:"mobile"`
-	Bot            bool              `json:"bot"`
-	Cookies        map[string]string `json:"cookies,omitempty"`
-	Referer        string            `json:"referer,omitempty"`
-	AcceptLanguage string            `json:"accept_language,omitempty"`
-	Host           string            `json:"host"`
-	Timestamp      time.Time         `json:"timestamp"`
-	Country        string            `json:"country,omitempty"`
-	Region         string            `json:"region,omitempty"`
-	City           string            `json:"city,omitempty"`
-	Timezone       string            `json:"timezone,omitempty"`
-}
-
-const TrackingInfoKey = "tracking_info"
-
 func RequestTracking() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tracking := &TrackingInfo{
@@ -60,6 +36,10 @@ func RequestTracking() gin.HandlerFunc {
 		parseUserAgent(tracking)
 
 		tracking.Cookies = extractCookies(c)
+		if tracking.Cookies != nil {
+			tracking.VisitorUUID = tracking.Cookies["visitor_uuid"]
+			tracking.SessionUUID = tracking.Cookies["session_id"]
+		}
 
 		tracking.Referer = c.Request.Referer()
 		tracking.AcceptLanguage = c.GetHeader("Accept-Language")
@@ -165,7 +145,6 @@ func extractGeolocation(ip string, tracking *TrackingInfo) {
 
 func parseUserAgent(tracking *TrackingInfo) {
 	if tracking.UserAgent == "" {
-		tracking.DeviceType = "unknown"
 		tracking.Browser = "unknown"
 		tracking.OS = "unknown"
 		return
@@ -173,16 +152,7 @@ func parseUserAgent(tracking *TrackingInfo) {
 
 	ua := user_agent.New(tracking.UserAgent)
 
-	if ua.Mobile() {
-		tracking.Mobile = true
-		if ua.Mobile() {
-			tracking.DeviceType = "mobile"
-		} else {
-			tracking.DeviceType = "tablet"
-		}
-	} else {
-		tracking.DeviceType = "desktop"
-	}
+	tracking.Mobile = ua.Mobile()
 
 	browserName, browserVersion := ua.Browser()
 	tracking.Browser = browserName
@@ -253,7 +223,6 @@ func Metrics(logger *slog.Logger) gin.HandlerFunc {
 			attrs = append(attrs,
 				"client_ip", tracking.OriginalIP,
 				"user_agent", tracking.UserAgent,
-				"device_type", tracking.DeviceType,
 				"browser", tracking.Browser,
 				"os", tracking.OS,
 				"mobile", tracking.Mobile,
@@ -297,7 +266,7 @@ func Cors() gin.HandlerFunc {
 		if origin == "" {
 			origin = "*" // Fallback
 		}
-		
+
 		c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-API-Key, X-Signature, X-Timestamp, X-Nonce, X-Request-Id, X-Real-IP, X-Forwarded-For, CF-Connecting-IP, True-Client-IP")

@@ -71,18 +71,15 @@ func Run(ctx context.Context, handler http.Handler, s Settings) error {
 
 	select {
 	case <-ctx.Done():
-		// external cancellation
 	case <-stop:
-		// OS signal
 	case err := <-errCh:
-		// server exited early
 		if err == nil || errors.Is(err, http.ErrServerClosed) {
 			return nil
 		}
 		return fmt.Errorf("server error: %w", err)
 	}
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), defaultIfZero(s.ShutdownTimeout, 10*time.Second))
+	shutdownCtx, cancel := context.WithTimeout(ctx, defaultIfZero(s.ShutdownTimeout, 10*time.Second))
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {

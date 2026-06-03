@@ -38,21 +38,6 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-type CreateSiteInput struct {
-	UUID      string
-	Name      string
-	Domain    string
-	TenantID  int64
-	PublicKey string
-	SecretKey string
-}
-
-type UpdateSiteInput struct {
-	Name     *string
-	Domain   *string
-	TenantID *int64
-	IsActive *bool
-}
 
 func (r *entRepository) Create(ctx context.Context, input CreateSiteInput) (*ent.Site, error) {
 	site, err := r.client.Site.

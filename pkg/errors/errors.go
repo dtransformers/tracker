@@ -10,6 +10,7 @@ type HTTPError interface {
 	error
 	StatusCode() int
 	Unwrap() error
+	GetMessage() string
 }
 
 type BaseError struct {
@@ -17,6 +18,10 @@ type BaseError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Cause   error  `json:"cause,omitempty"`
+}
+
+func (e *BaseError) GetMessage() string {
+	return e.Message
 }
 
 func unwrapCause(cause []error) error {

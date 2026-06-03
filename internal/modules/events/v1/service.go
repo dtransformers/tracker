@@ -8,56 +8,40 @@ import (
 
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
-	visitorsv1 "tracking/internal/modules/visitors/v1"
+	"tracking/pkg/constants"
 )
 
 type Service struct {
 	repo        Repository
-	visitorsSvc *visitorsv1.Service
 	logger      *slog.Logger
 	timeout     time.Duration
 }
 
-func NewService(repo Repository, visitorsSvc *visitorsv1.Service, logger *slog.Logger) *Service {
+func NewService(repo Repository, logger *slog.Logger) *Service {
 	if logger == nil {
 		logger = slog.Default()
 	}
 	return &Service{
 		repo:        repo,
-		visitorsSvc: visitorsSvc,
 		logger:      logger,
-		timeout:     5 * time.Second,
+		timeout:     constants.DefaultServiceTimeout,
 	}
 }
 
-type CreateEventRequest struct {
-	TrackingEvent
-}
 
 func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site *ent.Site) (*ent.VisitorEvent, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var visitorUUID string
-	var sessionID string
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		if tracking.Cookies != nil {
-			visitorUUID = tracking.Cookies["visitor_uuid"]
-			sessionID = tracking.Cookies["session_id"]
-		}
-	}
-	if sessionID == "" || visitorUUID == "" {
-		return nil, fmt.Errorf("unauthorized request")
-	}
-	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve session: %w", err)
+	details, ok := middlewares.GetSessionDetails(ctx)
+	if !ok || details == nil {
+		return nil, fmt.Errorf("failed to retrieve session details from context")
 	}
 
 	ev, err := s.repo.CreateEvent(ctx, CreateEventInput{
-		SessionID: int64(details.Session.ID),
-		VisitorID: int64(details.Visitor.ID),
-		DeviceID:  int64(details.Device.ID),
+		SessionID: details.SessionID,
+		VisitorID: details.VisitorID,
+		DeviceID:  details.DeviceID,
 		Event:     &req.TrackingEvent,
 	})
 	if err != nil {
@@ -67,38 +51,20 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site 
 	return ev, nil
 }
 
-type CreatePageViewRequest struct {
-	SessionToken    string `json:"session_token"`
-	FingerprintHash string `json:"fingerprint_hash"`
-	URL             string `json:"url" binding:"required"`
-	Title           string `json:"title"`
-	Referrer        string `json:"referrer"`
-}
 
 func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest, site *ent.Site) (*ent.PageView, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var visitorUUID string
-	var sessionID string
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		if tracking.Cookies != nil {
-			visitorUUID = tracking.Cookies["visitor_uuid"]
-			sessionID = tracking.Cookies["session_id"]
-		}
-	}
-	if sessionID == "" {
-		return nil, fmt.Errorf("UnAuthoized Request")
-	}
-	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve session: %w", err)
+	details, ok := middlewares.GetSessionDetails(ctx)
+	if !ok || details == nil {
+		return nil, fmt.Errorf("failed to retrieve session details from context")
 	}
 
 	pv, err := s.repo.CreatePageView(ctx, CreatePageViewInput{
-		SessionID: int64(details.Session.ID),
-		VisitorID: int64(details.Visitor.ID),
-		DeviceID:  int64(details.Device.ID),
+		SessionID: details.SessionID,
+		VisitorID: details.VisitorID,
+		DeviceID:  details.DeviceID,
 		URL:       req.URL,
 		Title:     req.Title,
 		Referrer:  req.Referrer,
