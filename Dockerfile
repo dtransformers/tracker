@@ -7,8 +7,9 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies (if needed)
-RUN apk add --no-cache git ca-certificates
+# Install build dependencies and create a non-root user
+RUN apk add --no-cache git ca-certificates tzdata && \
+    adduser -D -g '' appuser
 
 # Enable reproducible builds & module caching
 ENV CGO_ENABLED=0 \
@@ -19,8 +20,12 @@ ENV CGO_ENABLED=0 \
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source
-COPY . .
+# Copy source explicitly instead of recursively
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY pkg/ ./pkg/
+COPY docs/ ./docs/
+COPY tools/ ./tools/
 
 # Build-time metadata (inject at build time)
 ARG VERSION=dev
@@ -33,9 +38,7 @@ RUN go build -trimpath -ldflags "\
     -X main.version=${VERSION} \
     -X main.commit=${COMMIT} \
     -X main.buildTime=${BUILD_TIME}" \
-    -o /out/app ./cmd/app
-
-
+    -o /out/app ./cmd/api
 
 
 ############################
@@ -43,12 +46,16 @@ RUN go build -trimpath -ldflags "\
 ############################
 FROM scratch
 
-# CA certificates
+# Copy CA certificates and user/group from builder
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+# Use the non-root user
+USER appuser:appuser
 
 # Copy binary
 COPY --from=builder /out/app /app
-
 
 ENV TMPDIR=/tmp
 VOLUME ["/tmp"]
