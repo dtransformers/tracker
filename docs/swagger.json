@@ -718,21 +718,56 @@
         "internal_modules_events_v1.CreateEventRequest": {
             "type": "object",
             "required": [
-                "event_name"
+                "category",
+                "name",
+                "occurred_at",
+                "type"
             ],
             "properties": {
-                "event_name": {
-                    "type": "string"
+                "category": {
+                    "$ref": "#/definitions/v1.EventCategory"
                 },
-                "event_properties": {
-                    "type": "object",
-                    "additionalProperties": true
+                "click_ids": {
+                    "$ref": "#/definitions/v1.PlatformClickIds"
+                },
+                "event_id": {
+                    "type": "string"
                 },
                 "fingerprint_hash": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
+                "occurred_at": {
+                    "type": "string"
+                },
+                "page_id": {
+                    "type": "integer"
+                },
+                "schema_version": {
+                    "type": "string"
+                },
+                "sdk_name": {
+                    "type": "string"
+                },
+                "sdk_version": {
+                    "type": "string"
+                },
+                "sequence": {
+                    "type": "integer"
+                },
+                "server_received_at": {
+                    "type": "string"
+                },
                 "session_token": {
                     "type": "string"
+                },
+                "target": {
+                    "$ref": "#/definitions/v1.TargetProps"
+                },
+                "type": {
+                    "$ref": "#/definitions/v1.EventType"
                 }
             }
         },
@@ -813,6 +848,80 @@
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.AuthProvider": {
+            "type": "string",
+            "enum": [
+                "email",
+                "google",
+                "facebook",
+                "apple",
+                "twitter",
+                "github",
+                "sso"
+            ],
+            "x-enum-varnames": [
+                "AuthProviderEmail",
+                "AuthProviderGoogle",
+                "AuthProviderFacebook",
+                "AuthProviderApple",
+                "AuthProviderTwitter",
+                "AuthProviderGithub",
+                "AuthProviderSSO"
+            ]
+        },
+        "v1.CommerceItem": {
+            "type": "object",
+            "properties": {
+                "affiliation": {
+                    "type": "string"
+                },
+                "coupon": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "discount": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "item_brand": {
+                    "type": "string"
+                },
+                "item_category": {
+                    "type": "string"
+                },
+                "item_category2": {
+                    "type": "string"
+                },
+                "item_category3": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "string"
+                },
+                "item_list_id": {
+                    "type": "string"
+                },
+                "item_list_name": {
+                    "type": "string"
+                },
+                "item_name": {
+                    "type": "string"
+                },
+                "item_variant": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
                 }
             }
         },
@@ -904,6 +1013,191 @@
                 }
             }
         },
+        "v1.ErrorSeverity": {
+            "type": "string",
+            "enum": [
+                "info",
+                "warning",
+                "error",
+                "fatal"
+            ],
+            "x-enum-varnames": [
+                "ErrorSeverityInfo",
+                "ErrorSeverityWarning",
+                "ErrorSeverityError",
+                "ErrorSeverityFatal"
+            ]
+        },
+        "v1.EventCategory": {
+            "type": "string",
+            "enum": [
+                "navigation.page_view",
+                "navigation.page_leave",
+                "navigation.page_redirect",
+                "navigation.history_change",
+                "interaction.click",
+                "interaction.right_click",
+                "interaction.double_click",
+                "interaction.hover",
+                "interaction.scroll",
+                "interaction.keyboard",
+                "interaction.touch",
+                "interaction.drag",
+                "interaction.focus",
+                "interaction.blur",
+                "interaction.copy",
+                "interaction.paste",
+                "interaction.form_start",
+                "interaction.form_submit",
+                "interaction.form_abandon",
+                "interaction.form_error",
+                "interaction.input_change",
+                "engagement.read",
+                "engagement.content_view",
+                "engagement.content_share",
+                "engagement.content_save",
+                "engagement.download",
+                "engagement.search",
+                "engagement.video_watch",
+                "engagement.video_play",
+                "engagement.video_pause",
+                "engagement.video_seek",
+                "engagement.video_complete",
+                "engagement.video_buffer",
+                "engagement.video_quality",
+                "engagement.video_progress",
+                "authentication.login",
+                "authentication.logout",
+                "authentication.signup",
+                "authentication.password_reset",
+                "authentication.token_refresh",
+                "authentication.mfa_challenge",
+                "communication.message_sent",
+                "communication.contact_form",
+                "communication.chat_open",
+                "communication.chat_close",
+                "communication.notification_click",
+                "communication.notification_dismiss",
+                "communication.subscribe",
+                "communication.unsubscribe",
+                "communication.lead_submit",
+                "commerce.view_item",
+                "commerce.view_item_list",
+                "commerce.select_item",
+                "commerce.add_to_cart",
+                "commerce.remove_from_cart",
+                "commerce.view_cart",
+                "commerce.begin_checkout",
+                "commerce.add_payment_info",
+                "commerce.add_shipping_info",
+                "commerce.purchase",
+                "commerce.refund",
+                "commerce.add_to_wishlist",
+                "commerce.promo_view",
+                "commerce.promo_click",
+                "system.error",
+                "system.warning",
+                "system.performance",
+                "system.consent_update",
+                "system.app_crash",
+                "system.experiment_seen"
+            ],
+            "x-enum-varnames": [
+                "EventCategoryPageView",
+                "EventCategoryPageLeave",
+                "EventCategoryPageRedirect",
+                "EventCategoryHistoryChange",
+                "EventCategoryClick",
+                "EventCategoryRightClick",
+                "EventCategoryDoubleClick",
+                "EventCategoryHover",
+                "EventCategoryScroll",
+                "EventCategoryKeyboard",
+                "EventCategoryTouch",
+                "EventCategoryDrag",
+                "EventCategoryFocus",
+                "EventCategoryBlur",
+                "EventCategoryCopy",
+                "EventCategoryPaste",
+                "EventCategoryFormStart",
+                "EventCategoryFormSubmit",
+                "EventCategoryFormAbandon",
+                "EventCategoryFormError",
+                "EventCategoryInputChange",
+                "EventCategoryRead",
+                "EventCategoryContentView",
+                "EventCategoryContentShare",
+                "EventCategoryContentSave",
+                "EventCategoryDownload",
+                "EventCategorySearch",
+                "EventCategoryVideoWatch",
+                "EventCategoryVideoPlay",
+                "EventCategoryVideoPause",
+                "EventCategoryVideoSeek",
+                "EventCategoryVideoComplete",
+                "EventCategoryVideoBuffer",
+                "EventCategoryVideoQuality",
+                "EventCategoryVideoProgress",
+                "EventCategoryLogin",
+                "EventCategoryLogout",
+                "EventCategorySignup",
+                "EventCategoryPasswordReset",
+                "EventCategoryTokenRefresh",
+                "EventCategoryMFAChallenge",
+                "EventCategoryMessageSent",
+                "EventCategoryContactForm",
+                "EventCategoryChatOpen",
+                "EventCategoryChatClose",
+                "EventCategoryNotificationClick",
+                "EventCategoryNotificationDismiss",
+                "EventCategorySubscribe",
+                "EventCategoryUnsubscribe",
+                "EventCategoryLeadSubmit",
+                "EventCategoryViewItem",
+                "EventCategoryViewItemList",
+                "EventCategorySelectItem",
+                "EventCategoryAddToCart",
+                "EventCategoryRemoveFromCart",
+                "EventCategoryViewCart",
+                "EventCategoryBeginCheckout",
+                "EventCategoryAddPaymentInfo",
+                "EventCategoryAddShippingInfo",
+                "EventCategoryPurchase",
+                "EventCategoryRefund",
+                "EventCategoryAddToWishlist",
+                "EventCategoryPromoView",
+                "EventCategoryPromoClick",
+                "EventCategoryError",
+                "EventCategoryWarning",
+                "EventCategoryPerformance",
+                "EventCategoryConsentUpdate",
+                "EventCategoryAppCrash",
+                "EventCategoryExperimentSeen"
+            ]
+        },
+        "v1.EventType": {
+            "type": "string",
+            "enum": [
+                "navigation",
+                "interaction",
+                "engagement",
+                "authentication",
+                "communication",
+                "commerce",
+                "system",
+                "custom"
+            ],
+            "x-enum-varnames": [
+                "EventTypeNavigation",
+                "EventTypeInteraction",
+                "EventTypeEngagement",
+                "EventTypeAuthentication",
+                "EventTypeCommunication",
+                "EventTypeCommerce",
+                "EventTypeSystem",
+                "EventTypeCustom"
+            ]
+        },
         "v1.ListResponse": {
             "type": "object",
             "properties": {
@@ -917,6 +1211,97 @@
                     "type": "integer"
                 }
             }
+        },
+        "v1.MediaType": {
+            "type": "string",
+            "enum": [
+                "video",
+                "audio",
+                "live"
+            ],
+            "x-enum-varnames": [
+                "MediaTypeVideo",
+                "MediaTypeAudio",
+                "MediaTypeLive"
+            ]
+        },
+        "v1.MouseButton": {
+            "type": "string",
+            "enum": [
+                "left",
+                "right",
+                "middle"
+            ],
+            "x-enum-varnames": [
+                "MouseButtonLeft",
+                "MouseButtonRight",
+                "MouseButtonMiddle"
+            ]
+        },
+        "v1.PlatformClickIds": {
+            "type": "object",
+            "properties": {
+                "ScCid": {
+                    "type": "string"
+                },
+                "dclid": {
+                    "type": "string"
+                },
+                "epik": {
+                    "type": "string"
+                },
+                "fbc": {
+                    "type": "string"
+                },
+                "fbclid": {
+                    "type": "string"
+                },
+                "fbp": {
+                    "type": "string"
+                },
+                "gbraid": {
+                    "type": "string"
+                },
+                "gclid": {
+                    "type": "string"
+                },
+                "li_fat_id": {
+                    "type": "string"
+                },
+                "liveramp_ats_id": {
+                    "type": "string"
+                },
+                "msclkid": {
+                    "type": "string"
+                },
+                "ttclid": {
+                    "type": "string"
+                },
+                "ttp": {
+                    "type": "string"
+                },
+                "twclid": {
+                    "type": "string"
+                },
+                "wbraid": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.Priority": {
+            "type": "string",
+            "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+            ],
+            "x-enum-varnames": [
+                "PriorityLow",
+                "PriorityMedium",
+                "PriorityHigh",
+                "PriorityCritical"
+            ]
         },
         "v1.Response": {
             "type": "object",
@@ -944,6 +1329,269 @@
                 },
                 "uuid": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.ScrollDirection": {
+            "type": "string",
+            "enum": [
+                "up",
+                "down"
+            ],
+            "x-enum-varnames": [
+                "ScrollDirectionUp",
+                "ScrollDirectionDown"
+            ]
+        },
+        "v1.TargetElementType": {
+            "type": "string",
+            "enum": [
+                "button",
+                "link",
+                "image",
+                "video",
+                "form",
+                "input",
+                "select",
+                "checkbox",
+                "radio",
+                "textarea",
+                "banner",
+                "modal",
+                "nav_item",
+                "product_card",
+                "carousel",
+                "tab",
+                "accordion",
+                "search_bar",
+                "notification",
+                "toast",
+                "dropdown",
+                "unknown"
+            ],
+            "x-enum-varnames": [
+                "TargetElementTypeButton",
+                "TargetElementTypeLink",
+                "TargetElementTypeImage",
+                "TargetElementTypeVideo",
+                "TargetElementTypeForm",
+                "TargetElementTypeInput",
+                "TargetElementTypeSelect",
+                "TargetElementTypeCheckbox",
+                "TargetElementTypeRadio",
+                "TargetElementTypeTextarea",
+                "TargetElementTypeBanner",
+                "TargetElementTypeModal",
+                "TargetElementTypeNavItem",
+                "TargetElementTypeProductCard",
+                "TargetElementTypeCarousel",
+                "TargetElementTypeTab",
+                "TargetElementTypeAccordion",
+                "TargetElementTypeSearchBar",
+                "TargetElementTypeNotification",
+                "TargetElementTypeToast",
+                "TargetElementTypeDropdown",
+                "TargetElementTypeUnknown"
+            ]
+        },
+        "v1.TargetProps": {
+            "type": "object",
+            "properties": {
+                "affiliation": {
+                    "type": "string"
+                },
+                "auth_method": {
+                    "type": "string"
+                },
+                "auth_provider": {
+                    "$ref": "#/definitions/v1.AuthProvider"
+                },
+                "button_id": {
+                    "type": "string"
+                },
+                "button_name": {
+                    "type": "string"
+                },
+                "click_x": {
+                    "type": "integer"
+                },
+                "click_y": {
+                    "type": "integer"
+                },
+                "component": {
+                    "type": "string"
+                },
+                "component_name": {
+                    "type": "string"
+                },
+                "coupon": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "custom": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "duration_ms": {
+                    "type": "integer"
+                },
+                "element_class": {
+                    "type": "string"
+                },
+                "element_id": {
+                    "type": "string"
+                },
+                "element_name": {
+                    "type": "string"
+                },
+                "element_selector": {
+                    "type": "string"
+                },
+                "element_text": {
+                    "type": "string"
+                },
+                "element_type": {
+                    "$ref": "#/definitions/v1.TargetElementType"
+                },
+                "element_x": {
+                    "type": "integer"
+                },
+                "element_y": {
+                    "type": "integer"
+                },
+                "error_code": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "error_severity": {
+                    "$ref": "#/definitions/v1.ErrorSeverity"
+                },
+                "error_stack": {
+                    "type": "string"
+                },
+                "feature": {
+                    "type": "string"
+                },
+                "form_completion_pct": {
+                    "type": "number"
+                },
+                "form_field": {
+                    "type": "string"
+                },
+                "form_field_count": {
+                    "type": "integer"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "form_name": {
+                    "type": "string"
+                },
+                "form_value_hash": {
+                    "type": "string"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "http_status": {
+                    "type": "integer"
+                },
+                "is_new_user": {
+                    "type": "boolean"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.CommerceItem"
+                    }
+                },
+                "media_current_time_ms": {
+                    "type": "integer"
+                },
+                "media_duration_ms": {
+                    "type": "integer"
+                },
+                "media_fullscreen": {
+                    "type": "boolean"
+                },
+                "media_id": {
+                    "type": "string"
+                },
+                "media_percent": {
+                    "type": "number"
+                },
+                "media_provider": {
+                    "type": "string"
+                },
+                "media_quality": {
+                    "type": "string"
+                },
+                "media_sound_on": {
+                    "type": "boolean"
+                },
+                "media_title": {
+                    "type": "string"
+                },
+                "media_type": {
+                    "$ref": "#/definitions/v1.MediaType"
+                },
+                "mouse_button": {
+                    "$ref": "#/definitions/v1.MouseButton"
+                },
+                "page_name": {
+                    "type": "string"
+                },
+                "payment_type": {
+                    "type": "string"
+                },
+                "priority": {
+                    "$ref": "#/definitions/v1.Priority"
+                },
+                "scroll_depth_px": {
+                    "type": "integer"
+                },
+                "scroll_direction": {
+                    "$ref": "#/definitions/v1.ScrollDirection"
+                },
+                "scroll_percent": {
+                    "type": "number"
+                },
+                "search_filters": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "search_results_count": {
+                    "type": "integer"
+                },
+                "search_term": {
+                    "type": "string"
+                },
+                "share_method": {
+                    "type": "string"
+                },
+                "share_platform": {
+                    "type": "string"
+                },
+                "shipping": {
+                    "type": "number"
+                },
+                "shipping_tier": {
+                    "type": "string"
+                },
+                "tax": {
+                    "type": "number"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
                 }
             }
         },
@@ -998,9 +1646,6 @@
         "v1.VisitorResponse": {
             "type": "object",
             "properties": {
-                "anonymous_id": {
-                    "type": "string"
-                },
                 "first_seen_at": {
                     "type": "string"
                 },

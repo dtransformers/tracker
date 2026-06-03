@@ -38,19 +38,22 @@ since the tracking module is an open module, for every website that uses it, the
 TABLE sites {
   id bigint
   uuid string
-  domaine_name string
-  is_active string
-  is_deleted string
-  key string
+  name string
+  domain string
+  tenant_id bigint
+  public_key string
+  secret_key string
+  is_active boolean
+  is_deleted boolean
   created_at timestamp
   updated_at timestamp
+  deleted_at timestamp
 }
 ```
 
 #### Visitors
 
-```json
-
+```
 TABLE visitors {
   id bigint
   uuid string
@@ -69,19 +72,18 @@ TABLE visitors {
 }
 ```
 
-#### Sites Visitors
+#### Site Visitors
 
 ```
-TABLE site_visotrs {
+TABLE site_visitors {
   id bigint
-  uuid string bigint
+  uuid string
   visitor_id bigint
   session_id bigint
   site_id bigint
 
   created_at timestamp
   updated_at timestamp
-
 }
 ```
 
@@ -90,12 +92,11 @@ TABLE site_visotrs {
 ```
 TABLE devices {
   id bigint
+  uuid string
   visitor_id bigint
 
   fingerprint_hash string
-
   device_type string
-
   os string
 
   address_ip string
@@ -116,6 +117,7 @@ TABLE devices {
 ```
 TABLE visitor_sessions {
   id bigint
+  uuid string
   visitor_id bigint
   device_id bigint
 
@@ -123,6 +125,7 @@ TABLE visitor_sessions {
 
   started_at timestamp
   ended_at timestamp
+  is_active boolean
   last_activity_at timestamp
 
   entry_page string
@@ -131,6 +134,9 @@ TABLE visitor_sessions {
   acquisition_source string
   acquisition_medium string
   acquisition_campaign string
+  campaign_term string
+  campaign_content string
+  campaign_id string
 
   referrer_host string
 
@@ -143,6 +149,7 @@ TABLE visitor_sessions {
 ```
 TABLE visitor_events {
   id bigint
+  uuid string
 
   visitor_id bigint
   session_id bigint
@@ -150,12 +157,16 @@ TABLE visitor_events {
 
   type string
   name string
+  status string
+  error_message string
+  processing_time_ms bigint
 
   page_url string
   referrer_url string
 
   properties jsonb
 
+  timestamp timestamp
   created_at timestamp
 }
 ```
@@ -163,32 +174,17 @@ TABLE visitor_events {
 #### Page Views
 
 ```
-TABLE pageviews {
+TABLE page_views {
   id bigint
+  uuid string
 
   visitor_id bigint
   session_id bigint
+  device_id bigint
 
-  path string
+  url string
   title string
-
-  viewed_at timestamp
-}
-```
-
-#### Identity Links
-
-```
-TABLE visitor_identities {
-  id bigint
-
-  visitor_id bigint
-
-  type string
-  value string
-
-  verified boolean
-  confidence_score decimal
+  referrer string
 
   created_at timestamp
 }
@@ -197,26 +193,17 @@ TABLE visitor_identities {
 #### Visitors Consent
 
 ```
-visitor_consents {
-  id
-  visitor_id
+TABLE visitor_consents {
+  id bigint
+  uuid string
+  visitor_id bigint
+  site_id bigint
 
-  analytics_allowed boolean
-  marketing_allowed boolean
-  personalization_allowed boolean
+  consent_type string
+  status string
 
-  tracking_allowed boolean
-
-  ad_storage_allowed boolean
-  ad_personalization_allowed boolean
-
-  consent_source string   -- cookie banner, login, POS, etc.
-  consent_version string
-
-  region string           -- EU, US, etc.
-
-  created_at
-  updated_at
+  created_at timestamp
+  updated_at timestamp
 }
 ```
 
@@ -239,3 +226,32 @@ As web-based tracking moves past standard desktop cookies, consent awareness fac
 
 - **Cross-Device Authentication (XDAuth):** Modern workflows often decouple authentication across multiple devices (e.g., using a phone push notification or QR code to log into a browser). Studies reveal a massive gap here: over half of major web services fail to provide any context about the target device requesting authorization, meaning users frequently approve web sessions without a clear "right to know" what they are consenting to (Zhang, 2026).
 - **Wearable Ecosystems:** Connected health applications and consumer wearables generate highly detailed biometric tracking data that is often mirrored or handled through web platforms. Consumer data protection groups frequently warn that these ecosystems lack explicit boundaries; background syncs and alternative permissions make revoking web-tracking consent incredibly difficult for the average user (Doherty, 2025; Welzel et al., 2025).
+
+## Development & Deployment
+
+This project utilizes a modern containerized workflow and automated CI/CD pipeline to ensure code quality and security.
+
+### Docker Compose
+You can easily spin up the entire infrastructure locally using `docker-compose`. The environment includes:
+- **API Service:** Runs the main Go tracking application on ports `3000`/`8080`.
+- **PostgreSQL Database:** Handles persistent data modeling for visitors, sessions, and events.
+- **Redis:** Operates as a fast, in-memory caching layer for tracking state.
+
+Run the stack locally:
+```bash
+docker compose up -d
+```
+
+### Dockerfile Security Best Practices
+The `Dockerfile` is built with a multi-stage approach and incorporates several security hardening practices:
+- **Non-Root Execution:** A dedicated `appuser` is created in the build stage and carried over to the `scratch` runtime image.
+- **Explicit Artifact Copying:** Instead of a wildcard `COPY . .` that could leak sensitive directories (like `.git/` or `.env`), only explicit application packages (`cmd/`, `internal/`, `pkg/`, `docs/`, `tools/`) are moved into the builder.
+
+### CI/CD Pipeline
+The repository uses GitHub Actions (`.github/workflows/ci.yaml`) for strict backend enforcement on `push` and `pull_request` to the `main` branch. The pipeline automatically:
+1. Provisions a Go 1.22 environment.
+2. Manages file permissions to ensure Bash hooks (`validate_structure.sh`, `validate_scope.sh`, etc.) execute reliably.
+3. Lints the codebase using `go vet`.
+4. Builds the Go application binaries to ensure compilation integrity.
+5. Runs the unit test suite natively.
+6. Verifies that the Docker image builds successfully.

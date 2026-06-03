@@ -311,6 +311,22 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 		}
 	}
 
+	s.enrichDeviceTracking(req, tracking)
+
+	req.AddressIP = tracking.OriginalIP
+
+	if req.ReferrerHost == "" {
+		if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
+			req.ReferrerHost = u.Host
+		} else {
+			req.ReferrerHost = tracking.Referer
+		}
+	}
+
+	s.enrichGeoTracking(req, tracking)
+}
+
+func (s *Service) enrichDeviceTracking(req *CreateVisitorRequest, tracking *middlewares.TrackingInfo) {
 	if req.DeviceType == "" {
 		req.DeviceType = tracking.DeviceType
 	}
@@ -326,16 +342,9 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 	if req.Language == "" {
 		req.Language = tracking.AcceptLanguage
 	}
-	req.AddressIP = tracking.OriginalIP
+}
 
-	if req.ReferrerHost == "" {
-		if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
-			req.ReferrerHost = u.Host
-		} else {
-			req.ReferrerHost = tracking.Referer
-		}
-	}
-
+func (s *Service) enrichGeoTracking(req *CreateVisitorRequest, tracking *middlewares.TrackingInfo) {
 	if req.Country == "" {
 		req.Country = tracking.Country
 	}
@@ -727,114 +736,4 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 	}
 
 	return session, nil
-}
-
-func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site *ent.Site) (*EventResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
-
-	geo := CreateVisitorRequest{
-		Country:  req.Country,
-		Region:   req.Region,
-		City:     req.City,
-		Timezone: req.Timezone,
-	}
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		s.enrichRequestWithTracking(&geo, tracking)
-	}
-
-	session, err := s.ResolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
-	if err != nil {
-		return nil, err
-	}
-
-	v, err := s.repo.GetByID(ctx, session.VisitorID)
-	if err != nil {
-		return nil, err
-	}
-
-	device, err := s.getDevice(ctx, req.FingerprintHash)
-	if err != nil {
-		return nil, err
-	}
-	if device == nil {
-		return nil, fmt.Errorf("device not found")
-	}
-
-	ev, err := s.repo.CreateEvent(ctx, CreateEventInput{
-		SessionID:       int64(session.ID),
-		VisitorID:       int64(v.ID),
-		DeviceID:        int64(device.ID),
-		EventName:       req.EventName,
-		EventProperties: req.EventProperties,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &EventResponse{
-		UUID:            ev.UUID,
-		SessionUUID:     session.UUID,
-		VisitorUUID:     v.UUID,
-		DeviceUUID:      device.UUID,
-		EventName:       ev.EventName,
-		EventProperties: ev.EventProperties,
-		CreatedAt:       ev.CreatedAt,
-	}, nil
-}
-
-func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest, site *ent.Site) (*PageViewResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
-
-	geo := CreateVisitorRequest{
-		Country:  req.Country,
-		Region:   req.Region,
-		City:     req.City,
-		Timezone: req.Timezone,
-	}
-	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
-		s.enrichRequestWithTracking(&geo, tracking)
-	}
-
-	session, err := s.ResolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
-	if err != nil {
-		return nil, err
-	}
-
-	v, err := s.repo.GetByID(ctx, session.VisitorID)
-	if err != nil {
-		return nil, err
-	}
-
-	device, err := s.getDevice(ctx, req.FingerprintHash)
-	if err != nil {
-		return nil, err
-	}
-	if device == nil {
-		return nil, fmt.Errorf("device not found")
-	}
-
-	pv, err := s.repo.CreatePageView(ctx, CreatePageViewInput{
-		SessionID: int64(session.ID),
-		VisitorID: int64(v.ID),
-		DeviceID:  int64(device.ID),
-		URL:       req.URL,
-		Title:     req.Title,
-		Referrer:  req.Referrer,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &PageViewResponse{
-		UUID:        pv.UUID,
-		SessionUUID: session.UUID,
-		VisitorUUID: v.UUID,
-		DeviceUUID:  device.UUID,
-		URL:         pv.URL,
-		Title:       pv.Title,
-		Referrer:    pv.Referrer,
-		CreatedAt:   pv.CreatedAt,
-	}, nil
 }

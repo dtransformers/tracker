@@ -20,6 +20,54 @@ func (f DeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeviceMutation", m)
 }
 
+// The EventCommerceItemFunc type is an adapter to allow the use of ordinary
+// function as EventCommerceItem mutator.
+type EventCommerceItemFunc func(context.Context, *ent.EventCommerceItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EventCommerceItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EventCommerceItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventCommerceItemMutation", m)
+}
+
+// The EventCustomPropFunc type is an adapter to allow the use of ordinary
+// function as EventCustomProp mutator.
+type EventCustomPropFunc func(context.Context, *ent.EventCustomPropMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EventCustomPropFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EventCustomPropMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventCustomPropMutation", m)
+}
+
+// The EventTargetPropFunc type is an adapter to allow the use of ordinary
+// function as EventTargetProp mutator.
+type EventTargetPropFunc func(context.Context, *ent.EventTargetPropMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EventTargetPropFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EventTargetPropMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventTargetPropMutation", m)
+}
+
+// The EventTargetSearchFilterFunc type is an adapter to allow the use of ordinary
+// function as EventTargetSearchFilter mutator.
+type EventTargetSearchFilterFunc func(context.Context, *ent.EventTargetSearchFilterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EventTargetSearchFilterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EventTargetSearchFilterMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EventTargetSearchFilterMutation", m)
+}
+
 // The PageViewFunc type is an adapter to allow the use of ordinary
 // function as PageView mutator.
 type PageViewFunc func(context.Context, *ent.PageViewMutation) (ent.Value, error)
@@ -90,6 +138,18 @@ func (f VisitorEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorEventMutation", m)
+}
+
+// The VisitorPlatformClickFunc type is an adapter to allow the use of ordinary
+// function as VisitorPlatformClick mutator.
+type VisitorPlatformClickFunc func(context.Context, *ent.VisitorPlatformClickMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VisitorPlatformClickFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VisitorPlatformClickMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VisitorPlatformClickMutation", m)
 }
 
 // The VisitorSessionFunc type is an adapter to allow the use of ordinary

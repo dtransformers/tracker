@@ -20,8 +20,6 @@ type Repository interface {
 	Delete(ctx context.Context, uuid string) error
 
 	CreateSiteVisitor(ctx context.Context, input CreateSiteVisitorInput) (*ent.SiteVisitor, error)
-	CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error)
-	CreatePageView(ctx context.Context, input CreatePageViewInput) (*ent.PageView, error)
 	SetVisitorConsent(ctx context.Context, visitorID, siteID int64, consentType, status string) (*ent.VisitorConsent, error)
 }
 
@@ -190,39 +188,6 @@ type CreatePageViewInput struct {
 	URL       string
 	Title     string
 	Referrer  string
-}
-
-func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error) {
-	ev, err := r.client.VisitorEvent.
-		Create().
-		SetUUID(uuid.New().String()).
-		SetSessionID(input.SessionID).
-		SetVisitorID(input.VisitorID).
-		SetDeviceID(input.DeviceID).
-		SetEventName(input.EventName).
-		SetEventProperties(input.EventProperties).
-		Save(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create visitor event: %w", err)
-	}
-	return ev, nil
-}
-
-func (r *entRepository) CreatePageView(ctx context.Context, input CreatePageViewInput) (*ent.PageView, error) {
-	pv, err := r.client.PageView.
-		Create().
-		SetUUID(uuid.New().String()).
-		SetSessionID(input.SessionID).
-		SetVisitorID(input.VisitorID).
-		SetDeviceID(input.DeviceID).
-		SetURL(input.URL).
-		SetTitle(input.Title).
-		SetReferrer(input.Referrer).
-		Save(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create page view: %w", err)
-	}
-	return pv, nil
 }
 
 func (r *entRepository) SetVisitorConsent(ctx context.Context, visitorID, siteID int64, consentType, status string) (*ent.VisitorConsent, error) {

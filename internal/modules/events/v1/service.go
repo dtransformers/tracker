@@ -31,44 +31,34 @@ func NewService(repo Repository, visitorsSvc *visitorsv1.Service, logger *slog.L
 }
 
 type CreateEventRequest struct {
-	SessionToken    string                 `json:"session_token"`
-	FingerprintHash string                 `json:"fingerprint_hash"`
-	EventName       string                 `json:"event_name" binding:"required"`
-	EventProperties map[string]interface{} `json:"event_properties"`
+	TrackingEvent
 }
 
 func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site *ent.Site) (*ent.VisitorEvent, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	var anonID string
+	var visitorUUID string
 	var sessionID string
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		if tracking.Cookies != nil {
-			anonID = tracking.Cookies["visitor_uuid"]
+			visitorUUID = tracking.Cookies["visitor_uuid"]
 			sessionID = tracking.Cookies["session_id"]
 		}
 	}
-	if req.SessionToken == "" {
-		req.SessionToken = sessionID
+	if sessionID == "" || visitorUUID == "" {
+		return nil, fmt.Errorf("unauthorized request")
 	}
-	// geo is just empty since we don't extract from event payload usually, but we need to pass something
-	geo := visitorsv1.CreateVisitorRequest{
-		VisitorUUID:  anonID,
-		SessionToken: req.SessionToken,
-	}
-
-	session, err := s.visitorsSvc.ResolveSession(ctx, req.SessionToken, req.FingerprintHash, geo, site)
+	details, err := s.visitorsSvc.GetSessionByUUID(ctx, visitorUUID, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve session: %w", err)
 	}
 
 	ev, err := s.repo.CreateEvent(ctx, CreateEventInput{
-		SessionID:       int64(session.ID),
-		VisitorID:       session.VisitorID,
-		DeviceID:        session.DeviceID,
-		EventName:       req.EventName,
-		EventProperties: req.EventProperties,
+		SessionID: int64(details.Session.ID),
+		VisitorID: int64(details.Visitor.ID),
+		DeviceID:  int64(details.Device.ID),
+		Event:     &req.TrackingEvent,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)

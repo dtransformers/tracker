@@ -3,11 +3,12 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+	"tracking/internal/ent/eventtargetprop"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -26,13 +27,98 @@ type VisitorEvent struct {
 	VisitorID int64 `json:"visitor_id,omitempty"`
 	// DeviceID holds the value of the "device_id" field.
 	DeviceID int64 `json:"device_id,omitempty"`
+	// PageID holds the value of the "page_id" field.
+	PageID int64 `json:"page_id,omitempty"`
+	// EventType holds the value of the "event_type" field.
+	EventType string `json:"event_type,omitempty"`
+	// EventCategory holds the value of the "event_category" field.
+	EventCategory string `json:"event_category,omitempty"`
 	// EventName holds the value of the "event_name" field.
 	EventName string `json:"event_name,omitempty"`
-	// EventProperties holds the value of the "event_properties" field.
-	EventProperties map[string]interface{} `json:"event_properties,omitempty"`
+	// OccurredAt holds the value of the "occurred_at" field.
+	OccurredAt time.Time `json:"occurred_at,omitempty"`
+	// ServerReceivedAt holds the value of the "server_received_at" field.
+	ServerReceivedAt time.Time `json:"server_received_at,omitempty"`
+	// Sequence holds the value of the "sequence" field.
+	Sequence int `json:"sequence,omitempty"`
+	// SchemaVersion holds the value of the "schema_version" field.
+	SchemaVersion string `json:"schema_version,omitempty"`
+	// SdkName holds the value of the "sdk_name" field.
+	SdkName string `json:"sdk_name,omitempty"`
+	// SdkVersion holds the value of the "sdk_version" field.
+	SdkVersion string `json:"sdk_version,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the VisitorEventQuery when eager-loading is set.
+	Edges        VisitorEventEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// VisitorEventEdges holds the relations/edges for other nodes in the graph.
+type VisitorEventEdges struct {
+	// CustomProps holds the value of the custom_props edge.
+	CustomProps []*EventCustomProp `json:"custom_props,omitempty"`
+	// PlatformClicks holds the value of the platform_clicks edge.
+	PlatformClicks *VisitorPlatformClick `json:"platform_clicks,omitempty"`
+	// TargetProps holds the value of the target_props edge.
+	TargetProps *EventTargetProp `json:"target_props,omitempty"`
+	// CommerceItems holds the value of the commerce_items edge.
+	CommerceItems []*EventCommerceItem `json:"commerce_items,omitempty"`
+	// SearchFilters holds the value of the search_filters edge.
+	SearchFilters []*EventTargetSearchFilter `json:"search_filters,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [5]bool
+}
+
+// CustomPropsOrErr returns the CustomProps value or an error if the edge
+// was not loaded in eager-loading.
+func (e VisitorEventEdges) CustomPropsOrErr() ([]*EventCustomProp, error) {
+	if e.loadedTypes[0] {
+		return e.CustomProps, nil
+	}
+	return nil, &NotLoadedError{edge: "custom_props"}
+}
+
+// PlatformClicksOrErr returns the PlatformClicks value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e VisitorEventEdges) PlatformClicksOrErr() (*VisitorPlatformClick, error) {
+	if e.PlatformClicks != nil {
+		return e.PlatformClicks, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: visitorplatformclick.Label}
+	}
+	return nil, &NotLoadedError{edge: "platform_clicks"}
+}
+
+// TargetPropsOrErr returns the TargetProps value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e VisitorEventEdges) TargetPropsOrErr() (*EventTargetProp, error) {
+	if e.TargetProps != nil {
+		return e.TargetProps, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: eventtargetprop.Label}
+	}
+	return nil, &NotLoadedError{edge: "target_props"}
+}
+
+// CommerceItemsOrErr returns the CommerceItems value or an error if the edge
+// was not loaded in eager-loading.
+func (e VisitorEventEdges) CommerceItemsOrErr() ([]*EventCommerceItem, error) {
+	if e.loadedTypes[3] {
+		return e.CommerceItems, nil
+	}
+	return nil, &NotLoadedError{edge: "commerce_items"}
+}
+
+// SearchFiltersOrErr returns the SearchFilters value or an error if the edge
+// was not loaded in eager-loading.
+func (e VisitorEventEdges) SearchFiltersOrErr() ([]*EventTargetSearchFilter, error) {
+	if e.loadedTypes[4] {
+		return e.SearchFilters, nil
+	}
+	return nil, &NotLoadedError{edge: "search_filters"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,13 +126,11 @@ func (*VisitorEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case visitorevent.FieldEventProperties:
-			values[i] = new([]byte)
-		case visitorevent.FieldID, visitorevent.FieldSessionID, visitorevent.FieldVisitorID, visitorevent.FieldDeviceID:
+		case visitorevent.FieldID, visitorevent.FieldSessionID, visitorevent.FieldVisitorID, visitorevent.FieldDeviceID, visitorevent.FieldPageID, visitorevent.FieldSequence:
 			values[i] = new(sql.NullInt64)
-		case visitorevent.FieldUUID, visitorevent.FieldEventName:
+		case visitorevent.FieldUUID, visitorevent.FieldEventType, visitorevent.FieldEventCategory, visitorevent.FieldEventName, visitorevent.FieldSchemaVersion, visitorevent.FieldSdkName, visitorevent.FieldSdkVersion:
 			values[i] = new(sql.NullString)
-		case visitorevent.FieldCreatedAt:
+		case visitorevent.FieldOccurredAt, visitorevent.FieldServerReceivedAt, visitorevent.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -93,19 +177,65 @@ func (_m *VisitorEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DeviceID = value.Int64
 			}
+		case visitorevent.FieldPageID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field page_id", values[i])
+			} else if value.Valid {
+				_m.PageID = value.Int64
+			}
+		case visitorevent.FieldEventType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field event_type", values[i])
+			} else if value.Valid {
+				_m.EventType = value.String
+			}
+		case visitorevent.FieldEventCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field event_category", values[i])
+			} else if value.Valid {
+				_m.EventCategory = value.String
+			}
 		case visitorevent.FieldEventName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field event_name", values[i])
 			} else if value.Valid {
 				_m.EventName = value.String
 			}
-		case visitorevent.FieldEventProperties:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field event_properties", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.EventProperties); err != nil {
-					return fmt.Errorf("unmarshal field event_properties: %w", err)
-				}
+		case visitorevent.FieldOccurredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field occurred_at", values[i])
+			} else if value.Valid {
+				_m.OccurredAt = value.Time
+			}
+		case visitorevent.FieldServerReceivedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field server_received_at", values[i])
+			} else if value.Valid {
+				_m.ServerReceivedAt = value.Time
+			}
+		case visitorevent.FieldSequence:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field sequence", values[i])
+			} else if value.Valid {
+				_m.Sequence = int(value.Int64)
+			}
+		case visitorevent.FieldSchemaVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_version", values[i])
+			} else if value.Valid {
+				_m.SchemaVersion = value.String
+			}
+		case visitorevent.FieldSdkName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sdk_name", values[i])
+			} else if value.Valid {
+				_m.SdkName = value.String
+			}
+		case visitorevent.FieldSdkVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sdk_version", values[i])
+			} else if value.Valid {
+				_m.SdkVersion = value.String
 			}
 		case visitorevent.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -124,6 +254,31 @@ func (_m *VisitorEvent) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *VisitorEvent) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryCustomProps queries the "custom_props" edge of the VisitorEvent entity.
+func (_m *VisitorEvent) QueryCustomProps() *EventCustomPropQuery {
+	return NewVisitorEventClient(_m.config).QueryCustomProps(_m)
+}
+
+// QueryPlatformClicks queries the "platform_clicks" edge of the VisitorEvent entity.
+func (_m *VisitorEvent) QueryPlatformClicks() *VisitorPlatformClickQuery {
+	return NewVisitorEventClient(_m.config).QueryPlatformClicks(_m)
+}
+
+// QueryTargetProps queries the "target_props" edge of the VisitorEvent entity.
+func (_m *VisitorEvent) QueryTargetProps() *EventTargetPropQuery {
+	return NewVisitorEventClient(_m.config).QueryTargetProps(_m)
+}
+
+// QueryCommerceItems queries the "commerce_items" edge of the VisitorEvent entity.
+func (_m *VisitorEvent) QueryCommerceItems() *EventCommerceItemQuery {
+	return NewVisitorEventClient(_m.config).QueryCommerceItems(_m)
+}
+
+// QuerySearchFilters queries the "search_filters" edge of the VisitorEvent entity.
+func (_m *VisitorEvent) QuerySearchFilters() *EventTargetSearchFilterQuery {
+	return NewVisitorEventClient(_m.config).QuerySearchFilters(_m)
 }
 
 // Update returns a builder for updating this VisitorEvent.
@@ -161,11 +316,35 @@ func (_m *VisitorEvent) String() string {
 	builder.WriteString("device_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DeviceID))
 	builder.WriteString(", ")
+	builder.WriteString("page_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PageID))
+	builder.WriteString(", ")
+	builder.WriteString("event_type=")
+	builder.WriteString(_m.EventType)
+	builder.WriteString(", ")
+	builder.WriteString("event_category=")
+	builder.WriteString(_m.EventCategory)
+	builder.WriteString(", ")
 	builder.WriteString("event_name=")
 	builder.WriteString(_m.EventName)
 	builder.WriteString(", ")
-	builder.WriteString("event_properties=")
-	builder.WriteString(fmt.Sprintf("%v", _m.EventProperties))
+	builder.WriteString("occurred_at=")
+	builder.WriteString(_m.OccurredAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("server_received_at=")
+	builder.WriteString(_m.ServerReceivedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("sequence=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Sequence))
+	builder.WriteString(", ")
+	builder.WriteString("schema_version=")
+	builder.WriteString(_m.SchemaVersion)
+	builder.WriteString(", ")
+	builder.WriteString("sdk_name=")
+	builder.WriteString(_m.SdkName)
+	builder.WriteString(", ")
+	builder.WriteString("sdk_version=")
+	builder.WriteString(_m.SdkVersion)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

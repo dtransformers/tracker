@@ -7,7 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"tracking/internal/ent/eventcommerceitem"
+	"tracking/internal/ent/eventcustomprop"
+	"tracking/internal/ent/eventtargetprop"
+	"tracking/internal/ent/eventtargetsearchfilter"
 	"tracking/internal/ent/visitorevent"
+	"tracking/internal/ent/visitorplatformclick"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -44,15 +49,103 @@ func (_c *VisitorEventCreate) SetDeviceID(v int64) *VisitorEventCreate {
 	return _c
 }
 
+// SetPageID sets the "page_id" field.
+func (_c *VisitorEventCreate) SetPageID(v int64) *VisitorEventCreate {
+	_c.mutation.SetPageID(v)
+	return _c
+}
+
+// SetEventType sets the "event_type" field.
+func (_c *VisitorEventCreate) SetEventType(v string) *VisitorEventCreate {
+	_c.mutation.SetEventType(v)
+	return _c
+}
+
+// SetEventCategory sets the "event_category" field.
+func (_c *VisitorEventCreate) SetEventCategory(v string) *VisitorEventCreate {
+	_c.mutation.SetEventCategory(v)
+	return _c
+}
+
 // SetEventName sets the "event_name" field.
 func (_c *VisitorEventCreate) SetEventName(v string) *VisitorEventCreate {
 	_c.mutation.SetEventName(v)
 	return _c
 }
 
-// SetEventProperties sets the "event_properties" field.
-func (_c *VisitorEventCreate) SetEventProperties(v map[string]interface{}) *VisitorEventCreate {
-	_c.mutation.SetEventProperties(v)
+// SetOccurredAt sets the "occurred_at" field.
+func (_c *VisitorEventCreate) SetOccurredAt(v time.Time) *VisitorEventCreate {
+	_c.mutation.SetOccurredAt(v)
+	return _c
+}
+
+// SetNillableOccurredAt sets the "occurred_at" field if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableOccurredAt(v *time.Time) *VisitorEventCreate {
+	if v != nil {
+		_c.SetOccurredAt(*v)
+	}
+	return _c
+}
+
+// SetServerReceivedAt sets the "server_received_at" field.
+func (_c *VisitorEventCreate) SetServerReceivedAt(v time.Time) *VisitorEventCreate {
+	_c.mutation.SetServerReceivedAt(v)
+	return _c
+}
+
+// SetNillableServerReceivedAt sets the "server_received_at" field if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableServerReceivedAt(v *time.Time) *VisitorEventCreate {
+	if v != nil {
+		_c.SetServerReceivedAt(*v)
+	}
+	return _c
+}
+
+// SetSequence sets the "sequence" field.
+func (_c *VisitorEventCreate) SetSequence(v int) *VisitorEventCreate {
+	_c.mutation.SetSequence(v)
+	return _c
+}
+
+// SetSchemaVersion sets the "schema_version" field.
+func (_c *VisitorEventCreate) SetSchemaVersion(v string) *VisitorEventCreate {
+	_c.mutation.SetSchemaVersion(v)
+	return _c
+}
+
+// SetNillableSchemaVersion sets the "schema_version" field if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableSchemaVersion(v *string) *VisitorEventCreate {
+	if v != nil {
+		_c.SetSchemaVersion(*v)
+	}
+	return _c
+}
+
+// SetSdkName sets the "sdk_name" field.
+func (_c *VisitorEventCreate) SetSdkName(v string) *VisitorEventCreate {
+	_c.mutation.SetSdkName(v)
+	return _c
+}
+
+// SetNillableSdkName sets the "sdk_name" field if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableSdkName(v *string) *VisitorEventCreate {
+	if v != nil {
+		_c.SetSdkName(*v)
+	}
+	return _c
+}
+
+// SetSdkVersion sets the "sdk_version" field.
+func (_c *VisitorEventCreate) SetSdkVersion(v string) *VisitorEventCreate {
+	_c.mutation.SetSdkVersion(v)
+	return _c
+}
+
+// SetNillableSdkVersion sets the "sdk_version" field if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableSdkVersion(v *string) *VisitorEventCreate {
+	if v != nil {
+		_c.SetSdkVersion(*v)
+	}
 	return _c
 }
 
@@ -74,6 +167,89 @@ func (_c *VisitorEventCreate) SetNillableCreatedAt(v *time.Time) *VisitorEventCr
 func (_c *VisitorEventCreate) SetID(v int64) *VisitorEventCreate {
 	_c.mutation.SetID(v)
 	return _c
+}
+
+// AddCustomPropIDs adds the "custom_props" edge to the EventCustomProp entity by IDs.
+func (_c *VisitorEventCreate) AddCustomPropIDs(ids ...int64) *VisitorEventCreate {
+	_c.mutation.AddCustomPropIDs(ids...)
+	return _c
+}
+
+// AddCustomProps adds the "custom_props" edges to the EventCustomProp entity.
+func (_c *VisitorEventCreate) AddCustomProps(v ...*EventCustomProp) *VisitorEventCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCustomPropIDs(ids...)
+}
+
+// SetPlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID.
+func (_c *VisitorEventCreate) SetPlatformClicksID(id int64) *VisitorEventCreate {
+	_c.mutation.SetPlatformClicksID(id)
+	return _c
+}
+
+// SetNillablePlatformClicksID sets the "platform_clicks" edge to the VisitorPlatformClick entity by ID if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillablePlatformClicksID(id *int64) *VisitorEventCreate {
+	if id != nil {
+		_c = _c.SetPlatformClicksID(*id)
+	}
+	return _c
+}
+
+// SetPlatformClicks sets the "platform_clicks" edge to the VisitorPlatformClick entity.
+func (_c *VisitorEventCreate) SetPlatformClicks(v *VisitorPlatformClick) *VisitorEventCreate {
+	return _c.SetPlatformClicksID(v.ID)
+}
+
+// SetTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID.
+func (_c *VisitorEventCreate) SetTargetPropsID(id int64) *VisitorEventCreate {
+	_c.mutation.SetTargetPropsID(id)
+	return _c
+}
+
+// SetNillableTargetPropsID sets the "target_props" edge to the EventTargetProp entity by ID if the given value is not nil.
+func (_c *VisitorEventCreate) SetNillableTargetPropsID(id *int64) *VisitorEventCreate {
+	if id != nil {
+		_c = _c.SetTargetPropsID(*id)
+	}
+	return _c
+}
+
+// SetTargetProps sets the "target_props" edge to the EventTargetProp entity.
+func (_c *VisitorEventCreate) SetTargetProps(v *EventTargetProp) *VisitorEventCreate {
+	return _c.SetTargetPropsID(v.ID)
+}
+
+// AddCommerceItemIDs adds the "commerce_items" edge to the EventCommerceItem entity by IDs.
+func (_c *VisitorEventCreate) AddCommerceItemIDs(ids ...int64) *VisitorEventCreate {
+	_c.mutation.AddCommerceItemIDs(ids...)
+	return _c
+}
+
+// AddCommerceItems adds the "commerce_items" edges to the EventCommerceItem entity.
+func (_c *VisitorEventCreate) AddCommerceItems(v ...*EventCommerceItem) *VisitorEventCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommerceItemIDs(ids...)
+}
+
+// AddSearchFilterIDs adds the "search_filters" edge to the EventTargetSearchFilter entity by IDs.
+func (_c *VisitorEventCreate) AddSearchFilterIDs(ids ...int64) *VisitorEventCreate {
+	_c.mutation.AddSearchFilterIDs(ids...)
+	return _c
+}
+
+// AddSearchFilters adds the "search_filters" edges to the EventTargetSearchFilter entity.
+func (_c *VisitorEventCreate) AddSearchFilters(v ...*EventTargetSearchFilter) *VisitorEventCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSearchFilterIDs(ids...)
 }
 
 // Mutation returns the VisitorEventMutation object of the builder.
@@ -136,8 +312,20 @@ func (_c *VisitorEventCreate) check() error {
 	if _, ok := _c.mutation.DeviceID(); !ok {
 		return &ValidationError{Name: "device_id", err: errors.New(`ent: missing required field "VisitorEvent.device_id"`)}
 	}
+	if _, ok := _c.mutation.PageID(); !ok {
+		return &ValidationError{Name: "page_id", err: errors.New(`ent: missing required field "VisitorEvent.page_id"`)}
+	}
+	if _, ok := _c.mutation.EventType(); !ok {
+		return &ValidationError{Name: "event_type", err: errors.New(`ent: missing required field "VisitorEvent.event_type"`)}
+	}
+	if _, ok := _c.mutation.EventCategory(); !ok {
+		return &ValidationError{Name: "event_category", err: errors.New(`ent: missing required field "VisitorEvent.event_category"`)}
+	}
 	if _, ok := _c.mutation.EventName(); !ok {
 		return &ValidationError{Name: "event_name", err: errors.New(`ent: missing required field "VisitorEvent.event_name"`)}
+	}
+	if _, ok := _c.mutation.Sequence(); !ok {
+		return &ValidationError{Name: "sequence", err: errors.New(`ent: missing required field "VisitorEvent.sequence"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "VisitorEvent.created_at"`)}
@@ -190,17 +378,129 @@ func (_c *VisitorEventCreate) createSpec() (*VisitorEvent, *sqlgraph.CreateSpec)
 		_spec.SetField(visitorevent.FieldDeviceID, field.TypeInt64, value)
 		_node.DeviceID = value
 	}
+	if value, ok := _c.mutation.PageID(); ok {
+		_spec.SetField(visitorevent.FieldPageID, field.TypeInt64, value)
+		_node.PageID = value
+	}
+	if value, ok := _c.mutation.EventType(); ok {
+		_spec.SetField(visitorevent.FieldEventType, field.TypeString, value)
+		_node.EventType = value
+	}
+	if value, ok := _c.mutation.EventCategory(); ok {
+		_spec.SetField(visitorevent.FieldEventCategory, field.TypeString, value)
+		_node.EventCategory = value
+	}
 	if value, ok := _c.mutation.EventName(); ok {
 		_spec.SetField(visitorevent.FieldEventName, field.TypeString, value)
 		_node.EventName = value
 	}
-	if value, ok := _c.mutation.EventProperties(); ok {
-		_spec.SetField(visitorevent.FieldEventProperties, field.TypeJSON, value)
-		_node.EventProperties = value
+	if value, ok := _c.mutation.OccurredAt(); ok {
+		_spec.SetField(visitorevent.FieldOccurredAt, field.TypeTime, value)
+		_node.OccurredAt = value
+	}
+	if value, ok := _c.mutation.ServerReceivedAt(); ok {
+		_spec.SetField(visitorevent.FieldServerReceivedAt, field.TypeTime, value)
+		_node.ServerReceivedAt = value
+	}
+	if value, ok := _c.mutation.Sequence(); ok {
+		_spec.SetField(visitorevent.FieldSequence, field.TypeInt, value)
+		_node.Sequence = value
+	}
+	if value, ok := _c.mutation.SchemaVersion(); ok {
+		_spec.SetField(visitorevent.FieldSchemaVersion, field.TypeString, value)
+		_node.SchemaVersion = value
+	}
+	if value, ok := _c.mutation.SdkName(); ok {
+		_spec.SetField(visitorevent.FieldSdkName, field.TypeString, value)
+		_node.SdkName = value
+	}
+	if value, ok := _c.mutation.SdkVersion(); ok {
+		_spec.SetField(visitorevent.FieldSdkVersion, field.TypeString, value)
+		_node.SdkVersion = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(visitorevent.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if nodes := _c.mutation.CustomPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CustomPropsTable,
+			Columns: []string{visitorevent.CustomPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcustomprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PlatformClicksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.PlatformClicksTable,
+			Columns: []string{visitorevent.PlatformClicksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(visitorplatformclick.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TargetPropsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   visitorevent.TargetPropsTable,
+			Columns: []string{visitorevent.TargetPropsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetprop.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommerceItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.CommerceItemsTable,
+			Columns: []string{visitorevent.CommerceItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventcommerceitem.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SearchFiltersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   visitorevent.SearchFiltersTable,
+			Columns: []string{visitorevent.SearchFiltersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(eventtargetsearchfilter.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

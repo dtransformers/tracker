@@ -93,6 +93,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockDevicesRepo.On("Create", mock.Anything, mock.Anything).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
@@ -184,6 +185,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(mockSession, nil)
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Update", mock.Anything, "session-uuid", mock.Anything).Return(mockSession, nil)
 
 	res, err := service.CreateSession(context.Background(), req, mockSite)
@@ -253,6 +255,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	})).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
@@ -264,211 +267,4 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	mockDevicesRepo.AssertExpectations(t)
 	mockSessionsRepo.AssertExpectations(t)
 	mockConsentsRepo.AssertExpectations(t)
-}
-
-func TestCreateEvent_ExistingSession(t *testing.T) {
-	mockSitesRepo := new(sitesMocks.MockRepository)
-	sitesService := sitesv1.NewService(mockSitesRepo, nil)
-
-	mockVisitorsRepo := new(visitorsMocks.MockRepository)
-	mockDevicesRepo := new(devicesMocks.MockRepository)
-	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
-
-	sessionToken := "sess-123"
-	fingerprint := "fp-123"
-
-	mockSession := &ent.VisitorSession{
-		ID:           30,
-		UUID:         "session-uuid",
-		VisitorID:    10,
-		DeviceID:     20,
-		SessionToken: sessionToken,
-	}
-
-	mockVisitor := &ent.Visitor{
-		ID:   10,
-		UUID: "visitor-uuid",
-	}
-
-	mockDevice := &ent.Device{
-		ID:              20,
-		UUID:            "device-uuid",
-		FingerprintHash: fingerprint,
-	}
-
-	mockEvent := &ent.VisitorEvent{
-		UUID:            "event-uuid",
-		EventName:       "click",
-		EventProperties: map[string]interface{}{"button": "blue"},
-		CreatedAt:       time.Now(),
-	}
-
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, sessionToken).Return(mockSession, nil)
-	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil)
-	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, fingerprint).Return(mockDevice, nil)
-	mockVisitorsRepo.On("CreateEvent", mock.Anything, mock.Anything).Return(mockEvent, nil)
-
-	req := visitorsv1.CreateEventRequest{
-		SessionToken:    sessionToken,
-		FingerprintHash: fingerprint,
-		EventName:       "click",
-		EventProperties: map[string]interface{}{"button": "blue"},
-	}
-
-	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
-
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, "event-uuid", res.UUID)
-	assert.Equal(t, "session-uuid", res.SessionUUID)
-	assert.Equal(t, "visitor-uuid", res.VisitorUUID)
-	assert.Equal(t, "device-uuid", res.DeviceUUID)
-	assert.Equal(t, "click", res.EventName)
-}
-
-func TestCreatePageView_ExistingSession(t *testing.T) {
-	mockSitesRepo := new(sitesMocks.MockRepository)
-	sitesService := sitesv1.NewService(mockSitesRepo, nil)
-
-	mockVisitorsRepo := new(visitorsMocks.MockRepository)
-	mockDevicesRepo := new(devicesMocks.MockRepository)
-	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
-
-	sessionToken := "sess-123"
-	fingerprint := "fp-123"
-
-	mockSession := &ent.VisitorSession{
-		ID:           30,
-		UUID:         "session-uuid",
-		VisitorID:    10,
-		DeviceID:     20,
-		SessionToken: sessionToken,
-	}
-
-	mockVisitor := &ent.Visitor{
-		ID:   10,
-		UUID: "visitor-uuid",
-	}
-
-	mockDevice := &ent.Device{
-		ID:              20,
-		UUID:            "device-uuid",
-		FingerprintHash: fingerprint,
-	}
-
-	mockPV := &ent.PageView{
-		UUID:      "pv-uuid",
-		URL:       "https://example.com/home",
-		Title:     "Home Page",
-		Referrer:  "https://google.com",
-		CreatedAt: time.Now(),
-	}
-
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, sessionToken).Return(mockSession, nil)
-	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil)
-	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, fingerprint).Return(mockDevice, nil)
-	mockVisitorsRepo.On("CreatePageView", mock.Anything, mock.Anything).Return(mockPV, nil)
-
-	req := visitorsv1.CreatePageViewRequest{
-		SessionToken:    sessionToken,
-		FingerprintHash: fingerprint,
-		URL:             "https://example.com/home",
-		Title:           "Home Page",
-		Referrer:        "https://google.com",
-	}
-
-	res, err := service.CreatePageView(context.Background(), req, &ent.Site{})
-
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, "pv-uuid", res.UUID)
-	assert.Equal(t, "session-uuid", res.SessionUUID)
-	assert.Equal(t, "visitor-uuid", res.VisitorUUID)
-	assert.Equal(t, "device-uuid", res.DeviceUUID)
-	assert.Equal(t, "https://example.com/home", res.URL)
-}
-
-func TestCreateEvent_NewSession(t *testing.T) {
-	mockSitesRepo := new(sitesMocks.MockRepository)
-	sitesService := sitesv1.NewService(mockSitesRepo, nil)
-
-	mockVisitorsRepo := new(visitorsMocks.MockRepository)
-	mockDevicesRepo := new(devicesMocks.MockRepository)
-	mockSessionsRepo := new(visitor_sessionsMocks.MockRepository)
-	mockConsentsRepo := new(consentsMocks.MockRepository)
-	sessionSvc := visitor_sessionsv1.NewService(mockSessionsRepo, nil, config.AppConfig{})
-	consentsSvc := consentsv1.NewService(mockConsentsRepo, sessionSvc, nil)
-	service := visitorsv1.NewService(mockVisitorsRepo, sitesService, mockDevicesRepo, sessionSvc, consentsSvc, nil)
-
-	sessionToken := "new-sess-123"
-	fingerprint := "new-fp-123"
-
-	mockVisitor := &ent.Visitor{
-		ID:   10,
-		UUID: "new-visitor-uuid",
-	}
-
-	mockDevice := &ent.Device{
-		ID:              20,
-		UUID:            "new-device-uuid",
-		FingerprintHash: fingerprint,
-	}
-
-	mockSession := &ent.VisitorSession{
-		ID:           30,
-		UUID:         "new-session-uuid",
-		VisitorID:    10,
-		DeviceID:     20,
-		SessionToken: sessionToken,
-	}
-
-	mockEvent := &ent.VisitorEvent{
-		UUID:            "new-event-uuid",
-		EventName:       "page_load",
-		EventProperties: nil,
-		CreatedAt:       time.Now(),
-	}
-
-	// 1. getSession -> not found
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, sessionToken).Return(nil, &ent.NotFoundError{}).Once()
-	// 2. getDevice -> not found
-	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, fingerprint).Return(nil, &ent.NotFoundError{}).Once()
-	// 3. createVisitor
-	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{}).Once()
-	mockVisitorsRepo.On("Create", mock.Anything, mock.Anything).Return(mockVisitor, nil).Once()
-	// 4. createDevice
-	mockDevicesRepo.On("Create", mock.Anything, mock.Anything).Return(mockDevice, nil).Once()
-	// 5. createSession
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, sessionToken).Return(nil, &ent.NotFoundError{}).Once()
-	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil).Once()
-	mockVisitorsRepo.On("CreateSiteVisitor", mock.Anything, mock.Anything).Return(&ent.SiteVisitor{}, nil).Once()
-	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil).Once()
-
-	// Later when generating response
-	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil).Once()
-	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, fingerprint).Return(mockDevice, nil).Once()
-	mockVisitorsRepo.On("CreateEvent", mock.Anything, mock.Anything).Return(mockEvent, nil).Once()
-
-	req := visitorsv1.CreateEventRequest{
-		SessionToken:    sessionToken,
-		FingerprintHash: fingerprint,
-		EventName:       "page_load",
-	}
-
-	res, err := service.CreateEvent(context.Background(), req, &ent.Site{})
-
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, "new-event-uuid", res.UUID)
-	assert.Equal(t, "new-session-uuid", res.SessionUUID)
-	assert.Equal(t, "new-visitor-uuid", res.VisitorUUID)
-	assert.Equal(t, "new-device-uuid", res.DeviceUUID)
 }

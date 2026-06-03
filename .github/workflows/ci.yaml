@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Go (or Node/Python depending on stack)
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
@@ -22,20 +22,29 @@ jobs:
       - name: Install dependencies
         run: go mod tidy
 
+      - name: Fix script permissions
+        run: chmod +x ./scripts/hooks/*.sh
+
       - name: Validate structure
-        run: ./scripts/hooks/validate_structure.sh
+        run: bash ./scripts/hooks/validate_structure.sh
       
       - name: Validate scope (README alignment)
-        run: ./scripts/hooks/validate_scope.sh
+        run: bash ./scripts/hooks/validate_scope.sh
 
       - name: Validate HISTORY.md updates
-        run: ./scripts/hooks/validate_history.sh
+        run: bash ./scripts/hooks/validate_history.sh
 
       - name: Validate documentation
-        run: ./scripts/hooks/validate_docs.sh
-
-      - name: Run tests
-        run: go test ./...
+        run: bash ./scripts/hooks/validate_docs.sh
 
       - name: Lint
         run: go vet ./...
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Verify Docker Build
+        run: docker build -t tracking-api:test .
