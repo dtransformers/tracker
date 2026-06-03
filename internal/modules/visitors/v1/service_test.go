@@ -93,6 +93,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockDevicesRepo.On("Create", mock.Anything, mock.Anything).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
@@ -184,6 +185,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(mockSession, nil)
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Update", mock.Anything, "session-uuid", mock.Anything).Return(mockSession, nil)
 
 	res, err := service.CreateSession(context.Background(), req, mockSite)
@@ -253,6 +255,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 	})).Return(mockDevice, nil)
 
 	mockSessionsRepo.On("GetBySessionToken", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
 
