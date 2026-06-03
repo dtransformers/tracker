@@ -174,7 +174,6 @@ func (s *Service) VerifySiteKey(ctx context.Context, publicKey string) (bool, er
 	return site.IsActive, nil
 }
 
-// GetSiteKey retrieves a site by its public key.
 func (s *Service) GetSiteKey(ctx context.Context, publicKey string) (*ent.Site, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
@@ -190,7 +189,6 @@ func (s *Service) GetSiteKey(ctx context.Context, publicKey string) (*ent.Site, 
 	return site, nil
 }
 
-// ListSites retrieves sites, optionally filtered by tenant ID.
 func (s *Service) ListSites(ctx context.Context, tenantID *int64) (*ListResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
@@ -222,19 +220,16 @@ func (s *Service) ListSites(ctx context.Context, tenantID *int64) (*ListResponse
 	}, nil
 }
 
-// UpdateSite updates an existing site.
 func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateRequest) (*Response, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	s.logger.InfoContext(ctx, "updating site", "uuid", siteUUID)
 
-	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
 		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
-	// Validate update request
 	if err := s.validateUpdateRequest(req); err != nil {
 		s.logger.WarnContext(ctx, "validation failed",
 			"error", err,
@@ -243,14 +238,12 @@ func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateReq
 		return nil, err
 	}
 
-	// Check domain uniqueness if domain is being updated
 	if req.Domain != nil {
 		if err := s.checkDomainUniqueness(ctx, *req.Domain, siteUUID); err != nil {
 			return nil, err
 		}
 	}
 
-	// Normalize domain if provided
 	input := UpdateSiteInput{
 		Name:     req.Name,
 		TenantID: req.TenantID,
@@ -281,14 +274,12 @@ func (s *Service) UpdateSite(ctx context.Context, siteUUID string, req UpdateReq
 	return toResponse(site), nil
 }
 
-// DeleteSite deletes a site by its UUID.
 func (s *Service) DeleteSite(ctx context.Context, siteUUID string) error {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	s.logger.InfoContext(ctx, "deleting site", "uuid", siteUUID)
 
-	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
 		return fmt.Errorf(errInvalidUUIDFormat, err)
 	}
@@ -310,19 +301,16 @@ func (s *Service) DeleteSite(ctx context.Context, siteUUID string) error {
 	return nil
 }
 
-// RegenerateKeys regenerates the security keys for a site.
 func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Response, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	s.logger.InfoContext(ctx, "regenerating keys", "uuid", siteUUID)
 
-	// Validate UUID format
 	if _, err := uuid.Parse(siteUUID); err != nil {
 		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
-	// Generate new keys
 	pubKey, err := generateKeyFromBaseString(siteUUID, "public", s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
@@ -335,7 +323,6 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
 	}
 
-	// Update with new keys
 	site, err := s.repo.RegenerateKeys(ctx, siteUUID, pubKey, secKey)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -353,7 +340,6 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 	return toResponse(site), nil
 }
 
-// validateCreateRequest validates the create site request.
 func (s *Service) validateCreateRequest(req CreateRequest) error {
 	if err := validateName(req.Name); err != nil {
 		return err
@@ -366,21 +352,17 @@ func (s *Service) validateCreateRequest(req CreateRequest) error {
 	return nil
 }
 
-// validateUpdateRequest validates the update site request.
 func (s *Service) validateUpdateRequest(req UpdateRequest) error {
-	// Check that at least one field is being updated
 	if req.Name == nil && req.Domain == nil && req.TenantID == nil && req.IsActive == nil {
 		return ErrEmptyUpdate
 	}
 
-	// Validate name if provided
 	if req.Name != nil {
 		if err := validateName(*req.Name); err != nil {
 			return err
 		}
 	}
 
-	// Validate domain if provided
 	if req.Domain != nil {
 		if err := validateDomain(*req.Domain); err != nil {
 			return err
@@ -390,7 +372,6 @@ func (s *Service) validateUpdateRequest(req UpdateRequest) error {
 	return nil
 }
 
-// checkDomainUniqueness checks if a domain is already in use by another site.
 func (s *Service) checkDomainUniqueness(ctx context.Context, domain, excludeUUID string) error {
 	normalized := normalizeDomain(domain)
 
@@ -414,7 +395,6 @@ func (s *Service) checkDomainUniqueness(ctx context.Context, domain, excludeUUID
 	return nil
 }
 
-// validateName validates a site name.
 func validateName(name string) error {
 	trimmed := strings.TrimSpace(name)
 	if len(trimmed) < MinNameLength || len(trimmed) > MaxNameLength {
@@ -424,7 +404,6 @@ func validateName(name string) error {
 	return nil
 }
 
-// validateDomain validates a domain name.
 func validateDomain(domain string) error {
 	trimmed := strings.TrimSpace(domain)
 	if len(trimmed) == 0 {
@@ -436,17 +415,14 @@ func validateDomain(domain string) error {
 			ErrInvalidDomain, MaxDomainLength)
 	}
 
-	// Normalize and validate format
 	normalized := normalizeDomain(trimmed)
 
-	// Try to parse as URL to validate format
 	testURL := "http://" + normalized
 	u, err := url.Parse(testURL)
 	if err != nil || u.Host != normalized {
 		return fmt.Errorf("%w: invalid format", ErrInvalidDomain)
 	}
 
-	// Additional checks
 	if strings.Contains(normalized, " ") {
 		return fmt.Errorf("%w: cannot contain spaces", ErrInvalidDomain)
 	}
@@ -458,14 +434,11 @@ func validateDomain(domain string) error {
 	return nil
 }
 
-// normalizeDomain normalizes a domain name.
 func normalizeDomain(domain string) string {
 	normalized := strings.TrimSpace(domain)
 	normalized = strings.ToLower(normalized)
-	// Remove protocol if present
 	normalized = strings.TrimPrefix(normalized, "http://")
 	normalized = strings.TrimPrefix(normalized, "https://")
-	// Remove trailing slash
 	normalized = strings.TrimSuffix(normalized, "/")
 	return normalized
 }

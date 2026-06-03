@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"log/slog"
 	"time"
 
@@ -39,26 +38,15 @@ func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.L
 	}
 }
 
-// siteSecretFunc returns a SiteSecretFunc backed by the sites service.
-func (m *Module) siteSecretFunc() middlewares.SiteSecretFunc {
-	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
-		site, err := m.sitesService.GetSiteKey(ctx, publicKey)
-		if err != nil {
-			return "", nil, err
-		}
-		return site.SecretKey, site, nil
-	}
-}
-
 func (m *Module) Register(router *gin.RouterGroup) {
 	consents := router.Group("/consents")
 
 	consents.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: middlewares.HMACSecretKeyFunc(m.siteSecretFunc()),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(middlewares.DefaultSiteSecretFunc(m.sitesService)),
 		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	consents.Use(middlewares.VerifySite(m.siteSecretFunc()))
+	consents.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	consents.Use(middlewares.RateLimit(1*time.Minute, 600))
 	consents.Use(middlewares.Validation())
 	consents.Use(middlewares.Cors())

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"log/slog"
 	"time"
 
@@ -14,9 +13,9 @@ import (
 )
 
 type Module struct {
-	handler      *Handler
-	service      *Service
-	repo         Repository
+	handler          *Handler
+	service          *Service
+	repo             Repository
 	sitesService     *sitesv1.Service
 	sessionValidator middlewares.SessionValidator
 	logger           *slog.Logger
@@ -43,26 +42,15 @@ func (m *Module) Service() *Service {
 	return m.service
 }
 
-// siteSecretFunc returns a SiteSecretFunc backed by the sites service.
-func (m *Module) siteSecretFunc() middlewares.SiteSecretFunc {
-	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
-		site, err := m.sitesService.GetSiteKey(ctx, publicKey)
-		if err != nil {
-			return "", nil, err
-		}
-		return site.SecretKey, site, nil
-	}
-}
-
 func (m *Module) Register(router *gin.RouterGroup) {
 	events := router.Group("/events")
 
 	events.Use(middlewares.HMAC(middlewares.HMACConfig{
-		GetSecretKey: middlewares.HMACSecretKeyFunc(m.siteSecretFunc()),
+		GetSecretKey: middlewares.HMACSecretKeyFunc(middlewares.DefaultSiteSecretFunc(m.sitesService)),
 		NonceStore:   state.NewNonceStore(state.Redis),
 	}))
 
-	events.Use(middlewares.VerifySite(m.siteSecretFunc()))
+	events.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	events.Use(middlewares.RateLimit(1*time.Minute, 600))
 	events.Use(middlewares.Validation())
 	events.Use(middlewares.Cors())

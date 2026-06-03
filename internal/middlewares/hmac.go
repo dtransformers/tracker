@@ -18,12 +18,22 @@ import (
 	"tracking/internal/ent"
 )
 
-// SiteSecretFunc is a function that resolves a site's secret key from its public key.
-// It returns the secret key and any error. Used by HMAC and VerifySite middlewares.
+type SiteProvider interface {
+	GetSiteKey(ctx context.Context, publicKey string) (*ent.Site, error)
+}
+
 type SiteSecretFunc func(ctx context.Context, publicKey string) (secretKey string, site *ent.Site, err error)
 
-// HMACSecretKeyFunc builds the GetSecretKey callback used by HMACConfig from a SiteSecretFunc.
-// This eliminates the repeated inline closure across all route registrations.
+func DefaultSiteSecretFunc(provider SiteProvider) SiteSecretFunc {
+	return func(ctx context.Context, publicKey string) (string, *ent.Site, error) {
+		site, err := provider.GetSiteKey(ctx, publicKey)
+		if err != nil {
+			return "", nil, err
+		}
+		return site.SecretKey, site, nil
+	}
+}
+
 func HMACSecretKeyFunc(fn SiteSecretFunc) func(string) (string, error) {
 	return func(publicKey string) (string, error) {
 		secretKey, _, err := fn(context.Background(), publicKey)
@@ -31,9 +41,6 @@ func HMACSecretKeyFunc(fn SiteSecretFunc) func(string) (string, error) {
 	}
 }
 
-// VerifySite resolves the site from the public key set by the HMAC middleware,
-// validates it is active/not-deleted, and stores it in the Gin context as "site".
-// This replaces the duplicated inline closure in consents/v1 and events/v1 routes.
 func VerifySite(fn SiteSecretFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		pubKey := c.GetString("publicKey")
