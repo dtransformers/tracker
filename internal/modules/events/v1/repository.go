@@ -98,25 +98,19 @@ func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput)
 		return nil, err
 	}
 
-	if ev.Target.Custom != nil {
-		if err := saveCustomProps(ctx, tx, visitorEvent.ID, ev.Target.Custom); err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+	if err := saveCustomProps(ctx, tx, visitorEvent.ID, ev.Target.Custom); err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
-	if ev.Target.SearchFilters != nil {
-		if err := saveSearchFilters(ctx, tx, visitorEvent.ID, ev.Target.SearchFilters); err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+	if err := saveSearchFilters(ctx, tx, visitorEvent.ID, ev.Target.SearchFilters); err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
-	if len(ev.Target.Items) > 0 {
-		if err := saveCommerceItems(ctx, tx, visitorEvent.ID, ev.Target.Items); err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+	if err := saveCommerceItems(ctx, tx, visitorEvent.ID, ev.Target.Items); err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	err = tx.Commit()
@@ -130,186 +124,14 @@ func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput)
 func saveTargetProps(ctx context.Context, tx *ent.Tx, eventID int64, tp TargetProps) error {
 	tpBuilder := tx.EventTargetProp.Create().SetEventID(eventID)
 
-	if tp.ElementType != nil {
-		tpBuilder.SetElementType(string(*tp.ElementType))
-	}
-	if tp.ElementID != nil {
-		tpBuilder.SetElementID(*tp.ElementID)
-	}
-	if tp.ElementName != nil {
-		tpBuilder.SetElementName(*tp.ElementName)
-	}
-	if tp.ElementText != nil {
-		tpBuilder.SetElementText(*tp.ElementText)
-	}
-	if tp.ElementClass != nil {
-		tpBuilder.SetElementClass(*tp.ElementClass)
-	}
-	if tp.ElementSelector != nil {
-		tpBuilder.SetElementSelector(*tp.ElementSelector)
-	}
-	if tp.Component != nil {
-		tpBuilder.SetComponent(*tp.Component)
-	}
-	if tp.PageName != nil {
-		tpBuilder.SetPageName(*tp.PageName)
-	}
-	if tp.ButtonName != nil {
-		tpBuilder.SetButtonName(*tp.ButtonName)
-	}
-	if tp.ButtonID != nil {
-		tpBuilder.SetButtonID(*tp.ButtonID)
-	}
-	if tp.Href != nil {
-		tpBuilder.SetHref(*tp.Href)
-	}
-	if tp.FormName != nil {
-		tpBuilder.SetFormName(*tp.FormName)
-	}
-	if tp.FormID != nil {
-		tpBuilder.SetFormID(*tp.FormID)
-	}
-	if tp.FormField != nil {
-		tpBuilder.SetFormField(*tp.FormField)
-	}
-	if tp.FormValueHash != nil {
-		tpBuilder.SetFormValueHash(*tp.FormValueHash)
-	}
-	if tp.FormFieldCount != nil {
-		tpBuilder.SetFormFieldCount(*tp.FormFieldCount)
-	}
-	if tp.FormCompletionPct != nil {
-		tpBuilder.SetFormCompletionPct(*tp.FormCompletionPct)
-	}
-	if tp.MediaType != nil {
-		tpBuilder.SetMediaType(string(*tp.MediaType))
-	}
-	if tp.MediaID != nil {
-		tpBuilder.SetMediaID(*tp.MediaID)
-	}
-	if tp.MediaTitle != nil {
-		tpBuilder.SetMediaTitle(*tp.MediaTitle)
-	}
-	if tp.MediaProvider != nil {
-		tpBuilder.SetMediaProvider(*tp.MediaProvider)
-	}
-	if tp.MediaDurationMs != nil {
-		tpBuilder.SetMediaDurationMs(*tp.MediaDurationMs)
-	}
-	if tp.MediaCurrentTimeMs != nil {
-		tpBuilder.SetMediaCurrentTimeMs(*tp.MediaCurrentTimeMs)
-	}
-	if tp.MediaPercent != nil {
-		tpBuilder.SetMediaPercent(*tp.MediaPercent)
-	}
-	if tp.MediaQuality != nil {
-		tpBuilder.SetMediaQuality(*tp.MediaQuality)
-	}
-	if tp.MediaSoundOn != nil {
-		tpBuilder.SetMediaSoundOn(*tp.MediaSoundOn)
-	}
-	if tp.MediaFullscreen != nil {
-		tpBuilder.SetMediaFullscreen(*tp.MediaFullscreen)
-	}
-	if tp.ScrollPercent != nil {
-		tpBuilder.SetScrollPercent(*tp.ScrollPercent)
-	}
-	if tp.ScrollDirection != nil {
-		tpBuilder.SetScrollDirection(string(*tp.ScrollDirection))
-	}
-	if tp.ScrollDepthPx != nil {
-		tpBuilder.SetScrollDepthPx(*tp.ScrollDepthPx)
-	}
-	if tp.MouseButton != nil {
-		tpBuilder.SetMouseButton(string(*tp.MouseButton))
-	}
-	if tp.ClickX != nil {
-		tpBuilder.SetClickX(*tp.ClickX)
-	}
-	if tp.ClickY != nil {
-		tpBuilder.SetClickY(*tp.ClickY)
-	}
-	if tp.ElementX != nil {
-		tpBuilder.SetElementX(*tp.ElementX)
-	}
-	if tp.ElementY != nil {
-		tpBuilder.SetElementY(*tp.ElementY)
-	}
-	if tp.TransactionID != nil {
-		tpBuilder.SetTransactionID(*tp.TransactionID)
-	}
-	if tp.Currency != nil {
-		tpBuilder.SetCurrency(*tp.Currency)
-	}
-	if tp.Value != nil {
-		tpBuilder.SetValue(*tp.Value)
-	}
-	if tp.Tax != nil {
-		tpBuilder.SetTax(*tp.Tax)
-	}
-	if tp.Shipping != nil {
-		tpBuilder.SetShipping(*tp.Shipping)
-	}
-	if tp.Coupon != nil {
-		tpBuilder.SetCoupon(*tp.Coupon)
-	}
-	if tp.Affiliation != nil {
-		tpBuilder.SetAffiliation(*tp.Affiliation)
-	}
-	if tp.PaymentType != nil {
-		tpBuilder.SetPaymentType(*tp.PaymentType)
-	}
-	if tp.ShippingTier != nil {
-		tpBuilder.SetShippingTier(*tp.ShippingTier)
-	}
-	if tp.SearchTerm != nil {
-		tpBuilder.SetSearchTerm(*tp.SearchTerm)
-	}
-	if tp.SearchResultsCount != nil {
-		tpBuilder.SetSearchResultsCount(*tp.SearchResultsCount)
-	}
-	if tp.AuthProvider != nil {
-		tpBuilder.SetAuthProvider(string(*tp.AuthProvider))
-	}
-	if tp.AuthMethod != nil {
-		tpBuilder.SetAuthMethod(*tp.AuthMethod)
-	}
-	if tp.IsNewUser != nil {
-		tpBuilder.SetIsNewUser(*tp.IsNewUser)
-	}
-	if tp.ErrorCode != nil {
-		tpBuilder.SetErrorCode(*tp.ErrorCode)
-	}
-	if tp.ErrorMessage != nil {
-		tpBuilder.SetErrorMessage(*tp.ErrorMessage)
-	}
-	if tp.ErrorSeverity != nil {
-		tpBuilder.SetErrorSeverity(string(*tp.ErrorSeverity))
-	}
-	if tp.ErrorStack != nil {
-		tpBuilder.SetErrorStack(*tp.ErrorStack)
-	}
-	if tp.HttpStatus != nil {
-		tpBuilder.SetHTTPStatus(*tp.HttpStatus)
-	}
-	if tp.ComponentName != nil {
-		tpBuilder.SetComponentName(*tp.ComponentName)
-	}
-	if tp.SharePlatform != nil {
-		tpBuilder.SetSharePlatform(*tp.SharePlatform)
-	}
-	if tp.ShareMethod != nil {
-		tpBuilder.SetShareMethod(*tp.ShareMethod)
-	}
-	if tp.DurationMs != nil {
-		tpBuilder.SetDurationMs(*tp.DurationMs)
-	}
-	if tp.Feature != nil {
-		tpBuilder.SetFeature(*tp.Feature)
-	}
-	if tp.Priority != nil {
-		tpBuilder.SetPriority(string(*tp.Priority))
-	}
+	setElementProps(tpBuilder, tp)
+	setFormProps(tpBuilder, tp)
+	setMediaProps(tpBuilder, tp)
+	setScrollAndClickProps(tpBuilder, tp)
+	setCommerceProps(tpBuilder, tp)
+	setAuthProps(tpBuilder, tp)
+	setErrorProps(tpBuilder, tp)
+	setMiscProps(tpBuilder, tp)
 
 	_, err := tpBuilder.Save(ctx)
 	if err != nil {
@@ -318,54 +140,266 @@ func saveTargetProps(ctx context.Context, tx *ent.Tx, eventID int64, tp TargetPr
 	return nil
 }
 
+func setElementProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.ElementType != nil {
+		b.SetElementType(string(*tp.ElementType))
+	}
+	if tp.ElementID != nil {
+		b.SetElementID(*tp.ElementID)
+	}
+	if tp.ElementName != nil {
+		b.SetElementName(*tp.ElementName)
+	}
+	if tp.ElementText != nil {
+		b.SetElementText(*tp.ElementText)
+	}
+	if tp.ElementClass != nil {
+		b.SetElementClass(*tp.ElementClass)
+	}
+	if tp.ElementSelector != nil {
+		b.SetElementSelector(*tp.ElementSelector)
+	}
+	if tp.ElementX != nil {
+		b.SetElementX(*tp.ElementX)
+	}
+	if tp.ElementY != nil {
+		b.SetElementY(*tp.ElementY)
+	}
+}
+
+func setFormProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.FormName != nil {
+		b.SetFormName(*tp.FormName)
+	}
+	if tp.FormID != nil {
+		b.SetFormID(*tp.FormID)
+	}
+	if tp.FormField != nil {
+		b.SetFormField(*tp.FormField)
+	}
+	if tp.FormValueHash != nil {
+		b.SetFormValueHash(*tp.FormValueHash)
+	}
+	if tp.FormFieldCount != nil {
+		b.SetFormFieldCount(*tp.FormFieldCount)
+	}
+	if tp.FormCompletionPct != nil {
+		b.SetFormCompletionPct(*tp.FormCompletionPct)
+	}
+}
+
+func setMediaProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.MediaType != nil {
+		b.SetMediaType(string(*tp.MediaType))
+	}
+	if tp.MediaID != nil {
+		b.SetMediaID(*tp.MediaID)
+	}
+	if tp.MediaTitle != nil {
+		b.SetMediaTitle(*tp.MediaTitle)
+	}
+	if tp.MediaProvider != nil {
+		b.SetMediaProvider(*tp.MediaProvider)
+	}
+	if tp.MediaDurationMs != nil {
+		b.SetMediaDurationMs(*tp.MediaDurationMs)
+	}
+	if tp.MediaCurrentTimeMs != nil {
+		b.SetMediaCurrentTimeMs(*tp.MediaCurrentTimeMs)
+	}
+	if tp.MediaPercent != nil {
+		b.SetMediaPercent(*tp.MediaPercent)
+	}
+	if tp.MediaQuality != nil {
+		b.SetMediaQuality(*tp.MediaQuality)
+	}
+	if tp.MediaSoundOn != nil {
+		b.SetMediaSoundOn(*tp.MediaSoundOn)
+	}
+	if tp.MediaFullscreen != nil {
+		b.SetMediaFullscreen(*tp.MediaFullscreen)
+	}
+}
+
+func setScrollAndClickProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.ScrollPercent != nil {
+		b.SetScrollPercent(*tp.ScrollPercent)
+	}
+	if tp.ScrollDirection != nil {
+		b.SetScrollDirection(string(*tp.ScrollDirection))
+	}
+	if tp.ScrollDepthPx != nil {
+		b.SetScrollDepthPx(*tp.ScrollDepthPx)
+	}
+	if tp.MouseButton != nil {
+		b.SetMouseButton(string(*tp.MouseButton))
+	}
+	if tp.ClickX != nil {
+		b.SetClickX(*tp.ClickX)
+	}
+	if tp.ClickY != nil {
+		b.SetClickY(*tp.ClickY)
+	}
+}
+
+func setCommerceProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.TransactionID != nil {
+		b.SetTransactionID(*tp.TransactionID)
+	}
+	if tp.Currency != nil {
+		b.SetCurrency(*tp.Currency)
+	}
+	if tp.Value != nil {
+		b.SetValue(*tp.Value)
+	}
+	if tp.Tax != nil {
+		b.SetTax(*tp.Tax)
+	}
+	if tp.Shipping != nil {
+		b.SetShipping(*tp.Shipping)
+	}
+	if tp.Coupon != nil {
+		b.SetCoupon(*tp.Coupon)
+	}
+	if tp.Affiliation != nil {
+		b.SetAffiliation(*tp.Affiliation)
+	}
+	if tp.PaymentType != nil {
+		b.SetPaymentType(*tp.PaymentType)
+	}
+	if tp.ShippingTier != nil {
+		b.SetShippingTier(*tp.ShippingTier)
+	}
+}
+
+func setAuthProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.AuthProvider != nil {
+		b.SetAuthProvider(string(*tp.AuthProvider))
+	}
+	if tp.AuthMethod != nil {
+		b.SetAuthMethod(*tp.AuthMethod)
+	}
+	if tp.IsNewUser != nil {
+		b.SetIsNewUser(*tp.IsNewUser)
+	}
+}
+
+func setErrorProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.ErrorCode != nil {
+		b.SetErrorCode(*tp.ErrorCode)
+	}
+	if tp.ErrorMessage != nil {
+		b.SetErrorMessage(*tp.ErrorMessage)
+	}
+	if tp.ErrorSeverity != nil {
+		b.SetErrorSeverity(string(*tp.ErrorSeverity))
+	}
+	if tp.ErrorStack != nil {
+		b.SetErrorStack(*tp.ErrorStack)
+	}
+	if tp.HttpStatus != nil {
+		b.SetHTTPStatus(*tp.HttpStatus)
+	}
+}
+
+func setMiscProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+	if tp.Component != nil {
+		b.SetComponent(*tp.Component)
+	}
+	if tp.PageName != nil {
+		b.SetPageName(*tp.PageName)
+	}
+	if tp.ButtonName != nil {
+		b.SetButtonName(*tp.ButtonName)
+	}
+	if tp.ButtonID != nil {
+		b.SetButtonID(*tp.ButtonID)
+	}
+	if tp.Href != nil {
+		b.SetHref(*tp.Href)
+	}
+	if tp.ComponentName != nil {
+		b.SetComponentName(*tp.ComponentName)
+	}
+	if tp.SharePlatform != nil {
+		b.SetSharePlatform(*tp.SharePlatform)
+	}
+	if tp.ShareMethod != nil {
+		b.SetShareMethod(*tp.ShareMethod)
+	}
+	if tp.DurationMs != nil {
+		b.SetDurationMs(*tp.DurationMs)
+	}
+	if tp.Feature != nil {
+		b.SetFeature(*tp.Feature)
+	}
+	if tp.Priority != nil {
+		b.SetPriority(string(*tp.Priority))
+	}
+	if tp.SearchTerm != nil {
+		b.SetSearchTerm(*tp.SearchTerm)
+	}
+	if tp.SearchResultsCount != nil {
+		b.SetSearchResultsCount(*tp.SearchResultsCount)
+	}
+}
+
+func setPrimaryClickIDs(b *ent.VisitorPlatformClickCreate, pc PlatformClickIds) {
+	if pc.Gclid != nil {
+		b.SetGclid(*pc.Gclid)
+	}
+	if pc.Gbraid != nil {
+		b.SetGbraid(*pc.Gbraid)
+	}
+	if pc.Wbraid != nil {
+		b.SetWbraid(*pc.Wbraid)
+	}
+	if pc.Dclid != nil {
+		b.SetDclid(*pc.Dclid)
+	}
+	if pc.Fbclid != nil {
+		b.SetFbclid(*pc.Fbclid)
+	}
+	if pc.Fbp != nil {
+		b.SetFbp(*pc.Fbp)
+	}
+	if pc.Fbc != nil {
+		b.SetFbc(*pc.Fbc)
+	}
+}
+
+func setSecondaryClickIDs(b *ent.VisitorPlatformClickCreate, pc PlatformClickIds) {
+	if pc.Ttclid != nil {
+		b.SetTtclid(*pc.Ttclid)
+	}
+	if pc.Ttp != nil {
+		b.SetTtp(*pc.Ttp)
+	}
+	if pc.Msclkid != nil {
+		b.SetMsclkid(*pc.Msclkid)
+	}
+	if pc.Twclid != nil {
+		b.SetTwclid(*pc.Twclid)
+	}
+	if pc.LiFatId != nil {
+		b.SetLiFatID(*pc.LiFatId)
+	}
+	if pc.ScCid != nil {
+		b.SetScCid(*pc.ScCid)
+	}
+	if pc.Epik != nil {
+		b.SetEpik(*pc.Epik)
+	}
+	if pc.LiverampAtsId != nil {
+		b.SetLiverampAtsID(*pc.LiverampAtsId)
+	}
+}
+
 func savePlatformClicks(ctx context.Context, tx *ent.Tx, eventID int64, pc PlatformClickIds) error {
 	pcBuilder := tx.VisitorPlatformClick.Create().SetEventID(eventID)
 
-	if pc.Gclid != nil {
-		pcBuilder.SetGclid(*pc.Gclid)
-	}
-	if pc.Gbraid != nil {
-		pcBuilder.SetGbraid(*pc.Gbraid)
-	}
-	if pc.Wbraid != nil {
-		pcBuilder.SetWbraid(*pc.Wbraid)
-	}
-	if pc.Dclid != nil {
-		pcBuilder.SetDclid(*pc.Dclid)
-	}
-	if pc.Fbclid != nil {
-		pcBuilder.SetFbclid(*pc.Fbclid)
-	}
-	if pc.Fbp != nil {
-		pcBuilder.SetFbp(*pc.Fbp)
-	}
-	if pc.Fbc != nil {
-		pcBuilder.SetFbc(*pc.Fbc)
-	}
-	if pc.Ttclid != nil {
-		pcBuilder.SetTtclid(*pc.Ttclid)
-	}
-	if pc.Ttp != nil {
-		pcBuilder.SetTtp(*pc.Ttp)
-	}
-	if pc.Msclkid != nil {
-		pcBuilder.SetMsclkid(*pc.Msclkid)
-	}
-	if pc.Twclid != nil {
-		pcBuilder.SetTwclid(*pc.Twclid)
-	}
-	if pc.LiFatId != nil {
-		pcBuilder.SetLiFatID(*pc.LiFatId)
-	}
-	if pc.ScCid != nil {
-		pcBuilder.SetScCid(*pc.ScCid)
-	}
-	if pc.Epik != nil {
-		pcBuilder.SetEpik(*pc.Epik)
-	}
-	if pc.LiverampAtsId != nil {
-		pcBuilder.SetLiverampAtsID(*pc.LiverampAtsId)
-	}
+	setPrimaryClickIDs(pcBuilder, pc)
+	setSecondaryClickIDs(pcBuilder, pc)
 
 	_, err := pcBuilder.Save(ctx)
 	if err != nil {
@@ -403,57 +437,61 @@ func saveSearchFilters(ctx context.Context, tx *ent.Tx, eventID int64, filters m
 	return nil
 }
 
+func setCommerceItemFields(b *ent.EventCommerceItemCreate, item CommerceItem) {
+	if item.ItemName != nil {
+		b.SetItemName(*item.ItemName)
+	}
+	if item.ItemBrand != nil {
+		b.SetItemBrand(*item.ItemBrand)
+	}
+	if item.ItemCategory != nil {
+		b.SetItemCategory(*item.ItemCategory)
+	}
+	if item.ItemCategory2 != nil {
+		b.SetItemCategory2(*item.ItemCategory2)
+	}
+	if item.ItemCategory3 != nil {
+		b.SetItemCategory3(*item.ItemCategory3)
+	}
+	if item.ItemVariant != nil {
+		b.SetItemVariant(*item.ItemVariant)
+	}
+	if item.Price != nil {
+		b.SetPrice(*item.Price)
+	}
+	if item.Currency != nil {
+		b.SetCurrency(*item.Currency)
+	}
+	if item.Quantity != nil {
+		b.SetQuantity(*item.Quantity)
+	}
+	if item.Coupon != nil {
+		b.SetCoupon(*item.Coupon)
+	}
+	if item.Discount != nil {
+		b.SetDiscount(*item.Discount)
+	}
+	if item.Index != nil {
+		b.SetIndex(*item.Index)
+	}
+	if item.ItemListID != nil {
+		b.SetItemListID(*item.ItemListID)
+	}
+	if item.ItemListName != nil {
+		b.SetItemListName(*item.ItemListName)
+	}
+	if item.Affiliation != nil {
+		b.SetAffiliation(*item.Affiliation)
+	}
+}
+
 func saveCommerceItems(ctx context.Context, tx *ent.Tx, eventID int64, items []CommerceItem) error {
 	for _, item := range items {
 		itemBuilder := tx.EventCommerceItem.Create().
 			SetEventID(eventID).
 			SetItemID(item.ItemID)
 
-		if item.ItemName != nil {
-			itemBuilder.SetItemName(*item.ItemName)
-		}
-		if item.ItemBrand != nil {
-			itemBuilder.SetItemBrand(*item.ItemBrand)
-		}
-		if item.ItemCategory != nil {
-			itemBuilder.SetItemCategory(*item.ItemCategory)
-		}
-		if item.ItemCategory2 != nil {
-			itemBuilder.SetItemCategory2(*item.ItemCategory2)
-		}
-		if item.ItemCategory3 != nil {
-			itemBuilder.SetItemCategory3(*item.ItemCategory3)
-		}
-		if item.ItemVariant != nil {
-			itemBuilder.SetItemVariant(*item.ItemVariant)
-		}
-		if item.Price != nil {
-			itemBuilder.SetPrice(*item.Price)
-		}
-		if item.Currency != nil {
-			itemBuilder.SetCurrency(*item.Currency)
-		}
-		if item.Quantity != nil {
-			itemBuilder.SetQuantity(*item.Quantity)
-		}
-		if item.Coupon != nil {
-			itemBuilder.SetCoupon(*item.Coupon)
-		}
-		if item.Discount != nil {
-			itemBuilder.SetDiscount(*item.Discount)
-		}
-		if item.Index != nil {
-			itemBuilder.SetIndex(*item.Index)
-		}
-		if item.ItemListID != nil {
-			itemBuilder.SetItemListID(*item.ItemListID)
-		}
-		if item.ItemListName != nil {
-			itemBuilder.SetItemListName(*item.ItemListName)
-		}
-		if item.Affiliation != nil {
-			itemBuilder.SetAffiliation(*item.Affiliation)
-		}
+		setCommerceItemFields(itemBuilder, item)
 
 		_, err := itemBuilder.Save(ctx)
 		if err != nil {
