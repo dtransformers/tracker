@@ -26,21 +26,6 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-type CreateEventInput struct {
-	SessionID int64
-	VisitorID int64
-	DeviceID  int64
-	Event     *TrackingEvent
-}
-
-type CreatePageViewInput struct {
-	SessionID int64
-	VisitorID int64
-	DeviceID  int64
-	URL       string
-	Title     string
-	Referrer  string
-}
 
 func (r *entRepository) CreateEvent(ctx context.Context, input CreateEventInput) (*ent.VisitorEvent, error) {
 

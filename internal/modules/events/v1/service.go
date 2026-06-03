@@ -31,9 +31,6 @@ func NewService(repo Repository, visitorsSvc *visitorsv1.Service, logger *slog.L
 	}
 }
 
-type CreateEventRequest struct {
-	TrackingEvent
-}
 
 func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site *ent.Site) (*ent.VisitorEvent, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
@@ -68,13 +65,6 @@ func (s *Service) CreateEvent(ctx context.Context, req CreateEventRequest, site 
 	return ev, nil
 }
 
-type CreatePageViewRequest struct {
-	SessionToken    string `json:"session_token"`
-	FingerprintHash string `json:"fingerprint_hash"`
-	URL             string `json:"url" binding:"required"`
-	Title           string `json:"title"`
-	Referrer        string `json:"referrer"`
-}
 
 func (s *Service) CreatePageView(ctx context.Context, req CreatePageViewRequest, site *ent.Site) (*ent.PageView, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)

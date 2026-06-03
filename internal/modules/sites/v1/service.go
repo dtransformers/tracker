@@ -75,55 +75,6 @@ func NewServiceWithConfig(repo Repository, logger *slog.Logger, cfg ServiceConfi
 	}
 }
 
-// CreateRequest defines the payload for creating a new site.
-type CreateRequest struct {
-	// Name of the site (required, 1-255 characters)
-	Name string `json:"name" binding:"required"`
-	// Domain of the site (required, must be unique and valid)
-	Domain string `json:"domain" binding:"required"`
-	// Tenant ID of the site
-	TenantID int64 `json:"tenant_id" binding:"required"`
-}
-
-// UpdateRequest defines the payload for updating an existing site.
-type UpdateRequest struct {
-	// Optional new name for the site
-	Name *string `json:"name"`
-	// Optional new domain for the site
-	Domain *string `json:"domain"`
-	// Optional new tenant ID
-	TenantID *int64 `json:"tenant_id"`
-	// Optional active status
-	IsActive *bool `json:"is_active"`
-}
-
-type Response struct {
-	UUID      string `json:"uuid"`
-	Name      string `json:"name"`
-	Domain    string `json:"domain"`
-	TenantID  int64  `json:"tenant_id"`
-	PublicKey string `json:"public_key"`
-
-	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type FullSiteResponse struct {
-	UUID      string    `json:"uuid"`
-	Name      string    `json:"name"`
-	Domain    string    `json:"domain"`
-	TenantID  int64     `json:"tenant_id"`
-	PublicKey string    `json:"public_key"`
-	SecretKey string    `json:"secret_key"`
-	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-type ListResponse struct {
-	Sites []*Response `json:"sites"`
-	Total int         `json:"total"`
-}
 
 // CreateSite creates a new site with generated security keys.
 func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response, error) {

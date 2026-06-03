@@ -34,30 +34,6 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-type CreateSessionInput struct {
-	UUID                string
-	VisitorID           int64
-	DeviceID            int64
-	SessionToken        string
-	StartedAt           time.Time
-	EntryPage           string
-	AcquisitionSource   string
-	AcquisitionMedium   string
-	AcquisitionCampaign string
-	CampaignTerm        string
-	CampaignContent     string
-	CampaignID          string
-	ReferrerHost        string
-	EndedAt             *time.Time
-	IsActive            bool
-}
-
-type UpdateSessionInput struct {
-	EndedAt        *time.Time
-	LastActivityAt *time.Time
-	ExitPage       *string
-	IsActive       *bool
-}
 
 func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error) {
 	query := r.client.VisitorSession.

@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"fmt"
-	"time"
 	"tracking/internal/ent"
 	"tracking/internal/ent/device"
 )
@@ -27,30 +26,6 @@ func NewRepository(client *ent.Client) Repository {
 		panic("ent client cannot be nil")
 	}
 	return &entRepository{client: client}
-}
-
-type CreateDeviceInput struct {
-	UUID            string
-	VisitorID       int64
-	FingerprintHash string
-	DeviceType      string
-	OS              string
-	AddressIP       string
-	Country         string
-	Region          string
-	City            string
-	Browser         string
-	BrowserVersion  string
-	Language        string
-	Timezone        string
-	ISP             string
-	ScreenWidth     int
-	ScreenHeight    int
-}
-
-type UpdateDeviceInput struct {
-	LastSeenAt *time.Time
-	AddressIP  *string
 }
 
 func (r *entRepository) Create(ctx context.Context, input CreateDeviceInput) (*ent.Device, error) {

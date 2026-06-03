@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"fmt"
-	"time"
 	"tracking/internal/ent"
 	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorconsent"
@@ -32,28 +31,6 @@ func NewRepository(client *ent.Client) Repository {
 		panic("ent client cannot be nil")
 	}
 	return &entRepository{client: client}
-}
-
-type CreateSessionInput struct {
-	UUID            string
-	AnonymousID     string
-	PrimaryUserID   *string
-	IsBot           bool
-	IsVerifiedHuman bool
-}
-
-type UpdateVisitorInput struct {
-	PrimaryUserID   *string
-	LastSeenAt      *time.Time
-	IsBot           *bool
-	IsVerifiedHuman *bool
-}
-
-type CreateSiteVisitorInput struct {
-	UUID      string
-	VisitorID int64
-	SessionID int64
-	SiteID    int64
 }
 
 func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*ent.Visitor, error) {
@@ -171,23 +148,6 @@ func (r *entRepository) CreateSiteVisitor(ctx context.Context, input CreateSiteV
 	}
 
 	return sv, nil
-}
-
-type CreateEventInput struct {
-	SessionID       int64
-	VisitorID       int64
-	DeviceID        int64
-	EventName       string
-	EventProperties map[string]interface{}
-}
-
-type CreatePageViewInput struct {
-	SessionID int64
-	VisitorID int64
-	DeviceID  int64
-	URL       string
-	Title     string
-	Referrer  string
 }
 
 func (r *entRepository) SetVisitorConsent(ctx context.Context, visitorID, siteID int64, consentType, status string) (*ent.VisitorConsent, error) {
