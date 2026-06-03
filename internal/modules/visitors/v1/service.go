@@ -311,6 +311,22 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 		}
 	}
 
+	s.enrichDeviceTracking(req, tracking)
+
+	req.AddressIP = tracking.OriginalIP
+
+	if req.ReferrerHost == "" {
+		if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
+			req.ReferrerHost = u.Host
+		} else {
+			req.ReferrerHost = tracking.Referer
+		}
+	}
+
+	s.enrichGeoTracking(req, tracking)
+}
+
+func (s *Service) enrichDeviceTracking(req *CreateVisitorRequest, tracking *middlewares.TrackingInfo) {
 	if req.DeviceType == "" {
 		req.DeviceType = tracking.DeviceType
 	}
@@ -326,16 +342,9 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 	if req.Language == "" {
 		req.Language = tracking.AcceptLanguage
 	}
-	req.AddressIP = tracking.OriginalIP
+}
 
-	if req.ReferrerHost == "" {
-		if u, err := url.Parse(tracking.Referer); err == nil && u.Host != "" {
-			req.ReferrerHost = u.Host
-		} else {
-			req.ReferrerHost = tracking.Referer
-		}
-	}
-
+func (s *Service) enrichGeoTracking(req *CreateVisitorRequest, tracking *middlewares.TrackingInfo) {
 	if req.Country == "" {
 		req.Country = tracking.Country
 	}

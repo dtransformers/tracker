@@ -131,7 +131,8 @@ func saveTargetProps(ctx context.Context, tx *ent.Tx, eventID int64, tp TargetPr
 	setCommerceProps(tpBuilder, tp)
 	setAuthProps(tpBuilder, tp)
 	setErrorProps(tpBuilder, tp)
-	setMiscProps(tpBuilder, tp)
+	setMiscComponentProps(tpBuilder, tp)
+	setMiscActionProps(tpBuilder, tp)
 
 	_, err := tpBuilder.Save(ctx)
 	if err != nil {
@@ -302,7 +303,7 @@ func setErrorProps(b *ent.EventTargetPropCreate, tp TargetProps) {
 	}
 }
 
-func setMiscProps(b *ent.EventTargetPropCreate, tp TargetProps) {
+func setMiscComponentProps(b *ent.EventTargetPropCreate, tp TargetProps) {
 	if tp.Component != nil {
 		b.SetComponent(*tp.Component)
 	}
@@ -321,6 +322,9 @@ func setMiscProps(b *ent.EventTargetPropCreate, tp TargetProps) {
 	if tp.ComponentName != nil {
 		b.SetComponentName(*tp.ComponentName)
 	}
+}
+
+func setMiscActionProps(b *ent.EventTargetPropCreate, tp TargetProps) {
 	if tp.SharePlatform != nil {
 		b.SetSharePlatform(*tp.SharePlatform)
 	}
@@ -437,7 +441,7 @@ func saveSearchFilters(ctx context.Context, tx *ent.Tx, eventID int64, filters m
 	return nil
 }
 
-func setCommerceItemFields(b *ent.EventCommerceItemCreate, item CommerceItem) {
+func setCommerceItemDetails(b *ent.EventCommerceItemCreate, item CommerceItem) {
 	if item.ItemName != nil {
 		b.SetItemName(*item.ItemName)
 	}
@@ -456,6 +460,21 @@ func setCommerceItemFields(b *ent.EventCommerceItemCreate, item CommerceItem) {
 	if item.ItemVariant != nil {
 		b.SetItemVariant(*item.ItemVariant)
 	}
+	if item.Index != nil {
+		b.SetIndex(*item.Index)
+	}
+	if item.ItemListID != nil {
+		b.SetItemListID(*item.ItemListID)
+	}
+	if item.ItemListName != nil {
+		b.SetItemListName(*item.ItemListName)
+	}
+	if item.Affiliation != nil {
+		b.SetAffiliation(*item.Affiliation)
+	}
+}
+
+func setCommerceItemPricing(b *ent.EventCommerceItemCreate, item CommerceItem) {
 	if item.Price != nil {
 		b.SetPrice(*item.Price)
 	}
@@ -471,18 +490,6 @@ func setCommerceItemFields(b *ent.EventCommerceItemCreate, item CommerceItem) {
 	if item.Discount != nil {
 		b.SetDiscount(*item.Discount)
 	}
-	if item.Index != nil {
-		b.SetIndex(*item.Index)
-	}
-	if item.ItemListID != nil {
-		b.SetItemListID(*item.ItemListID)
-	}
-	if item.ItemListName != nil {
-		b.SetItemListName(*item.ItemListName)
-	}
-	if item.Affiliation != nil {
-		b.SetAffiliation(*item.Affiliation)
-	}
 }
 
 func saveCommerceItems(ctx context.Context, tx *ent.Tx, eventID int64, items []CommerceItem) error {
@@ -491,7 +498,8 @@ func saveCommerceItems(ctx context.Context, tx *ent.Tx, eventID int64, items []C
 			SetEventID(eventID).
 			SetItemID(item.ItemID)
 
-		setCommerceItemFields(itemBuilder, item)
+		setCommerceItemDetails(itemBuilder, item)
+		setCommerceItemPricing(itemBuilder, item)
 
 		_, err := itemBuilder.Save(ctx)
 		if err != nil {
