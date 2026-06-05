@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"tracking/internal/ent"
+	devicesv1 "tracking/internal/modules/devices/v1"
+	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 )
 
 type CreateVisitorRequest struct {
@@ -55,6 +57,19 @@ type FullVisitorSessionDetails struct {
 	Visitor *ent.Visitor        `json:"visitor"`
 	Device  *ent.Device         `json:"device"`
 	Session *ent.VisitorSession `json:"session"`
+}
+
+type VerifyVisitorData struct {
+	IsValid bool                                        `json:"is_valid"`
+	Session *visitor_sessionsv1.SessionResponse         `json:"session"`
+	Device  *devicesv1.DeviceResponse                   `json:"device"`
+}
+
+type VerifyVisitorAPIResponse struct {
+	Success bool               `json:"success"`
+	Data    *VerifyVisitorData `json:"data"`
+	Version string             `json:"version"`
+	Error   *string            `json:"error"`
 }
 
 type CreateEventRequest struct {

@@ -73,6 +73,41 @@ func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, Sess
 	return toFullSessionDetails(v, device, session), nil
 }
 
+func (s *Service) VerifyVisitor(ctx context.Context, visitorUUID string, sessionToken string) (*VerifyVisitorData, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, sessionToken)
+	if err != nil {
+		return nil, err
+	}
+	if session == nil {
+		return &VerifyVisitorData{IsValid: false}, nil
+	}
+
+	v, err := s.getVistorByUUID(ctx, visitorUUID)
+	if err != nil {
+		return nil, err
+	}
+	if v == nil || int(session.VisitorID) != v.ID {
+		return &VerifyVisitorData{IsValid: false}, nil
+	}
+
+	device, err := s.deviceRepo.GetByID(ctx, int(session.DeviceID))
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		return &VerifyVisitorData{IsValid: false}, nil
+	}
+
+	return &VerifyVisitorData{
+		IsValid: true,
+		Session: toVisitorSessionResponse(session),
+		Device:  toVisitorDeviceResponse(device),
+	}, nil
+}
+
 func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, SessionUUID string) (*VisitorResponse, error) {
 	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, SessionUUID)
 	if err != nil {
@@ -562,6 +597,55 @@ func toFullSessionDetails(v *ent.Visitor, d *ent.Device, s *ent.VisitorSession) 
 		return nil
 	}
 	return &FullVisitorSessionDetails{Visitor: v, Device: d, Session: s}
+}
+
+func toVisitorSessionResponse(s *ent.VisitorSession) *visitor_sessionsv1.SessionResponse {
+	if s == nil {
+		return nil
+	}
+	return &visitor_sessionsv1.SessionResponse{
+		UUID:                s.UUID,
+		VisitorID:           s.VisitorID,
+		DeviceID:            s.DeviceID,
+		SessionToken:        s.SessionToken,
+		StartedAt:           s.StartedAt,
+		EndedAt:             s.EndedAt,
+		IsActive:            s.IsActive,
+		LastActivityAt:      s.LastActivityAt,
+		EntryPage:           s.EntryPage,
+		ExitPage:            s.ExitPage,
+		AcquisitionSource:   s.AcquisitionSource,
+		AcquisitionMedium:   s.AcquisitionMedium,
+		AcquisitionCampaign: s.AcquisitionCampaign,
+		CampaignTerm:        s.CampaignTerm,
+		CampaignContent:     s.CampaignContent,
+		CampaignID:          s.CampaignID,
+		ReferrerHost:        s.ReferrerHost,
+		CreatedAt:           s.CreatedAt,
+	}
+}
+
+func toVisitorDeviceResponse(d *ent.Device) *devicesv1.DeviceResponse {
+	if d == nil {
+		return nil
+	}
+	return &devicesv1.DeviceResponse{
+		UUID:            d.UUID,
+		VisitorID:       d.VisitorID,
+		FingerprintHash: d.FingerprintHash,
+		DeviceType:      d.DeviceType,
+		OS:              d.Os,
+		AddressIP:       d.AddressIP,
+		Country:         d.Country,
+		Region:          d.Region,
+		City:            d.City,
+		Browser:         d.Browser,
+		BrowserVersion:  d.BrowserVersion,
+		Language:        d.Language,
+		Timezone:        d.Timezone,
+		FirstSeenAt:     d.FirstSeenAt,
+		LastSeenAt:      d.LastSeenAt,
+	}
 }
 
 const (

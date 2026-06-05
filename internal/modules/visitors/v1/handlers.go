@@ -82,3 +82,39 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// VerifyVisitor godoc
+// @Summary Verify a visitor
+// @Description Verify that the visitor uuid and session_uuid are valid and return session status. Always returns 200 with is_valid flag unless params are invalid or an internal error occurs.
+// @Tags visitors
+// @Accept json
+// @Produce json
+// @Param visitor_uuid path string true "Visitor UUID"
+// @Param session_uuid path string true "Session UUID (session token)"
+// @Success 200 {object} VerifyVisitorAPIResponse
+// @Failure 400 {object} httputil.ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
+// @Router /api/v1/visitors/{visitor_uuid}/verify/{session_uuid} [get]
+func (h *Handler) VerifyVisitor(c *gin.Context) {
+	visitorUUID := c.Param("visitor_uuid")
+	sessionUUID := c.Param("session_uuid")
+
+	if visitorUUID == "" || sessionUUID == "" {
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "visitor_uuid and session_uuid are required", nil))
+		return
+	}
+
+	data, err := h.service.VerifyVisitor(c.Request.Context(), visitorUUID, sessionUUID)
+	if err != nil {
+		h.logger.Error("failed to verify visitor session", "error", err)
+		httputil.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, VerifyVisitorAPIResponse{
+		Success: true,
+		Data:    data,
+		Version: constants.Version,
+		Error:   nil,
+	})
+}
