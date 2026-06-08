@@ -33,7 +33,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 
 // CreateSession godoc
 // @Summary Create a visitor
-// @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.
+// @Description Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.
 // @Tags visitors
 // @Accept json
 // @Produce json
@@ -42,7 +42,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 // @Param X-Signature header string true "HMAC Signature"
 // @Param X-Timestamp header string true "Request Timestamp"
 // @Param X-Nonce header string true "Request Nonce"
-// @Param Cookie header string true "Cookie must contain anonymous_id"
+// @Param Cookie header string false "Optional session_id and visitor_uuid cookies"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
@@ -77,8 +77,8 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	visitorExpiration := h.appCfg.VisitorExpiration
 	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_id: ", response.SessionID, "and visitor_uuid: ", response.UUID)
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("session_id", response.SessionID, sessionExpiration, "/", "", true, true)
-	c.SetCookie("visitor_uuid", response.UUID, visitorExpiration, "/", "", true, true)
+	c.SetCookie(constants.CookieSessionID, response.SessionID, sessionExpiration, "/", "", true, true)
+	c.SetCookie(constants.CookieVisitorUUID, response.UUID, visitorExpiration, "/", "", true, true)
 
 	c.JSON(http.StatusOK, response)
 }
