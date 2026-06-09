@@ -43,7 +43,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 // @Param X-Signature header string true "HMAC Signature"
 // @Param X-Timestamp header string true "Request Timestamp"
 // @Param X-Nonce header string true "Request Nonce"
-// @Param Cookie header string false "Optional session_id and visitor_uuid cookies"
+// @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
@@ -76,9 +76,9 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	}
 	sessionExpiration := h.appCfg.SessionExpiration
 	visitorExpiration := h.appCfg.VisitorExpiration
-	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_id: ", response.SessionID, "and visitor_uuid: ", response.UUID)
+	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_token: ", response.SessionToken, "and visitor_uuid: ", response.UUID)
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie(constants.CookieSessionID, response.SessionID, sessionExpiration, "/", "", true, true)
+	c.SetCookie(constants.CookieSessionToken, response.SessionToken, sessionExpiration, "/", "", true, true)
 	c.SetCookie(constants.CookieVisitorUUID, response.UUID, visitorExpiration, "/", "", true, true)
 
 	c.JSON(http.StatusOK, response)
@@ -129,7 +129,7 @@ func (h *Handler) VerifyVisitor(c *gin.Context) {
 // @Param X-Api-Key header string true "Site API Key"
 // @Param X-Fingerprint header string true "Client Fingerprint"
 // @Param X-Nonce header string true "Request Nonce"
-// @Param Cookie header string false "Optional session_id and visitor_uuid cookies"
+// @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
 // @Success 200 {object} map[string]string
 // @Failure 401 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse

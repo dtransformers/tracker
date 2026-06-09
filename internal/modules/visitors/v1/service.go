@@ -131,7 +131,7 @@ func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, Se
 		return nil, custom_errors.NewUnauthorizedError(constants.Version, "visitor not found, please clear cookies")
 	}
 	response := toVisitorResponse(v)
-	response.SessionID = session.SessionToken
+	response.SessionToken = session.SessionToken
 	return response, nil
 
 }
@@ -228,7 +228,7 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 	s.linkSiteVisitorAndConsent(ctx, int64(visitor.ID), int64(site.ID), int64(newSession.ID))
 
 	response := toVisitorResponse(visitor)
-	response.SessionID = newSession.SessionToken
+	response.SessionToken = newSession.SessionToken
 	return response, nil
 }
 
@@ -457,7 +457,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	}
 
 	res := toVisitorResponse(v)
-	res.SessionID = sessionToken
+	res.SessionToken = sessionToken
 
 	return res, nil
 }
