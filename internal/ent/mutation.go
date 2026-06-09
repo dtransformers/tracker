@@ -16919,6 +16919,7 @@ type VisitorSessionMutation struct {
 	typ                  string
 	id                   *int
 	uuid                 *string
+	session_uuid         *string
 	visitor_id           *int64
 	addvisitor_id        *int64
 	device_id            *int64
@@ -17076,6 +17077,42 @@ func (m *VisitorSessionMutation) OldUUID(ctx context.Context) (v string, err err
 // ResetUUID resets all changes to the "uuid" field.
 func (m *VisitorSessionMutation) ResetUUID() {
 	m.uuid = nil
+}
+
+// SetSessionUUID sets the "session_uuid" field.
+func (m *VisitorSessionMutation) SetSessionUUID(s string) {
+	m.session_uuid = &s
+}
+
+// SessionUUID returns the value of the "session_uuid" field in the mutation.
+func (m *VisitorSessionMutation) SessionUUID() (r string, exists bool) {
+	v := m.session_uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionUUID returns the old "session_uuid" field's value of the VisitorSession entity.
+// If the VisitorSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VisitorSessionMutation) OldSessionUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionUUID: %w", err)
+	}
+	return oldValue.SessionUUID, nil
+}
+
+// ResetSessionUUID resets all changes to the "session_uuid" field.
+func (m *VisitorSessionMutation) ResetSessionUUID() {
+	m.session_uuid = nil
 }
 
 // SetVisitorID sets the "visitor_id" field.
@@ -17894,9 +17931,12 @@ func (m *VisitorSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VisitorSessionMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.uuid != nil {
 		fields = append(fields, visitorsession.FieldUUID)
+	}
+	if m.session_uuid != nil {
+		fields = append(fields, visitorsession.FieldSessionUUID)
 	}
 	if m.visitor_id != nil {
 		fields = append(fields, visitorsession.FieldVisitorID)
@@ -17959,6 +17999,8 @@ func (m *VisitorSessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case visitorsession.FieldUUID:
 		return m.UUID()
+	case visitorsession.FieldSessionUUID:
+		return m.SessionUUID()
 	case visitorsession.FieldVisitorID:
 		return m.VisitorID()
 	case visitorsession.FieldDeviceID:
@@ -18004,6 +18046,8 @@ func (m *VisitorSessionMutation) OldField(ctx context.Context, name string) (ent
 	switch name {
 	case visitorsession.FieldUUID:
 		return m.OldUUID(ctx)
+	case visitorsession.FieldSessionUUID:
+		return m.OldSessionUUID(ctx)
 	case visitorsession.FieldVisitorID:
 		return m.OldVisitorID(ctx)
 	case visitorsession.FieldDeviceID:
@@ -18053,6 +18097,13 @@ func (m *VisitorSessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUUID(v)
+		return nil
+	case visitorsession.FieldSessionUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionUUID(v)
 		return nil
 	case visitorsession.FieldVisitorID:
 		v, ok := value.(int64)
@@ -18314,6 +18365,9 @@ func (m *VisitorSessionMutation) ResetField(name string) error {
 	switch name {
 	case visitorsession.FieldUUID:
 		m.ResetUUID()
+		return nil
+	case visitorsession.FieldSessionUUID:
+		m.ResetSessionUUID()
 		return nil
 	case visitorsession.FieldVisitorID:
 		m.ResetVisitorID()

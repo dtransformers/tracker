@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldSessionUUID holds the string denoting the session_uuid field in the database.
+	FieldSessionUUID = "session_uuid"
 	// FieldVisitorID holds the string denoting the visitor_id field in the database.
 	FieldVisitorID = "visitor_id"
 	// FieldDeviceID holds the string denoting the device_id field in the database.
@@ -57,6 +59,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUUID,
+	FieldSessionUUID,
 	FieldVisitorID,
 	FieldDeviceID,
 	FieldSessionToken,
@@ -89,6 +92,8 @@ func ValidColumn(column string) bool {
 var (
 	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
 	UUIDValidator func(string) error
+	// SessionUUIDValidator is a validator for the "session_uuid" field. It is called by the builders before save.
+	SessionUUIDValidator func(string) error
 	// VisitorIDValidator is a validator for the "visitor_id" field. It is called by the builders before save.
 	VisitorIDValidator func(int64) error
 	// DeviceIDValidator is a validator for the "device_id" field. It is called by the builders before save.
@@ -116,6 +121,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByUUID orders the results by the uuid field.
 func ByUUID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUUID, opts...).ToFunc()
+}
+
+// BySessionUUID orders the results by the session_uuid field.
+func BySessionUUID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSessionUUID, opts...).ToFunc()
 }
 
 // ByVisitorID orders the results by the visitor_id field.

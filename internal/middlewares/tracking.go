@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"tracking/pkg/constants"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/user_agent"
 	"github.com/ulule/limiter/v3"
@@ -37,8 +39,8 @@ func RequestTracking() gin.HandlerFunc {
 
 		tracking.Cookies = extractCookies(c)
 		if tracking.Cookies != nil {
-			tracking.VisitorUUID = tracking.Cookies["visitor_uuid"]
-			tracking.SessionUUID = tracking.Cookies["session_id"]
+			tracking.VisitorUUID = tracking.Cookies[constants.CookieVisitorUUID]
+			tracking.SessionUUID = tracking.Cookies[constants.CookieSessionID]
 		}
 
 		tracking.Referer = c.Request.Referer()
