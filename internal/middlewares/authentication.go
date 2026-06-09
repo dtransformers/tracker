@@ -13,7 +13,7 @@ func Basic(username, password string) gin.HandlerFunc {
 	})
 }
 
-type SessionValidator func(ctx context.Context, visitorUUID, sessionToken string) (*SessionDetails, error)
+type SessionValidator func(ctx context.Context, visitorUUID, sessionUUID string) (*SessionDetails, error)
 
 // RequireVisitorAuthentication ensures that the request has valid Visitor and Session UUIDs via cookies.
 // It also validates them against the database using the provided SessionValidator.

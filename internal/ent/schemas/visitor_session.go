@@ -17,6 +17,10 @@ func (VisitorSession) Fields() []ent.Field {
 			Unique().
 			NotEmpty(),
 
+		field.String("session_uuid").
+			Unique().
+			NotEmpty(),
+
 		field.Int64("visitor_id").
 			Positive(),
 

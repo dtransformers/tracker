@@ -42,6 +42,20 @@ func (_u *VisitorSessionUpdate) SetNillableUUID(v *string) *VisitorSessionUpdate
 	return _u
 }
 
+// SetSessionUUID sets the "session_uuid" field.
+func (_u *VisitorSessionUpdate) SetSessionUUID(v string) *VisitorSessionUpdate {
+	_u.mutation.SetSessionUUID(v)
+	return _u
+}
+
+// SetNillableSessionUUID sets the "session_uuid" field if the given value is not nil.
+func (_u *VisitorSessionUpdate) SetNillableSessionUUID(v *string) *VisitorSessionUpdate {
+	if v != nil {
+		_u.SetSessionUUID(*v)
+	}
+	return _u
+}
+
 // SetVisitorID sets the "visitor_id" field.
 func (_u *VisitorSessionUpdate) SetVisitorID(v int64) *VisitorSessionUpdate {
 	_u.mutation.ResetVisitorID()
@@ -393,6 +407,11 @@ func (_u *VisitorSessionUpdate) check() error {
 			return &ValidationError{Name: "uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.uuid": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SessionUUID(); ok {
+		if err := visitorsession.SessionUUIDValidator(v); err != nil {
+			return &ValidationError{Name: "session_uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.session_uuid": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.VisitorID(); ok {
 		if err := visitorsession.VisitorIDValidator(v); err != nil {
 			return &ValidationError{Name: "visitor_id", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.visitor_id": %w`, err)}
@@ -425,6 +444,9 @@ func (_u *VisitorSessionUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(visitorsession.FieldUUID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SessionUUID(); ok {
+		_spec.SetField(visitorsession.FieldSessionUUID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.VisitorID(); ok {
 		_spec.SetField(visitorsession.FieldVisitorID, field.TypeInt64, value)
@@ -543,6 +565,20 @@ func (_u *VisitorSessionUpdateOne) SetUUID(v string) *VisitorSessionUpdateOne {
 func (_u *VisitorSessionUpdateOne) SetNillableUUID(v *string) *VisitorSessionUpdateOne {
 	if v != nil {
 		_u.SetUUID(*v)
+	}
+	return _u
+}
+
+// SetSessionUUID sets the "session_uuid" field.
+func (_u *VisitorSessionUpdateOne) SetSessionUUID(v string) *VisitorSessionUpdateOne {
+	_u.mutation.SetSessionUUID(v)
+	return _u
+}
+
+// SetNillableSessionUUID sets the "session_uuid" field if the given value is not nil.
+func (_u *VisitorSessionUpdateOne) SetNillableSessionUUID(v *string) *VisitorSessionUpdateOne {
+	if v != nil {
+		_u.SetSessionUUID(*v)
 	}
 	return _u
 }
@@ -911,6 +947,11 @@ func (_u *VisitorSessionUpdateOne) check() error {
 			return &ValidationError{Name: "uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.uuid": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SessionUUID(); ok {
+		if err := visitorsession.SessionUUIDValidator(v); err != nil {
+			return &ValidationError{Name: "session_uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.session_uuid": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.VisitorID(); ok {
 		if err := visitorsession.VisitorIDValidator(v); err != nil {
 			return &ValidationError{Name: "visitor_id", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.visitor_id": %w`, err)}
@@ -960,6 +1001,9 @@ func (_u *VisitorSessionUpdateOne) sqlSave(ctx context.Context) (_node *VisitorS
 	}
 	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(visitorsession.FieldUUID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SessionUUID(); ok {
+		_spec.SetField(visitorsession.FieldSessionUUID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.VisitorID(); ok {
 		_spec.SetField(visitorsession.FieldVisitorID, field.TypeInt64, value)
