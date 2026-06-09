@@ -63,4 +63,5 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	visitors.Use(middlewares.RequestTracking())
 
 	visitors.POST("/", m.handler.CreateVisitor)
+	visitors.POST("/ping", m.handler.Ping)
 }
