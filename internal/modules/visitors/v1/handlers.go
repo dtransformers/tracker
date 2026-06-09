@@ -155,7 +155,7 @@ func (h *Handler) Ping(c *gin.Context) {
 	err = h.service.sessionSvc.KeepAliveSession(c.Request.Context(), tracking.SessionUUID)
 	if err != nil {
 		h.logger.Error("failed to keep session alive", "error", err)
-		httputil.RespondError(c, custom_errors.NewInternalServerError(constants.Version, "failed to keep session alive", err))
+		httputil.RespondError(c, custom_errors.NewInternalError(constants.Version, "failed to keep session alive", err))
 		return
 	}
 
