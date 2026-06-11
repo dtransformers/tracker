@@ -29,13 +29,13 @@ func RequireVisitorAuthentication(validator SessionValidator) gin.HandlerFunc {
 			return
 		}
 
-		if tracking.VisitorUUID == "" || tracking.SessionUUID == "" {
+		if tracking.VisitorUUID == "" || tracking.SessionToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized request: missing visitor session cookies"})
 			c.Abort()
 			return
 		}
 
-		details, err := validator(c.Request.Context(), tracking.VisitorUUID, tracking.SessionUUID)
+		details, err := validator(c.Request.Context(), tracking.VisitorUUID, tracking.SessionToken)
 		if err != nil || details == nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized request: invalid visitor session"})
 			c.Abort()

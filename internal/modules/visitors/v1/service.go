@@ -44,8 +44,8 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 	}
 }
 
-func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, SessionUUID string) (*FullVisitorSessionDetails, error) {
-	session, err := s.sessionSvc.GetBySessionUUIDRaw(ctx, SessionUUID)
+func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, SessionToken string) (*FullVisitorSessionDetails, error) {
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, SessionToken)
 	if err != nil {
 		return nil, err
 	}
@@ -73,11 +73,11 @@ func (s *Service) GetSessionByUUID(ctx context.Context, VisitorUUID string, Sess
 	return toFullSessionDetails(v, device, session), nil
 }
 
-func (s *Service) VerifyVisitor(ctx context.Context, visitorUUID string, sessionUUID string) (*VerifyVisitorData, error) {
+func (s *Service) VerifyVisitor(ctx context.Context, visitorUUID string, sessionToken string) (*VerifyVisitorData, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	session, err := s.sessionSvc.GetBySessionUUIDRaw(ctx, sessionUUID)
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, sessionToken)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +108,8 @@ func (s *Service) VerifyVisitor(ctx context.Context, visitorUUID string, session
 	}, nil
 }
 
-func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, SessionUUID string) (*VisitorResponse, error) {
-	session, err := s.sessionSvc.GetBySessionUUIDRaw(ctx, SessionUUID)
+func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, SessionToken string) (*VisitorResponse, error) {
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, SessionToken)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,6 @@ func (s *Service) ensureVisitorLastActiveSession(ctx context.Context, visitorID 
 		UUID:                uuid.New().String(),
 		VisitorID:           visitorID,
 		DeviceID:            int64(visitorLastSession.DeviceID),
-		SessionUUID:         uuid.New().String(),
 		SessionToken:        uuid.New().String(),
 		StartedAt:           time.Now().UTC(),
 		EntryPage:           entryPage,
@@ -208,7 +207,6 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 		UUID:                uuid.New().String(),
 		VisitorID:           int64(visitor.ID),
 		DeviceID:            int64(device.ID),
-		SessionUUID:         uuid.New().String(),
 		SessionToken:        uuid.New().String(),
 		StartedAt:           time.Now().UTC(),
 		EntryPage:           entryPage,
@@ -242,8 +240,8 @@ func (s *Service) enrichRequestWithTracking(req *CreateVisitorRequest, tracking 
 	if tracking.VisitorUUID != "" {
 		req.VisitorUUID = tracking.VisitorUUID
 	}
-	if tracking.SessionUUID != "" {
-		req.SessionUUID = tracking.SessionUUID
+	if tracking.SessionToken != "" {
+		req.SessionToken = tracking.SessionToken
 	}
 
 	s.enrichDeviceTracking(req, tracking)
@@ -335,18 +333,15 @@ func (s *Service) resolveVisitorAndDevice(ctx context.Context, req CreateVisitor
 }
 
 func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device) (int64, string, bool, error) {
-	if req.SessionUUID == "" {
-		req.SessionUUID = uuid.New().String()
-	}
 	if req.SessionToken == "" {
 		req.SessionToken = uuid.New().String()
 	}
 
-	session, err := s.sessionSvc.GetBySessionUUIDRaw(ctx, req.SessionUUID)
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, req.SessionToken)
 	if err != nil {
 		return 0, "", false, err
 	}
-	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And UUID: `, req.SessionUUID, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
+	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And UUID: `, req.SessionToken, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 
 	if session == nil {
 		req.SessionToken = uuid.New().String()
@@ -354,7 +349,6 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
 			DeviceID:            int64(device.ID),
-			SessionUUID:         req.SessionUUID,
 			SessionToken:        req.SessionToken,
 			StartedAt:           time.Now().UTC(),
 			EntryPage:           req.EntryPage,
@@ -394,7 +388,6 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
 			DeviceID:            int64(device.ID),
-			SessionUUID:         req.SessionUUID,
 			SessionToken:        req.SessionToken,
 			StartedAt:           time.Now().UTC(),
 			EntryPage:           req.EntryPage,
@@ -423,7 +416,7 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 }
 
 func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, bool, error) {
-	if isNewDevice || req.SessionUUID != "" {
+	if isNewDevice || req.SessionToken != "" {
 		return s.getOrCreateSessionForDeviceOrToken(ctx, req, v, device)
 	}
 
@@ -441,14 +434,14 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	if tracking, ok := middlewares.GetTrackingInfo(ctx); ok && tracking != nil {
 		s.enrichRequestWithTracking(&req, tracking)
 		isBot = tracking.Bot
-		if tracking.VisitorUUID != "" && tracking.SessionUUID != "" {
-			res, err := s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
+		if tracking.VisitorUUID != "" && tracking.SessionToken != "" {
+			res, err := s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionToken)
 			if err == nil {
 				return res, nil
 			}
 			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
 		}
-		if tracking.VisitorUUID != "" && tracking.SessionUUID == "" {
+		if tracking.VisitorUUID != "" && tracking.SessionToken == "" {
 			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
 		}
 	}
@@ -683,8 +676,8 @@ func (s *Service) linkSiteVisitorAndConsent(ctx context.Context, visitorID, site
 	}
 }
 
-func (s *Service) ResolveSession(ctx context.Context, sessionUUID, fingerprintHash string, geo CreateVisitorRequest, site *ent.Site) (*ent.VisitorSession, error) {
-	session, err := s.sessionSvc.GetBySessionUUIDRaw(ctx, sessionUUID)
+func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintHash string, geo CreateVisitorRequest, site *ent.Site) (*ent.VisitorSession, error) {
+	session, err := s.sessionSvc.GetBySessionTokenRaw(ctx, sessionToken)
 	if err != nil {
 		return nil, err
 	}
@@ -698,7 +691,7 @@ func (s *Service) ResolveSession(ctx context.Context, sessionUUID, fingerprintHa
 	}
 
 	geo.FingerprintHash = fingerprintHash
-	geo.SessionUUID = sessionUUID
+	geo.SessionToken = sessionToken
 
 	v, device, _, err := s.resolveVisitorAndDevice(ctx, geo, isBot)
 	if err != nil {
@@ -711,7 +704,6 @@ func (s *Service) ResolveSession(ctx context.Context, sessionUUID, fingerprintHa
 		UUID:                uuid.New().String(),
 		VisitorID:           int64(v.ID),
 		DeviceID:            int64(device.ID),
-		SessionUUID:         geo.SessionUUID,
 		SessionToken:        uuid.New().String(),
 		StartedAt:           time.Now().UTC(),
 		EntryPage:           geo.EntryPage,

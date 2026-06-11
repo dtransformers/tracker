@@ -118,41 +118,7 @@ func (s *Service) GetBySessionTokenRaw(ctx context.Context, token string) (*ent.
 	return sess, nil
 }
 
-func (s *Service) GetBySessionUUID(ctx context.Context, sessionUUID string) (*SessionResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
 
-	sess, err := s.repo.GetBySessionUUID(ctx, sessionUUID)
-	if err != nil {
-		return nil, err
-	}
-	return toSessionResponse(sess), nil
-}
-
-func (s *Service) GetBySessionUUIDRaw(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error) {
-	ctx, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel()
-
-	sess, err := s.repo.GetBySessionUUID(ctx, sessionUUID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	if sess.IsActive && sess.EndedAt != nil && time.Now().UTC().After(*sess.EndedAt) {
-		isActive := false
-		sess, err = s.repo.Update(ctx, sess.UUID, UpdateSessionInput{IsActive: &isActive})
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to update expired session status", "error", err)
-			return nil, err
-		}
-		return nil, nil
-	}
-
-	return sess, nil
-}
 
 func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 	if s == nil {
@@ -246,11 +212,11 @@ func (s *Service) GetVisitorLastSession(ctx context.Context, visitorID int64) (*
 	return sess, nil
 }
 
-func (s *Service) ValidateSessionDetails(ctx context.Context, VisitorUUID string, SessionUUID string) (*middlewares.SessionDetails, error) {
+func (s *Service) ValidateSessionDetails(ctx context.Context, VisitorUUID string, SessionToken string) (*middlewares.SessionDetails, error) {
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	session, err := s.GetBySessionUUIDRaw(ctx, SessionUUID)
+	session, err := s.GetBySessionTokenRaw(ctx, SessionToken)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, custom_errors.NewUnauthorizedError(constants.Version, "session not found, please clear cookies")

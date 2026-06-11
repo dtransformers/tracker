@@ -45,15 +45,15 @@ func (s *Service) AutoResolveSessionMiddleware(sessionExp, visitorExp int) gin.H
 }
 
 func (s *Service) tryValidateExistingSession(c *gin.Context, tracking *middlewares.TrackingInfo, sessionExp, visitorExp int) bool {
-	if tracking.VisitorUUID == "" || tracking.SessionUUID == "" {
+	if tracking.VisitorUUID == "" || tracking.SessionToken == "" {
 		return false
 	}
-	details, err := s.sessionSvc.ValidateSessionDetails(c.Request.Context(), tracking.VisitorUUID, tracking.SessionUUID)
+	details, err := s.sessionSvc.ValidateSessionDetails(c.Request.Context(), tracking.VisitorUUID, tracking.SessionToken)
 	if err != nil || details == nil {
 		return false
 	}
 
-	middlewares.SetTrackingCookies(c, tracking.SessionUUID, tracking.VisitorUUID, sessionExp, visitorExp)
+	middlewares.SetTrackingCookies(c, tracking.SessionToken, tracking.VisitorUUID, sessionExp, visitorExp)
 	c.Set(middlewares.SessionDetailsKey, details)
 	c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), middlewares.SessionDetailsKey, details))
 	return true
@@ -74,7 +74,7 @@ func getSiteFromContext(c *gin.Context) (*ent.Site, bool) {
 func (s *Service) autoResolveNewSession(c *gin.Context, tracking *middlewares.TrackingInfo, site *ent.Site, sessionExp, visitorExp int) bool {
 	req := CreateVisitorRequest{
 		VisitorUUID:     tracking.VisitorUUID,
-		SessionUUID:     tracking.SessionUUID,
+		SessionToken:    tracking.SessionToken,
 		FingerprintHash: c.GetHeader("X-Fingerprint"),
 	}
 
@@ -89,7 +89,7 @@ func (s *Service) autoResolveNewSession(c *gin.Context, tracking *middlewares.Tr
 	}
 
 	tracking.VisitorUUID = res.UUID
-	tracking.SessionUUID = res.SessionToken
+	tracking.SessionToken = res.SessionToken
 
 	middlewares.SetTrackingCookies(c, res.SessionToken, res.UUID, sessionExp, visitorExp)
 	c.Set(middlewares.SessionDetailsKey, details)

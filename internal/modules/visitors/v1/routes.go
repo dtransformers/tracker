@@ -47,7 +47,7 @@ func (m *Module) Service() *Service {
 
 func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
-	visitors.GET("/:visitor_uuid/verify/:session_uuid", m.handler.VerifyVisitor)
+	visitors.GET("/:visitor_uuid/verify/:session_token", m.handler.VerifyVisitor)
 
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
 		GetSecretKey: middlewares.HMACSecretKeyFunc(middlewares.DefaultSiteSecretFunc(m.sitesService)),

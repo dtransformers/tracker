@@ -80,26 +80,26 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 
 // VerifyVisitor godoc
 // @Summary Verify a visitor
-// @Description Verify that the visitor uuid and session_uuid are valid and return session status. Always returns 200 with is_valid flag unless params are invalid or an internal error occurs.
+// @Description Verify that the visitor uuid and session_token are valid and return session status. Always returns 200 with is_valid flag unless params are invalid or an internal error occurs.
 // @Tags visitors
 // @Accept json
 // @Produce json
 // @Param visitor_uuid path string true "Visitor UUID"
-// @Param session_uuid path string true "Session UUID (session token)"
+// @Param session_token path string true "Session Token"
 // @Success 200 {object} VerifyVisitorAPIResponse
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/visitors/{visitor_uuid}/verify/{session_uuid} [get]
+// @Router /api/v1/visitors/{visitor_uuid}/verify/{session_token} [get]
 func (h *Handler) VerifyVisitor(c *gin.Context) {
 	visitorUUID := c.Param("visitor_uuid")
-	sessionUUID := c.Param("session_uuid")
+	sessionToken := c.Param("session_token")
 
-	if visitorUUID == "" || sessionUUID == "" {
-		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "visitor_uuid and session_uuid are required", nil))
+	if visitorUUID == "" || sessionToken == "" {
+		httputil.RespondError(c, custom_errors.NewBadRequestError(constants.Version, "visitor_uuid and session_token are required", nil))
 		return
 	}
 
-	data, err := h.service.VerifyVisitor(c.Request.Context(), visitorUUID, sessionUUID)
+	data, err := h.service.VerifyVisitor(c.Request.Context(), visitorUUID, sessionToken)
 	if err != nil {
 		h.logger.Error("failed to verify visitor session", "error", err)
 		httputil.RespondError(c, err)
@@ -135,18 +135,18 @@ func (h *Handler) Ping(c *gin.Context) {
 		return
 	}
 
-	if tracking.VisitorUUID == "" || tracking.SessionUUID == "" {
+	if tracking.VisitorUUID == "" || tracking.SessionToken == "" {
 		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "unauthorized request: missing visitor session cookies"))
 		return
 	}
 
-	details, err := h.service.sessionSvc.ValidateSessionDetails(c.Request.Context(), tracking.VisitorUUID, tracking.SessionUUID)
+	details, err := h.service.sessionSvc.ValidateSessionDetails(c.Request.Context(), tracking.VisitorUUID, tracking.SessionToken)
 	if err != nil || details == nil {
 		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "unauthorized request: invalid visitor session"))
 		return
 	}
 
-	err = h.service.sessionSvc.KeepAliveSession(c.Request.Context(), tracking.SessionUUID)
+	err = h.service.sessionSvc.KeepAliveSession(c.Request.Context(), tracking.SessionToken)
 	if err != nil {
 		h.logger.Error("failed to keep session alive", "error", err)
 		httputil.RespondError(c, custom_errors.NewInternalError(constants.Version, "failed to keep session alive", err))

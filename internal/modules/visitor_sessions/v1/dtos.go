@@ -6,7 +6,6 @@ type SessionResponse struct {
 	UUID                string     `json:"uuid"`
 	VisitorID           int64      `json:"visitor_id"`
 	DeviceID            int64      `json:"device_id"`
-	SessionUUID         string     `json:"session_uuid"`
 	SessionToken        string     `json:"session_token"`
 	StartedAt           time.Time  `json:"started_at"`
 	EndedAt             *time.Time `json:"ended_at,omitempty"`
@@ -28,7 +27,6 @@ type CreateSessionInput struct {
 	UUID                string
 	VisitorID           int64
 	DeviceID            int64
-	SessionUUID         string
 	SessionToken        string
 	StartedAt           time.Time
 	EntryPage           string

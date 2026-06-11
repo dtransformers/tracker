@@ -40,7 +40,7 @@ func RequestTracking() gin.HandlerFunc {
 		tracking.Cookies = extractCookies(c)
 		if tracking.Cookies != nil {
 			tracking.VisitorUUID = tracking.Cookies[constants.CookieVisitorUUID]
-			tracking.SessionUUID = tracking.Cookies[constants.CookieSessionToken]
+			tracking.SessionToken = tracking.Cookies[constants.CookieSessionToken]
 		}
 
 		tracking.Referer = c.Request.Referer()

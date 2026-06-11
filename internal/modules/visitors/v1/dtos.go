@@ -12,7 +12,6 @@ type CreateVisitorRequest struct {
 	PublicKey string `json:"-"`
 
 	VisitorUUID string `json:"visitor_uuid" swaggerignore:"true"`
-	SessionUUID string `json:"session_uuid" swaggerignore:"true"`
 
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
 	DeviceType      string `json:"device_type" swaggerignore:"true"`
@@ -87,7 +86,7 @@ type CreateEventRequest struct {
 
 type EventResponse struct {
 	UUID            string                 `json:"uuid"`
-	SessionUUID     string                 `json:"session_uuid"`
+	SessionToken    string                 `json:"session_token"`
 	VisitorUUID     string                 `json:"visitor_uuid"`
 	DeviceUUID      string                 `json:"device_uuid"`
 	EventName       string                 `json:"event_name"`
@@ -111,7 +110,7 @@ type CreatePageViewRequest struct {
 
 type PageViewResponse struct {
 	UUID        string    `json:"uuid"`
-	SessionUUID string    `json:"session_uuid"`
+	SessionToken string   `json:"session_token"`
 	VisitorUUID string    `json:"visitor_uuid"`
 	DeviceUUID  string    `json:"device_uuid"`
 	URL         string    `json:"url"`
