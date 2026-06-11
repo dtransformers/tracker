@@ -289,6 +289,74 @@ func (_c *MockRepository_GetByDeviceID_Call) RunAndReturn(run func(ctx context.C
 	return _c
 }
 
+// GetBySessionUUID provides a mock function for the type MockRepository
+func (_mock *MockRepository) GetBySessionUUID(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error) {
+	ret := _mock.Called(ctx, sessionUUID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBySessionUUID")
+	}
+
+	var r0 *ent.VisitorSession
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*ent.VisitorSession, error)); ok {
+		return returnFunc(ctx, sessionUUID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *ent.VisitorSession); ok {
+		r0 = returnFunc(ctx, sessionUUID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ent.VisitorSession)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, sessionUUID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockRepository_GetBySessionUUID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBySessionUUID'
+type MockRepository_GetBySessionUUID_Call struct {
+	*mock.Call
+}
+
+// GetBySessionUUID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - sessionUUID string
+func (_e *MockRepository_Expecter) GetBySessionUUID(ctx interface{}, sessionUUID interface{}) *MockRepository_GetBySessionUUID_Call {
+	return &MockRepository_GetBySessionUUID_Call{Call: _e.mock.On("GetBySessionUUID", ctx, sessionUUID)}
+}
+
+func (_c *MockRepository_GetBySessionUUID_Call) Run(run func(ctx context.Context, sessionUUID string)) *MockRepository_GetBySessionUUID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockRepository_GetBySessionUUID_Call) Return(visitorSession *ent.VisitorSession, err error) *MockRepository_GetBySessionUUID_Call {
+	_c.Call.Return(visitorSession, err)
+	return _c
+}
+
+func (_c *MockRepository_GetBySessionUUID_Call) RunAndReturn(run func(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error)) *MockRepository_GetBySessionUUID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetBySessionToken provides a mock function for the type MockRepository
 func (_mock *MockRepository) GetBySessionToken(ctx context.Context, token string) (*ent.VisitorSession, error) {
 	ret := _mock.Called(ctx, token)

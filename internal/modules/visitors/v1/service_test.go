@@ -92,7 +92,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, "fingerprint-hash").Return(nil, &ent.NotFoundError{})
 	mockDevicesRepo.On("Create", mock.Anything, mock.Anything).Return(mockDevice, nil)
 
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("GetBySessionUUID", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
 	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)
@@ -123,6 +123,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	anonID := "anon-123"
 	req := visitorsv1.CreateVisitorRequest{
 		PublicKey:           pubKey,
+		SessionUUID:         "session-uuid",
 		SessionToken:        "session-token",
 		DeviceType:          "desktop",
 		OS:                  "linux",
@@ -184,7 +185,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, "fingerprint-hash").Return(mockDevice, nil)
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
 
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(mockSession, nil)
+	mockSessionsRepo.On("GetBySessionUUID", mock.Anything, "session-uuid").Return(mockSession, nil)
 	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Update", mock.Anything, "session-uuid", mock.Anything).Return(mockSession, nil)
 
@@ -254,7 +255,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 		return in.Country == "" && in.Region == "" && in.City == "" && in.Timezone == "" && in.AddressIP == "127.0.0.1"
 	})).Return(mockDevice, nil)
 
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
+	mockSessionsRepo.On("GetBySessionUUID", mock.Anything, mock.AnythingOfType("string")).Return(nil, &ent.NotFoundError{})
 	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Create", mock.Anything, mock.Anything).Return(mockSession, nil)
 	mockConsentsRepo.On("SetVisitorConsent", mock.Anything, mock.Anything, mock.Anything, "none", "pending").Return(&ent.VisitorConsent{}, nil)

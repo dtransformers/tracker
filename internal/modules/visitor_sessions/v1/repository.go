@@ -14,6 +14,7 @@ type Repository interface {
 	Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error)
 	GetByUUID(ctx context.Context, uuid string) (*ent.VisitorSession, error)
 	GetByToken(ctx context.Context, uuid string) (*ent.VisitorSession, error)
+	GetBySessionUUID(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error)
 
 	GetByVisitorID(ctx context.Context, visitorID int64) ([]*ent.VisitorSession, error)
 	GetVisitorLastActiveSession(ctx context.Context, visitorID int64) (*ent.VisitorSession, error)
@@ -37,13 +38,13 @@ func NewRepository(client *ent.Client) Repository {
 	return &entRepository{client: client}
 }
 
-
 func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*ent.VisitorSession, error) {
 	query := r.client.VisitorSession.
 		Create().
 		SetUUID(input.UUID).
 		SetVisitorID(input.VisitorID).
 		SetDeviceID(input.DeviceID).
+		SetSessionUUID(input.SessionUUID).
 		SetSessionToken(input.SessionToken).
 		SetStartedAt(input.StartedAt).
 		SetEntryPage(input.EntryPage).
@@ -159,6 +160,20 @@ func (r *entRepository) GetBySessionToken(ctx context.Context, token string) (*e
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get visitor session by token: %w", err)
+	}
+
+	return s, nil
+}
+
+func (r *entRepository) GetBySessionUUID(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error) {
+	s, err := r.client.VisitorSession.
+		Query().
+		Where(visitorsession.SessionUUID(sessionUUID)).
+		Where(visitorsession.IsActive(true)).
+		Only(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get visitor session by session_uuid: %w", err)
 	}
 
 	return s, nil
