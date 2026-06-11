@@ -99,11 +99,11 @@ func LoadFrom(env EnvProvider, opts LoadOptions) (Config, error) {
 	}
 
 	cfg := Config{
-		App:   loadApp(env, opts),
-		DB:    loadDB(env, opts),
+		App:   loadApp(env),
+		DB:    loadDB(env),
 		Redis: loadRedis(env, opts),
 		TLS:   loadTLS(env, opts),
-		Auth:  loadAuth(env, opts),
+		Auth:  loadAuth(env),
 	}
 
 	if err := Validate(cfg); err != nil {
@@ -158,10 +158,10 @@ func Validate(cfg Config) error {
 	return joinErrors(errs)
 }
 
-func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
-	port, _err := mustValidPort(env, "APP_PORT")
-	if _err != nil {
-		panic(_err)
+func loadApp(env EnvProvider) AppConfig {
+	port, err := mustValidPort(env, "APP_PORT")
+	if err != nil {
+		panic(err)
 	}
 	runMode := mustString(env, "RUN_MODE")
 	if runMode != "development" && runMode != "production" && runMode != "testing" {
@@ -180,7 +180,7 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 	}
 }
 
-func loadDB(env EnvProvider, opts LoadOptions) DBConfig {
+func loadDB(env EnvProvider) DBConfig {
 	return DBConfig{
 		Host:     mustString(env, "DB_HOST"),
 		Port:     mustInt(env, "DB_PORT"),
@@ -208,7 +208,7 @@ func loadTLS(env EnvProvider, opts LoadOptions) TLSConfig {
 	}
 }
 
-func loadAuth(env EnvProvider, opts LoadOptions) AuthConfig {
+func loadAuth(env EnvProvider) AuthConfig {
 	return AuthConfig{
 		RootUsername: mustString(env, "ROOT_USERNAME"),
 		RootPassword: mustString(env, "ROOT_PASSWORD"),
