@@ -102,7 +102,7 @@ func (r *entRepository) GetByFingerprintHash(ctx context.Context, hash string) (
 	d, err := r.client.Device.
 		Query().
 		Where(device.FingerprintHash(hash)).
-		Only(ctx)
+		First(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get device by fingerprint hash: %w", err)

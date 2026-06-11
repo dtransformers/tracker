@@ -135,8 +135,10 @@ func (app *application) registerRoutes(router *gin.Engine) {
 	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
 	consentsModule := consents.RegisterV1(router, app.db.Client, slog.Default())
 	visitorsService := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App)
-	consentsModule.SetSessionValidator(sessionSvc.ValidateSessionDetails)
-	events.RegisterV1(router, app.db.Client, visitorsService.AutoResolveSessionMiddleware(app.cfg.App.SessionExpiration, app.cfg.App.VisitorExpiration), slog.Default())
+	
+	autoResolveMiddleware := visitorsService.AutoResolveSessionMiddleware(app.cfg.App.SessionExpiration, app.cfg.App.VisitorExpiration)
+	consentsModule.SetSessionMiddleware(autoResolveMiddleware)
+	events.RegisterV1(router, app.db.Client, autoResolveMiddleware, slog.Default())
 
 	app.registerSwaggerRoutes(router)
 }

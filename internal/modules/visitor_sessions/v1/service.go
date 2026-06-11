@@ -105,7 +105,11 @@ func (s *Service) GetBySessionTokenRaw(ctx context.Context, token string) (*ent.
 		return nil, err
 	}
 
-	if sess.IsActive && sess.EndedAt != nil && time.Now().UTC().After(*sess.EndedAt) {
+	if !sess.IsActive {
+		return nil, nil
+	}
+
+	if sess.EndedAt != nil && time.Now().UTC().After(*sess.EndedAt) {
 		isActive := false
 		sess, err = s.repo.Update(ctx, sess.UUID, UpdateSessionInput{IsActive: &isActive})
 		if err != nil {

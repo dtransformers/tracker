@@ -83,6 +83,7 @@ func TestTrackVisitor_NewVisitor(t *testing.T) {
 		ID:           30,
 		UUID:         uuid.New().String(),
 		SessionToken: "session-token",
+		IsActive:     true,
 	}
 
 	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
@@ -175,6 +176,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 		ID:           30,
 		UUID:         "session-uuid",
 		SessionToken: "session-token",
+		IsActive:     true,
 	}
 
 	mockVisitorsRepo.On("GetByID", mock.Anything, int64(10)).Return(mockVisitor, nil)
@@ -243,6 +245,7 @@ func TestTrackVisitor_GeoIP_SkipLocal(t *testing.T) {
 		ID:           30,
 		UUID:         uuid.New().String(),
 		SessionToken: "session-token",
+		IsActive:     true,
 	}
 
 	mockVisitorsRepo.On("GetByAnonymousID", mock.Anything, anonID).Return(nil, &ent.NotFoundError{}).Maybe()
