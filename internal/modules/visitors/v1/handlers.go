@@ -77,9 +77,24 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	sessionExpiration := h.appCfg.SessionExpiration
 	visitorExpiration := h.appCfg.VisitorExpiration
 	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_token: ", response.SessionToken, "and visitor_uuid: ", response.UUID)
-	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie(constants.CookieSessionToken, response.SessionToken, sessionExpiration, "/", "", true, true)
-	c.SetCookie(constants.CookieVisitorUUID, response.UUID, visitorExpiration, "/", "", true, true)
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieSessionToken,
+		Value:    response.SessionToken,
+		MaxAge:   sessionExpiration,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieVisitorUUID,
+		Value:    response.UUID,
+		MaxAge:   visitorExpiration,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 
 	c.JSON(http.StatusOK, response)
 }

@@ -382,6 +382,7 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 		return 0, "", err
 	}
 	if sess == nil {
+		req.SessionToken = uuid.New().String()
 		sess, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
@@ -693,7 +694,11 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 	}
 
 	geo.FingerprintHash = fingerprintHash
-	geo.SessionToken = sessionToken
+	if sessionToken == "" {
+		geo.SessionToken = uuid.New().String()
+	} else {
+		geo.SessionToken = sessionToken
+	}
 	session, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 		UUID:                uuid.New().String(),
 		VisitorID:           int64(v.ID),
