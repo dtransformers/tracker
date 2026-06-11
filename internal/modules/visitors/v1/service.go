@@ -369,7 +369,7 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 		if err != nil {
 			return 0, "", false, err
 		}
-		return int64(sess.ID), sess.SessionUUID, true, nil
+		return int64(sess.ID), sess.UUID, true, nil
 	}
 
 	now := time.Now()
@@ -380,7 +380,7 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 	if err != nil {
 		return 0, "", false, err
 	}
-	return int64(sess.ID), sess.SessionUUID, false, nil
+	return int64(sess.ID), sess.UUID, false, nil
 }
 
 func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device) (int64, string, error) {
@@ -409,7 +409,7 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 		if err != nil {
 			return 0, "", err
 		}
-		return int64(sess.ID), sess.SessionUUID, nil
+		return int64(sess.ID), sess.UUID, nil
 	}
 
 	now := time.Now()
@@ -419,7 +419,7 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 	if err != nil {
 		return 0, "", err
 	}
-	return int64(sess.ID), sess.SessionUUID, nil
+	return int64(sess.ID), sess.UUID, nil
 }
 
 func (s *Service) resolveSessionForCreate(ctx context.Context, req CreateVisitorRequest, v *ent.Visitor, device *ent.Device, isNewDevice bool) (int64, string, bool, error) {

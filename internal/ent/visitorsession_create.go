@@ -26,12 +26,6 @@ func (_c *VisitorSessionCreate) SetUUID(v string) *VisitorSessionCreate {
 	return _c
 }
 
-// SetSessionUUID sets the "session_uuid" field.
-func (_c *VisitorSessionCreate) SetSessionUUID(v string) *VisitorSessionCreate {
-	_c.mutation.SetSessionUUID(v)
-	return _c
-}
-
 // SetVisitorID sets the "visitor_id" field.
 func (_c *VisitorSessionCreate) SetVisitorID(v int64) *VisitorSessionCreate {
 	_c.mutation.SetVisitorID(v)
@@ -309,14 +303,6 @@ func (_c *VisitorSessionCreate) check() error {
 			return &ValidationError{Name: "uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.uuid": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.SessionUUID(); !ok {
-		return &ValidationError{Name: "session_uuid", err: errors.New(`ent: missing required field "VisitorSession.session_uuid"`)}
-	}
-	if v, ok := _c.mutation.SessionUUID(); ok {
-		if err := visitorsession.SessionUUIDValidator(v); err != nil {
-			return &ValidationError{Name: "session_uuid", err: fmt.Errorf(`ent: validator failed for field "VisitorSession.session_uuid": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.VisitorID(); !ok {
 		return &ValidationError{Name: "visitor_id", err: errors.New(`ent: missing required field "VisitorSession.visitor_id"`)}
 	}
@@ -382,10 +368,6 @@ func (_c *VisitorSessionCreate) createSpec() (*VisitorSession, *sqlgraph.CreateS
 	if value, ok := _c.mutation.UUID(); ok {
 		_spec.SetField(visitorsession.FieldUUID, field.TypeString, value)
 		_node.UUID = value
-	}
-	if value, ok := _c.mutation.SessionUUID(); ok {
-		_spec.SetField(visitorsession.FieldSessionUUID, field.TypeString, value)
-		_node.SessionUUID = value
 	}
 	if value, ok := _c.mutation.VisitorID(); ok {
 		_spec.SetField(visitorsession.FieldVisitorID, field.TypeInt64, value)

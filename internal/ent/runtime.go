@@ -211,36 +211,32 @@ func init() {
 	visitorsessionDescUUID := visitorsessionFields[0].Descriptor()
 	// visitorsession.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
 	visitorsession.UUIDValidator = visitorsessionDescUUID.Validators[0].(func(string) error)
-	// visitorsessionDescSessionUUID is the schema descriptor for session_uuid field.
-	visitorsessionDescSessionUUID := visitorsessionFields[1].Descriptor()
-	// visitorsession.SessionUUIDValidator is a validator for the "session_uuid" field. It is called by the builders before save.
-	visitorsession.SessionUUIDValidator = visitorsessionDescSessionUUID.Validators[0].(func(string) error)
 	// visitorsessionDescVisitorID is the schema descriptor for visitor_id field.
-	visitorsessionDescVisitorID := visitorsessionFields[2].Descriptor()
+	visitorsessionDescVisitorID := visitorsessionFields[1].Descriptor()
 	// visitorsession.VisitorIDValidator is a validator for the "visitor_id" field. It is called by the builders before save.
 	visitorsession.VisitorIDValidator = visitorsessionDescVisitorID.Validators[0].(func(int64) error)
 	// visitorsessionDescDeviceID is the schema descriptor for device_id field.
-	visitorsessionDescDeviceID := visitorsessionFields[3].Descriptor()
+	visitorsessionDescDeviceID := visitorsessionFields[2].Descriptor()
 	// visitorsession.DeviceIDValidator is a validator for the "device_id" field. It is called by the builders before save.
 	visitorsession.DeviceIDValidator = visitorsessionDescDeviceID.Validators[0].(func(int64) error)
 	// visitorsessionDescSessionToken is the schema descriptor for session_token field.
-	visitorsessionDescSessionToken := visitorsessionFields[4].Descriptor()
+	visitorsessionDescSessionToken := visitorsessionFields[3].Descriptor()
 	// visitorsession.SessionTokenValidator is a validator for the "session_token" field. It is called by the builders before save.
 	visitorsession.SessionTokenValidator = visitorsessionDescSessionToken.Validators[0].(func(string) error)
 	// visitorsessionDescStartedAt is the schema descriptor for started_at field.
-	visitorsessionDescStartedAt := visitorsessionFields[5].Descriptor()
+	visitorsessionDescStartedAt := visitorsessionFields[4].Descriptor()
 	// visitorsession.DefaultStartedAt holds the default value on creation for the started_at field.
 	visitorsession.DefaultStartedAt = visitorsessionDescStartedAt.Default.(func() time.Time)
 	// visitorsessionDescIsActive is the schema descriptor for is_active field.
-	visitorsessionDescIsActive := visitorsessionFields[7].Descriptor()
+	visitorsessionDescIsActive := visitorsessionFields[6].Descriptor()
 	// visitorsession.DefaultIsActive holds the default value on creation for the is_active field.
 	visitorsession.DefaultIsActive = visitorsessionDescIsActive.Default.(bool)
 	// visitorsessionDescLastActivityAt is the schema descriptor for last_activity_at field.
-	visitorsessionDescLastActivityAt := visitorsessionFields[8].Descriptor()
+	visitorsessionDescLastActivityAt := visitorsessionFields[7].Descriptor()
 	// visitorsession.DefaultLastActivityAt holds the default value on creation for the last_activity_at field.
 	visitorsession.DefaultLastActivityAt = visitorsessionDescLastActivityAt.Default.(func() time.Time)
 	// visitorsessionDescCreatedAt is the schema descriptor for created_at field.
-	visitorsessionDescCreatedAt := visitorsessionFields[18].Descriptor()
+	visitorsessionDescCreatedAt := visitorsessionFields[17].Descriptor()
 	// visitorsession.DefaultCreatedAt holds the default value on creation for the created_at field.
 	visitorsession.DefaultCreatedAt = visitorsessionDescCreatedAt.Default.(func() time.Time)
 }

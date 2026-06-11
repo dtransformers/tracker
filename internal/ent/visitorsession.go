@@ -19,8 +19,6 @@ type VisitorSession struct {
 	ID int `json:"id,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID string `json:"uuid,omitempty"`
-	// SessionUUID holds the value of the "session_uuid" field.
-	SessionUUID string `json:"session_uuid,omitempty"`
 	// VisitorID holds the value of the "visitor_id" field.
 	VisitorID int64 `json:"visitor_id,omitempty"`
 	// DeviceID holds the value of the "device_id" field.
@@ -67,7 +65,7 @@ func (*VisitorSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case visitorsession.FieldID, visitorsession.FieldVisitorID, visitorsession.FieldDeviceID:
 			values[i] = new(sql.NullInt64)
-		case visitorsession.FieldUUID, visitorsession.FieldSessionUUID, visitorsession.FieldSessionToken, visitorsession.FieldEntryPage, visitorsession.FieldExitPage, visitorsession.FieldAcquisitionSource, visitorsession.FieldAcquisitionMedium, visitorsession.FieldAcquisitionCampaign, visitorsession.FieldCampaignTerm, visitorsession.FieldCampaignContent, visitorsession.FieldCampaignID, visitorsession.FieldReferrerHost:
+		case visitorsession.FieldUUID, visitorsession.FieldSessionToken, visitorsession.FieldEntryPage, visitorsession.FieldExitPage, visitorsession.FieldAcquisitionSource, visitorsession.FieldAcquisitionMedium, visitorsession.FieldAcquisitionCampaign, visitorsession.FieldCampaignTerm, visitorsession.FieldCampaignContent, visitorsession.FieldCampaignID, visitorsession.FieldReferrerHost:
 			values[i] = new(sql.NullString)
 		case visitorsession.FieldStartedAt, visitorsession.FieldEndedAt, visitorsession.FieldLastActivityAt, visitorsession.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -97,12 +95,6 @@ func (_m *VisitorSession) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field uuid", values[i])
 			} else if value.Valid {
 				_m.UUID = value.String
-			}
-		case visitorsession.FieldSessionUUID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field session_uuid", values[i])
-			} else if value.Valid {
-				_m.SessionUUID = value.String
 			}
 		case visitorsession.FieldVisitorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -245,9 +237,6 @@ func (_m *VisitorSession) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("uuid=")
 	builder.WriteString(_m.UUID)
-	builder.WriteString(", ")
-	builder.WriteString("session_uuid=")
-	builder.WriteString(_m.SessionUUID)
 	builder.WriteString(", ")
 	builder.WriteString("visitor_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.VisitorID))

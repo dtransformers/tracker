@@ -167,7 +167,6 @@ func toSessionResponse(s *ent.VisitorSession) *SessionResponse {
 		UUID:                s.UUID,
 		VisitorID:           s.VisitorID,
 		DeviceID:            s.DeviceID,
-		SessionUUID:         s.SessionUUID,
 		SessionToken:        s.SessionToken,
 		StartedAt:           s.StartedAt,
 		EndedAt:             endedAt,

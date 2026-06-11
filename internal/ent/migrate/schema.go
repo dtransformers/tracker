@@ -346,7 +346,6 @@ var (
 	VisitorSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "uuid", Type: field.TypeString, Unique: true},
-		{Name: "session_uuid", Type: field.TypeString, Unique: true},
 		{Name: "visitor_id", Type: field.TypeInt64},
 		{Name: "device_id", Type: field.TypeInt64},
 		{Name: "session_token", Type: field.TypeString, Unique: true},

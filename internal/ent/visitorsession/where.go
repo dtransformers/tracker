@@ -59,11 +59,6 @@ func UUID(v string) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldEQ(FieldUUID, v))
 }
 
-// SessionUUID applies equality check predicate on the "session_uuid" field. It's identical to SessionUUIDEQ.
-func SessionUUID(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldEQ(FieldSessionUUID, v))
-}
-
 // VisitorID applies equality check predicate on the "visitor_id" field. It's identical to VisitorIDEQ.
 func VisitorID(v int64) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldEQ(FieldVisitorID, v))
@@ -212,71 +207,6 @@ func UUIDEqualFold(v string) predicate.VisitorSession {
 // UUIDContainsFold applies the ContainsFold predicate on the "uuid" field.
 func UUIDContainsFold(v string) predicate.VisitorSession {
 	return predicate.VisitorSession(sql.FieldContainsFold(FieldUUID, v))
-}
-
-// SessionUUIDEQ applies the EQ predicate on the "session_uuid" field.
-func SessionUUIDEQ(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldEQ(FieldSessionUUID, v))
-}
-
-// SessionUUIDNEQ applies the NEQ predicate on the "session_uuid" field.
-func SessionUUIDNEQ(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldNEQ(FieldSessionUUID, v))
-}
-
-// SessionUUIDIn applies the In predicate on the "session_uuid" field.
-func SessionUUIDIn(vs ...string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldIn(FieldSessionUUID, vs...))
-}
-
-// SessionUUIDNotIn applies the NotIn predicate on the "session_uuid" field.
-func SessionUUIDNotIn(vs ...string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldNotIn(FieldSessionUUID, vs...))
-}
-
-// SessionUUIDGT applies the GT predicate on the "session_uuid" field.
-func SessionUUIDGT(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldGT(FieldSessionUUID, v))
-}
-
-// SessionUUIDGTE applies the GTE predicate on the "session_uuid" field.
-func SessionUUIDGTE(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldGTE(FieldSessionUUID, v))
-}
-
-// SessionUUIDLT applies the LT predicate on the "session_uuid" field.
-func SessionUUIDLT(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldLT(FieldSessionUUID, v))
-}
-
-// SessionUUIDLTE applies the LTE predicate on the "session_uuid" field.
-func SessionUUIDLTE(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldLTE(FieldSessionUUID, v))
-}
-
-// SessionUUIDContains applies the Contains predicate on the "session_uuid" field.
-func SessionUUIDContains(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldContains(FieldSessionUUID, v))
-}
-
-// SessionUUIDHasPrefix applies the HasPrefix predicate on the "session_uuid" field.
-func SessionUUIDHasPrefix(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldHasPrefix(FieldSessionUUID, v))
-}
-
-// SessionUUIDHasSuffix applies the HasSuffix predicate on the "session_uuid" field.
-func SessionUUIDHasSuffix(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldHasSuffix(FieldSessionUUID, v))
-}
-
-// SessionUUIDEqualFold applies the EqualFold predicate on the "session_uuid" field.
-func SessionUUIDEqualFold(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldEqualFold(FieldSessionUUID, v))
-}
-
-// SessionUUIDContainsFold applies the ContainsFold predicate on the "session_uuid" field.
-func SessionUUIDContainsFold(v string) predicate.VisitorSession {
-	return predicate.VisitorSession(sql.FieldContainsFold(FieldSessionUUID, v))
 }
 
 // VisitorIDEQ applies the EQ predicate on the "visitor_id" field.

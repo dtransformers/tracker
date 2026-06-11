@@ -44,7 +44,7 @@ func (r *entRepository) Create(ctx context.Context, input CreateSessionInput) (*
 		SetUUID(input.UUID).
 		SetVisitorID(input.VisitorID).
 		SetDeviceID(input.DeviceID).
-		SetSessionUUID(input.SessionUUID).
+		SetUUID(input.SessionUUID).
 		SetSessionToken(input.SessionToken).
 		SetStartedAt(input.StartedAt).
 		SetEntryPage(input.EntryPage).
@@ -168,7 +168,7 @@ func (r *entRepository) GetBySessionToken(ctx context.Context, token string) (*e
 func (r *entRepository) GetBySessionUUID(ctx context.Context, sessionUUID string) (*ent.VisitorSession, error) {
 	s, err := r.client.VisitorSession.
 		Query().
-		Where(visitorsession.SessionUUID(sessionUUID)).
+		Where(visitorsession.UUID(sessionUUID)).
 		Where(visitorsession.IsActive(true)).
 		Only(ctx)
 
