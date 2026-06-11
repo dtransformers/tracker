@@ -184,7 +184,7 @@ func TestTrackVisitor_ExistingVisitor(t *testing.T) {
 	mockDevicesRepo.On("GetByFingerprintHash", mock.Anything, "fingerprint-hash").Return(mockDevice, nil)
 	mockDevicesRepo.On("Update", mock.Anything, "device-uuid", mock.Anything).Return(mockDevice, nil)
 
-	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-uuid").Return(mockSession, nil)
+	mockSessionsRepo.On("GetBySessionToken", mock.Anything, "session-token").Return(mockSession, nil)
 	mockSessionsRepo.On("DeactivateVisitorSessions", mock.Anything, mock.Anything).Return(nil).Maybe()
 	mockSessionsRepo.On("Update", mock.Anything, "session-uuid", mock.Anything).Return(mockSession, nil)
 
