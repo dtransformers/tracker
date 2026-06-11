@@ -58,10 +58,14 @@ type FullVisitorSessionDetails struct {
 	Session *ent.VisitorSession `json:"session"`
 }
 
+type PingResponse struct {
+	Message string `json:"message" example:"pong"`
+}
+
 type VerifyVisitorData struct {
-	IsValid bool                                        `json:"is_valid"`
-	Session *visitor_sessionsv1.SessionResponse         `json:"session"`
-	Device  *devicesv1.DeviceResponse                   `json:"device"`
+	IsValid bool                                `json:"is_valid"`
+	Session *visitor_sessionsv1.SessionResponse `json:"session"`
+	Device  *devicesv1.DeviceResponse           `json:"device"`
 }
 
 type VerifyVisitorAPIResponse struct {
@@ -109,14 +113,14 @@ type CreatePageViewRequest struct {
 }
 
 type PageViewResponse struct {
-	UUID        string    `json:"uuid"`
-	SessionToken string   `json:"session_token"`
-	VisitorUUID string    `json:"visitor_uuid"`
-	DeviceUUID  string    `json:"device_uuid"`
-	URL         string    `json:"url"`
-	Title       string    `json:"title,omitempty"`
-	Referrer    string    `json:"referrer,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	UUID         string    `json:"uuid"`
+	SessionToken string    `json:"session_token"`
+	VisitorUUID  string    `json:"visitor_uuid"`
+	DeviceUUID   string    `json:"device_uuid"`
+	URL          string    `json:"url"`
+	Title        string    `json:"title,omitempty"`
+	Referrer     string    `json:"referrer,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type CreateSessionInput struct {

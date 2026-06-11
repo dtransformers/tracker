@@ -124,7 +124,7 @@ func (h *Handler) VerifyVisitor(c *gin.Context) {
 // @Param X-Fingerprint header string true "Client Fingerprint"
 // @Param X-Nonce header string true "Request Nonce"
 // @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} PingResponse
 // @Failure 401 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/visitors/ping [post]
