@@ -60,6 +60,8 @@ type AppConfig struct {
 	IsDev             bool
 	SessionExpiration int
 	VisitorExpiration int
+	AllowedOrigins    []string
+	TrustedProxies    []string
 }
 
 type DBConfig struct {
@@ -173,6 +175,8 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		IsDev:             isDev,
 		SessionExpiration: intOrDefault(env, "SESSION_EXPIRATION", 2*60*60),
 		VisitorExpiration: intOrDefault(env, "VISITOR_EXPIRATION", 3600*24*365),
+		AllowedOrigins:    parseOrigins(stringOrDefault(env, "ALLOWED_ORIGINS", "", true)),
+		TrustedProxies:    parseOrigins(stringOrDefault(env, "APP_TRUSTED_PROXIES", "", true)),
 	}
 }
 
@@ -325,4 +329,19 @@ func joinErrors(errs []error) error {
 		return nil
 	}
 	return errors.Join(errs...)
+}
+
+func parseOrigins(originsStr string) []string {
+	if originsStr == "" {
+		return nil
+	}
+	parts := strings.Split(originsStr, ",")
+	var origins []string
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			origins = append(origins, p)
+		}
+	}
+	return origins
 }

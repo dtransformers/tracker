@@ -49,7 +49,6 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	consents.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	consents.Use(middlewares.RateLimit(1*time.Minute, 600))
 	consents.Use(middlewares.Validation())
-	consents.Use(middlewares.Cors())
 	consents.Use(middlewares.Metrics(m.logger))
 	consents.Use(middlewares.RequestTracking())
 	consents.Use(func(c *gin.Context) {

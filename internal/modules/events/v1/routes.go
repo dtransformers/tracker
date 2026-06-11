@@ -53,7 +53,6 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	events.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	events.Use(middlewares.RateLimit(1*time.Minute, 600))
 	events.Use(middlewares.Validation())
-	events.Use(middlewares.Cors())
 	events.Use(middlewares.Metrics(m.logger))
 	events.Use(middlewares.RequestTracking())
 	events.Use(func(c *gin.Context) {

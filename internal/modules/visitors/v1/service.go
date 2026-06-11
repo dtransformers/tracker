@@ -341,7 +341,6 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 	if err != nil {
 		return 0, "", false, err
 	}
-	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And UUID: `, req.SessionToken, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 
 	if session == nil {
 		req.SessionToken = uuid.New().String()
@@ -457,7 +456,6 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(`Generating New Session For The Visitor With ID: `, v.ID, `And Token: `, sessionToken, `For A IsNewSession:`, isNewSession, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 	if isNewSession && sessionID != 0 {
 		s.linkSiteVisitorAndConsent(ctx, int64(v.ID), int64(site.ID), sessionID)
 	}
