@@ -344,6 +344,7 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And Token: `, req.SessionToken, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 
 	if session == nil {
+		req.SessionToken = uuid.New().String()
 		sess, err := s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
@@ -434,7 +435,11 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 		s.enrichRequestWithTracking(&req, tracking)
 		isBot = tracking.Bot
 		if tracking.VisitorUUID != "" && tracking.SessionUUID != "" {
-			return s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
+			res, err := s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
+			if err == nil {
+				return res, nil
+			}
+			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
 		}
 		if tracking.VisitorUUID != "" && tracking.SessionUUID == "" {
 			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
@@ -694,11 +699,7 @@ func (s *Service) ResolveSession(ctx context.Context, sessionToken, fingerprintH
 	}
 
 	geo.FingerprintHash = fingerprintHash
-	if sessionToken == "" {
-		geo.SessionToken = uuid.New().String()
-	} else {
-		geo.SessionToken = sessionToken
-	}
+	geo.SessionToken = uuid.New().String()
 	session, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 		UUID:                uuid.New().String(),
 		VisitorID:           int64(v.ID),
