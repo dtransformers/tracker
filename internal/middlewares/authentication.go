@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"tracking/pkg/constants"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,4 +59,25 @@ func GetSessionDetails(ctx context.Context) (*SessionDetails, bool) {
 		}
 	}
 	return nil, false
+}
+
+func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessionExp, visitorExp int) {
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieSessionToken,
+		Value:    sessionToken,
+		MaxAge:   sessionExp,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieVisitorUUID,
+		Value:    visitorUUID,
+		MaxAge:   visitorExp,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 }

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -74,27 +73,7 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 		httputil.RespondError(c, err)
 		return
 	}
-	sessionExpiration := h.appCfg.SessionExpiration
-	visitorExpiration := h.appCfg.VisitorExpiration
-	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_token: ", response.SessionToken, "and visitor_uuid: ", response.UUID)
-	c.SetCookieData(&http.Cookie{
-		Name:     constants.CookieSessionToken,
-		Value:    response.SessionToken,
-		MaxAge:   sessionExpiration,
-		Path:     "/",
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
-	c.SetCookieData(&http.Cookie{
-		Name:     constants.CookieVisitorUUID,
-		Value:    response.UUID,
-		MaxAge:   visitorExpiration,
-		Path:     "/",
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	})
+	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration)
 
 	c.JSON(http.StatusOK, response)
 }
