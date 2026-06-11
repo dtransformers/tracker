@@ -131,7 +131,7 @@ func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, Se
 		return nil, custom_errors.NewUnauthorizedError(constants.Version, "visitor not found, please clear cookies")
 	}
 	response := toVisitorResponse(v)
-	response.SessionID = session.SessionUUID
+	response.SessionToken = session.SessionToken
 	return response, nil
 
 }
@@ -230,7 +230,7 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 	s.linkSiteVisitorAndConsent(ctx, int64(visitor.ID), int64(site.ID), int64(newSession.ID))
 
 	response := toVisitorResponse(visitor)
-	response.SessionID = newSession.SessionUUID
+	response.SessionToken = newSession.SessionToken
 	return response, nil
 }
 
@@ -349,6 +349,7 @@ func (s *Service) getOrCreateSessionForDeviceOrToken(ctx context.Context, req Cr
 	fmt.Println(`Session Info From DB For The Visitor With ID: `, v.ID, `And UUID: `, req.SessionUUID, `For A IsNewSession:`, false, `For Visitor UUID : `, v.UUID, `And Device UUID : `, device.UUID)
 
 	if session == nil {
+		req.SessionToken = uuid.New().String()
 		sess, err := s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
@@ -388,6 +389,7 @@ func (s *Service) getOrCreateSessionForActiveVisitor(ctx context.Context, req Cr
 		return 0, "", err
 	}
 	if sess == nil {
+		req.SessionToken = uuid.New().String()
 		sess, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 			UUID:                uuid.New().String(),
 			VisitorID:           int64(v.ID),
@@ -440,7 +442,11 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 		s.enrichRequestWithTracking(&req, tracking)
 		isBot = tracking.Bot
 		if tracking.VisitorUUID != "" && tracking.SessionUUID != "" {
-			return s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
+			res, err := s.GetExistingSession(ctx, tracking.VisitorUUID, tracking.SessionUUID)
+			if err == nil {
+				return res, nil
+			}
+			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
 		}
 		if tracking.VisitorUUID != "" && tracking.SessionUUID == "" {
 			return s.createNewSessionForVisitor(ctx, tracking.VisitorUUID, req.EntryPage, site)
@@ -464,7 +470,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 	}
 
 	res := toVisitorResponse(v)
-	res.SessionID = sessionToken // Note: sessionToken variable actually holds SessionUUID now from resolveSessionForCreate
+	res.SessionToken = sessionToken
 
 	return res, nil
 }
@@ -700,7 +706,7 @@ func (s *Service) ResolveSession(ctx context.Context, sessionUUID, fingerprintHa
 	}
 
 	geo.FingerprintHash = fingerprintHash
-	geo.SessionUUID = sessionUUID
+	geo.SessionToken = uuid.New().String()
 	session, err = s.sessionSvc.CreateSession(ctx, visitor_sessionsv1.CreateSessionInput{
 		UUID:                uuid.New().String(),
 		VisitorID:           int64(v.ID),

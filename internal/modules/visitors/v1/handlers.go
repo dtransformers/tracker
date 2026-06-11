@@ -1,12 +1,12 @@
 package v1
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
 	"tracking/internal/config"
 	"tracking/internal/ent"
+	"tracking/internal/middlewares"
 	"tracking/pkg/constants"
 	custom_errors "tracking/pkg/errors"
 	"tracking/pkg/httputil"
@@ -42,7 +42,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 // @Param X-Signature header string true "HMAC Signature"
 // @Param X-Timestamp header string true "Request Timestamp"
 // @Param X-Nonce header string true "Request Nonce"
-// @Param Cookie header string false "Optional session_id and visitor_uuid cookies"
+// @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
 // @Success 200 {object} VisitorResponse
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
@@ -73,12 +73,7 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 		httputil.RespondError(c, err)
 		return
 	}
-	sessionExpiration := h.appCfg.SessionExpiration
-	visitorExpiration := h.appCfg.VisitorExpiration
-	fmt.Println("Providing Visitor UUID: ", response.UUID, "with cookies session_id: ", response.SessionID, "and visitor_uuid: ", response.UUID)
-	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie(constants.CookieSessionID, response.SessionID, sessionExpiration, "/", "", true, true)
-	c.SetCookie(constants.CookieVisitorUUID, response.UUID, visitorExpiration, "/", "", true, true)
+	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -117,4 +112,46 @@ func (h *Handler) VerifyVisitor(c *gin.Context) {
 		Version: constants.Version,
 		Error:   nil,
 	})
+}
+
+// Ping godoc
+// @Summary Ping session
+// @Description Keep the visitor session alive
+// @Tags visitors
+// @Accept json
+// @Produce json
+// @Param X-Api-Key header string true "Site API Key"
+// @Param X-Fingerprint header string true "Client Fingerprint"
+// @Param X-Nonce header string true "Request Nonce"
+// @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} httputil.ErrorResponse
+// @Failure 500 {object} httputil.ErrorResponse
+// @Router /api/v1/visitors/ping [post]
+func (h *Handler) Ping(c *gin.Context) {
+	tracking, exists := middlewares.GetTrackingInfo(c.Request.Context())
+	if !exists || tracking == nil {
+		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "unauthorized request"))
+		return
+	}
+
+	if tracking.VisitorUUID == "" || tracking.SessionUUID == "" {
+		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "unauthorized request: missing visitor session cookies"))
+		return
+	}
+
+	details, err := h.service.sessionSvc.ValidateSessionDetails(c.Request.Context(), tracking.VisitorUUID, tracking.SessionUUID)
+	if err != nil || details == nil {
+		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "unauthorized request: invalid visitor session"))
+		return
+	}
+
+	err = h.service.sessionSvc.KeepAliveSession(c.Request.Context(), tracking.SessionUUID)
+	if err != nil {
+		h.logger.Error("failed to keep session alive", "error", err)
+		httputil.RespondError(c, custom_errors.NewInternalError(constants.Version, "failed to keep session alive", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "pong"})
 }

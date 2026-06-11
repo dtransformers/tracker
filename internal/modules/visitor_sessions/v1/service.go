@@ -276,3 +276,29 @@ func (s *Service) ValidateSessionDetails(ctx context.Context, VisitorUUID string
 		DeviceID:  session.DeviceID,
 	}, nil
 }
+
+func (s *Service) KeepAliveSession(ctx context.Context, sessionToken string) error {
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
+	sess, err := s.GetSessionByTokenRaw(ctx, sessionToken)
+	if err != nil {
+		return err
+	}
+	if sess == nil {
+		return custom_errors.NewNotFoundError(constants.Version, "session not found")
+	}
+
+	now := time.Now().UTC()
+	var endedAt *time.Time
+	if s.appCfg.SessionExpiration > 0 {
+		t := now.Add(time.Duration(s.appCfg.SessionExpiration) * time.Second)
+		endedAt = &t
+	}
+
+	_, err = s.UpdateSession(ctx, sess.UUID, UpdateSessionInput{
+		LastActivityAt: &now,
+		EndedAt:        endedAt,
+	})
+	return err
+}
