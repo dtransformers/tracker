@@ -82,7 +82,6 @@ func newApplication(cfg config.Config, db *database.Database) *application {
 	return app
 }
 
-// start starts the HTTP server
 func (app *application) start(ctx context.Context) error {
 	fmt.Printf("Starting server on %s:%d (tls=%v)\n", app.cfg.App.Host, app.cfg.App.Port, app.cfg.TLS.Enabled)
 	fmt.Printf("Health check: http://%s:%d/health\n", app.cfg.App.Host, app.cfg.App.Port)
@@ -105,7 +104,6 @@ func (app *application) setupRouter() *gin.Engine {
 	if len(app.cfg.App.TrustedProxies) > 0 {
 		_ = router.SetTrustedProxies(app.cfg.App.TrustedProxies)
 	} else {
-		// By default Gin trusts all proxies, which is insecure. Disable it.
 		_ = router.SetTrustedProxies(nil)
 	}
 
@@ -140,8 +138,8 @@ func (app *application) registerRoutes(router *gin.Engine) {
 
 	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
 	consentsModule := consents.RegisterV1(router, app.db.Client, slog.Default())
-	visitorsService := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App)
-	
+	visitorsService := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App, app.cfg.Auth)
+
 	autoResolveMiddleware := visitorsService.AutoResolveSessionMiddleware(app.cfg.App.SessionExpiration, app.cfg.App.VisitorExpiration)
 	consentsModule.SetSessionMiddleware(autoResolveMiddleware)
 	events.RegisterV1(router, app.db.Client, autoResolveMiddleware, slog.Default())
