@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"tracking/pkg/constants"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,13 +29,13 @@ func RequireVisitorAuthentication(validator SessionValidator) gin.HandlerFunc {
 			return
 		}
 
-		if tracking.VisitorUUID == "" || tracking.SessionUUID == "" {
+		if tracking.VisitorUUID == "" || tracking.SessionToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized request: missing visitor session cookies"})
 			c.Abort()
 			return
 		}
 
-		details, err := validator(c.Request.Context(), tracking.VisitorUUID, tracking.SessionUUID)
+		details, err := validator(c.Request.Context(), tracking.VisitorUUID, tracking.SessionToken)
 		if err != nil || details == nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized request: invalid visitor session"})
 			c.Abort()
@@ -57,4 +59,25 @@ func GetSessionDetails(ctx context.Context) (*SessionDetails, bool) {
 		}
 	}
 	return nil, false
+}
+
+func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessionExp, visitorExp int) {
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieSessionToken,
+		Value:    sessionToken,
+		MaxAge:   sessionExp,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieVisitorUUID,
+		Value:    visitorUUID,
+		MaxAge:   visitorExp,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
 }

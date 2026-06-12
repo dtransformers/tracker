@@ -16,9 +16,9 @@ type Module struct {
 	handler          *Handler
 	service          *Service
 	repo             Repository
-	sitesService     *sitesv1.Service
-	sessionValidator middlewares.SessionValidator
-	logger           *slog.Logger
+	sitesService      *sitesv1.Service
+	sessionMiddleware gin.HandlerFunc
+	logger            *slog.Logger
 }
 
 func NewModule(client *ent.Client, sitesService *sitesv1.Service, logger *slog.Logger) *Module {
@@ -49,16 +49,15 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	consents.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	consents.Use(middlewares.RateLimit(1*time.Minute, 600))
 	consents.Use(middlewares.Validation())
-	consents.Use(middlewares.Cors())
 	consents.Use(middlewares.Metrics(m.logger))
 	consents.Use(middlewares.RequestTracking())
 	consents.Use(func(c *gin.Context) {
-		if m.sessionValidator == nil {
-			c.JSON(500, gin.H{"error": "internal error: session validator not configured"})
+		if m.sessionMiddleware == nil {
+			c.JSON(500, gin.H{"error": "internal error: session middleware not configured"})
 			c.Abort()
 			return
 		}
-		middlewares.RequireVisitorAuthentication(m.sessionValidator)(c)
+		m.sessionMiddleware(c)
 	})
 
 	consents.POST("/", m.handler.UpdateConsent)
@@ -68,6 +67,6 @@ func (m *Module) Service() *Service {
 	return m.service
 }
 
-func (m *Module) SetSessionValidator(validator middlewares.SessionValidator) {
-	m.sessionValidator = validator
+func (m *Module) SetSessionMiddleware(middleware gin.HandlerFunc) {
+	m.sessionMiddleware = middleware
 }

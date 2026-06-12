@@ -17,7 +17,7 @@ type Module struct {
 	service          *Service
 	repo             Repository
 	sitesService     *sitesv1.Service
-	sessionValidator middlewares.SessionValidator
+	sessionMiddleware gin.HandlerFunc
 	logger           *slog.Logger
 }
 
@@ -53,22 +53,21 @@ func (m *Module) Register(router *gin.RouterGroup) {
 	events.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	events.Use(middlewares.RateLimit(1*time.Minute, 600))
 	events.Use(middlewares.Validation())
-	events.Use(middlewares.Cors())
 	events.Use(middlewares.Metrics(m.logger))
 	events.Use(middlewares.RequestTracking())
 	events.Use(func(c *gin.Context) {
-		if m.sessionValidator == nil {
-			c.JSON(500, gin.H{"error": "internal error: session validator not configured"})
+		if m.sessionMiddleware == nil {
+			c.JSON(500, gin.H{"error": "internal error: session middleware not configured"})
 			c.Abort()
 			return
 		}
-		middlewares.RequireVisitorAuthentication(m.sessionValidator)(c)
+		m.sessionMiddleware(c)
 	})
 
 	events.POST("/custom", m.handler.CreateEvent)
 	events.POST("/pageviews", m.handler.CreatePageView)
 }
 
-func (m *Module) SetSessionValidator(validator middlewares.SessionValidator) {
-	m.sessionValidator = validator
+func (m *Module) SetSessionMiddleware(middleware gin.HandlerFunc) {
+	m.sessionMiddleware = middleware
 }

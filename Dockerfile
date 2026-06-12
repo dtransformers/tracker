@@ -27,6 +27,8 @@ COPY pkg/ ./pkg/
 COPY docs/ ./docs/
 COPY tools/ ./tools/
 
+
+
 # Build-time metadata (inject at build time)
 ARG VERSION=dev
 ARG COMMIT=none
@@ -67,5 +69,7 @@ ENV APP_ENV=production
 
 EXPOSE 8080
 ## TO GENERATE SWAGGER DOCS:
-## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go        
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go      
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go --parseDependency --parseInternal
+
 ENTRYPOINT ["/app"]

@@ -102,6 +102,12 @@ func (app *application) setupRouter() *gin.Engine {
 	}
 
 	router := gin.New()
+	if len(app.cfg.App.TrustedProxies) > 0 {
+		_ = router.SetTrustedProxies(app.cfg.App.TrustedProxies)
+	} else {
+		// By default Gin trusts all proxies, which is insecure. Disable it.
+		_ = router.SetTrustedProxies(nil)
+	}
 
 	app.applyMiddlewares(router)
 
@@ -116,13 +122,13 @@ func (app *application) setupRouter() *gin.Engine {
 }
 
 func (app *application) applyMiddlewares(router *gin.Engine) {
-	router.Use(middlewares.Cors())
+	router.Use(middlewares.Cors(app.cfg.App.AllowedOrigins))
 	router.Use(gin.LoggerWithConfig(gin.LoggerConfig{
 		SkipPaths: []string{"/health"},
 	}))
 	router.Use(gin.Recovery())
 
-	router.NoRoute(middlewares.Cors(), func(c *gin.Context) {
+	router.NoRoute(middlewares.Cors(app.cfg.App.AllowedOrigins), func(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "route not found"})
 	})
 }
@@ -134,9 +140,11 @@ func (app *application) registerRoutes(router *gin.Engine) {
 
 	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
 	consentsModule := consents.RegisterV1(router, app.db.Client, slog.Default())
-	visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App)
-	consentsModule.SetSessionValidator(sessionSvc.ValidateSessionDetails)
-	events.RegisterV1(router, app.db.Client, sessionSvc.ValidateSessionDetails, slog.Default())
+	visitorsService := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App)
+	
+	autoResolveMiddleware := visitorsService.AutoResolveSessionMiddleware(app.cfg.App.SessionExpiration, app.cfg.App.VisitorExpiration)
+	consentsModule.SetSessionMiddleware(autoResolveMiddleware)
+	events.RegisterV1(router, app.db.Client, autoResolveMiddleware, slog.Default())
 
 	app.registerSwaggerRoutes(router)
 }

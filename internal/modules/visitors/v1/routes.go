@@ -47,8 +47,6 @@ func (m *Module) Service() *Service {
 
 func (m *Module) Register(router *gin.RouterGroup) {
 	visitors := router.Group("/visitors")
-	visitors.GET("/:visitor_uuid/verify/:session_uuid", m.handler.VerifyVisitor)
-
 	visitors.Use(middlewares.HMAC(middlewares.HMACConfig{
 		GetSecretKey: middlewares.HMACSecretKeyFunc(middlewares.DefaultSiteSecretFunc(m.sitesService)),
 		NonceStore:   state.NewNonceStore(state.Redis),
@@ -56,11 +54,12 @@ func (m *Module) Register(router *gin.RouterGroup) {
 
 	visitors.Use(middlewares.VerifySite(middlewares.DefaultSiteSecretFunc(m.sitesService)))
 	visitors.Use(middlewares.RateLimit(1*time.Minute, 600))
-
 	visitors.Use(middlewares.Validation())
-	visitors.Use(middlewares.Cors())
+
 	visitors.Use(middlewares.Metrics(m.logger))
 	visitors.Use(middlewares.RequestTracking())
 
+	visitors.GET("/:visitor_uuid/verify/:session_token", m.handler.VerifyVisitor)
 	visitors.POST("/", m.handler.CreateVisitor)
+	visitors.POST("/ping", m.handler.Ping)
 }

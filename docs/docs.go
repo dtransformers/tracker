@@ -65,7 +65,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.UpdateConsentRequest"
+                            "$ref": "#/definitions/internal_modules_consents_v1.UpdateConsentRequest"
                         }
                     }
                 ],
@@ -73,19 +73,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.UpdateConsentResponse"
+                            "$ref": "#/definitions/internal_modules_consents_v1.UpdateConsentResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_consents_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -140,19 +140,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.VisitorEvent"
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -207,19 +207,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.PageView"
+                            "$ref": "#/definitions/tracking_internal_ent.PageView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_events_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -253,13 +253,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.ListResponse"
+                            "$ref": "#/definitions/internal_modules_sites_v1.ListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -288,7 +288,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateRequest"
+                            "$ref": "#/definitions/internal_modules_sites_v1.CreateRequest"
                         }
                     }
                 ],
@@ -296,25 +296,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Domain already exists",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -348,25 +348,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -398,19 +398,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -446,7 +446,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.UpdateRequest"
+                            "$ref": "#/definitions/internal_modules_sites_v1.UpdateRequest"
                         }
                     }
                 ],
@@ -454,31 +454,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Domain already in use",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -512,25 +512,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.Response"
+                            "$ref": "#/definitions/internal_modules_sites_v1.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_sites_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -538,7 +538,7 @@ const docTemplate = `{
         },
         "/api/v1/visitors": {
             "post": {
-                "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time. Requires anonymous_id cookie.",
+                "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.",
                 "consumes": [
                     "application/json"
                 ],
@@ -556,7 +556,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateVisitorRequest"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.CreateVisitorRequest"
                         }
                     },
                     {
@@ -589,9 +589,123 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Cookie must contain anonymous_id",
+                        "description": "Optional session_token and visitor_uuid cookies",
                         "name": "Cookie",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.VisitorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/visitors/ping": {
+            "post": {
+                "description": "Keep the visitor session alive",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Ping session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Site API Key",
+                        "name": "X-Api-Key",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Client Fingerprint",
+                        "name": "X-Fingerprint",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request Nonce",
+                        "name": "X-Nonce",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional session_token and visitor_uuid cookies",
+                        "name": "Cookie",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_modules_visitors_v1.PingResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/visitors/{visitor_uuid}/verify/{session_token}": {
+            "get": {
+                "description": "Verify that the visitor uuid and session_token are valid and return session status. Always returns 200 with is_valid flag unless params are invalid or an internal error occurs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "visitors"
+                ],
+                "summary": "Verify a visitor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Visitor UUID",
+                        "name": "visitor_uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session Token",
+                        "name": "session_token",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -599,19 +713,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.VisitorResponse"
+                            "$ref": "#/definitions/internal_modules_visitors_v1.VerifyVisitorAPIResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_visitors_v1.ErrorResponse"
+                            "$ref": "#/definitions/tracking_pkg_httputil.ErrorResponse"
                         }
                     }
                 }
@@ -619,245 +733,62 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "ent.PageView": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "device_id": {
-                    "description": "DeviceID holds the value of the \"device_id\" field.",
-                    "type": "integer"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "referrer": {
-                    "description": "Referrer holds the value of the \"referrer\" field.",
-                    "type": "string"
-                },
-                "session_id": {
-                    "description": "SessionID holds the value of the \"session_id\" field.",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "Title holds the value of the \"title\" field.",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "URL holds the value of the \"url\" field.",
-                    "type": "string"
-                },
-                "uuid": {
-                    "description": "UUID holds the value of the \"uuid\" field.",
-                    "type": "string"
-                },
-                "visitor_id": {
-                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
-                    "type": "integer"
-                }
-            }
+        "internal_modules_consents_v1.ConsentStatus": {
+            "type": "string",
+            "enum": [
+                "granted",
+                "denied",
+                "pending"
+            ],
+            "x-enum-varnames": [
+                "ConsentStatusGranted",
+                "ConsentStatusDenied",
+                "ConsentStatusPending"
+            ]
         },
-        "ent.VisitorEvent": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "device_id": {
-                    "description": "DeviceID holds the value of the \"device_id\" field.",
-                    "type": "integer"
-                },
-                "event_name": {
-                    "description": "EventName holds the value of the \"event_name\" field.",
-                    "type": "string"
-                },
-                "event_properties": {
-                    "description": "EventProperties holds the value of the \"event_properties\" field.",
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "session_id": {
-                    "description": "SessionID holds the value of the \"session_id\" field.",
-                    "type": "integer"
-                },
-                "uuid": {
-                    "description": "UUID holds the value of the \"uuid\" field.",
-                    "type": "string"
-                },
-                "visitor_id": {
-                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
-                    "type": "integer"
-                }
-            }
+        "internal_modules_consents_v1.ConsentType": {
+            "type": "string",
+            "enum": [
+                "tracking",
+                "marketing",
+                "functional",
+                "none"
+            ],
+            "x-enum-varnames": [
+                "ConsentTypeTracking",
+                "ConsentTypeMarketing",
+                "ConsentTypeFunctional",
+                "ConsentTypeNone"
+            ]
         },
-        "internal_modules_consents_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "trace_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_modules_events_v1.CreateEventRequest": {
+        "internal_modules_consents_v1.UpdateConsentRequest": {
             "type": "object",
             "required": [
-                "category",
-                "name",
-                "occurred_at",
-                "type"
+                "consent_type",
+                "status"
             ],
             "properties": {
-                "category": {
-                    "$ref": "#/definitions/v1.EventCategory"
-                },
-                "click_ids": {
-                    "$ref": "#/definitions/v1.PlatformClickIds"
-                },
-                "event_id": {
-                    "type": "string"
-                },
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "occurred_at": {
-                    "type": "string"
-                },
-                "page_id": {
-                    "type": "integer"
-                },
-                "schema_version": {
-                    "type": "string"
-                },
-                "sdk_name": {
-                    "type": "string"
-                },
-                "sdk_version": {
-                    "type": "string"
-                },
-                "sequence": {
-                    "type": "integer"
-                },
-                "server_received_at": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                },
-                "target": {
-                    "$ref": "#/definitions/v1.TargetProps"
-                },
-                "type": {
-                    "$ref": "#/definitions/v1.EventType"
-                }
-            }
-        },
-        "internal_modules_events_v1.CreatePageViewRequest": {
-            "type": "object",
-            "required": [
-                "url"
-            ],
-            "properties": {
-                "fingerprint_hash": {
-                    "type": "string"
-                },
-                "referrer": {
-                    "type": "string"
-                },
-                "session_token": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_modules_events_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
+                "consent_type": {
+                    "$ref": "#/definitions/internal_modules_consents_v1.ConsentType"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/internal_modules_consents_v1.ConsentStatus"
+                }
+            }
+        },
+        "internal_modules_consents_v1.UpdateConsentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
                 },
                 "success": {
                     "type": "boolean"
-                },
-                "trace_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
-        "internal_modules_sites_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_modules_visitors_v1.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "trace_id": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.AuthProvider": {
+        "internal_modules_events_v1.AuthProvider": {
             "type": "string",
             "enum": [
                 "email",
@@ -878,7 +809,7 @@ const docTemplate = `{
                 "AuthProviderSSO"
             ]
         },
-        "v1.CommerceItem": {
+        "internal_modules_events_v1.CommerceItem": {
             "type": "object",
             "properties": {
                 "affiliation": {
@@ -931,95 +862,80 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.ConsentStatus": {
-            "type": "string",
-            "enum": [
-                "granted",
-                "denied",
-                "pending"
-            ],
-            "x-enum-varnames": [
-                "ConsentStatusGranted",
-                "ConsentStatusDenied",
-                "ConsentStatusPending"
-            ]
-        },
-        "v1.ConsentType": {
-            "type": "string",
-            "enum": [
-                "tracking",
-                "marketing",
-                "functional",
-                "none"
-            ],
-            "x-enum-varnames": [
-                "ConsentTypeTracking",
-                "ConsentTypeMarketing",
-                "ConsentTypeFunctional",
-                "ConsentTypeNone"
-            ]
-        },
-        "v1.CreateRequest": {
+        "internal_modules_events_v1.CreateEventRequest": {
             "type": "object",
             "required": [
-                "domain",
+                "category",
                 "name",
-                "tenant_id"
+                "occurred_at",
+                "type"
             ],
             "properties": {
-                "domain": {
-                    "description": "Domain of the site (required, must be unique and valid)",
+                "category": {
+                    "$ref": "#/definitions/internal_modules_events_v1.EventCategory"
+                },
+                "click_ids": {
+                    "$ref": "#/definitions/internal_modules_events_v1.PlatformClickIds"
+                },
+                "event_id": {
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the site (required, 1-255 characters)",
                     "type": "string"
                 },
-                "tenant_id": {
-                    "description": "Tenant ID of the site",
+                "occurred_at": {
+                    "type": "string"
+                },
+                "page_id": {
                     "type": "integer"
+                },
+                "schema_version": {
+                    "type": "string"
+                },
+                "sdk_name": {
+                    "type": "string"
+                },
+                "sdk_version": {
+                    "type": "string"
+                },
+                "sequence": {
+                    "type": "integer"
+                },
+                "server_received_at": {
+                    "type": "string"
+                },
+                "target": {
+                    "$ref": "#/definitions/internal_modules_events_v1.TargetProps"
+                },
+                "type": {
+                    "$ref": "#/definitions/internal_modules_events_v1.EventType"
                 }
             }
         },
-        "v1.CreateVisitorRequest": {
+        "internal_modules_events_v1.CreatePageViewRequest": {
             "type": "object",
             "required": [
-                "fingerprint_hash"
+                "url"
             ],
             "properties": {
-                "acquisition_campaign": {
-                    "type": "string"
-                },
-                "acquisition_medium": {
-                    "type": "string"
-                },
-                "acquisition_source": {
-                    "type": "string"
-                },
-                "campaign_content": {
-                    "type": "string"
-                },
-                "campaign_id": {
-                    "type": "string"
-                },
-                "campaign_term": {
-                    "type": "string"
-                },
-                "entry_page": {
-                    "type": "string"
-                },
-                "exit_page": {
-                    "type": "string"
-                },
                 "fingerprint_hash": {
                     "type": "string"
                 },
-                "referrer_host": {
+                "referrer": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
         },
-        "v1.ErrorSeverity": {
+        "internal_modules_events_v1.ErrorSeverity": {
             "type": "string",
             "enum": [
                 "info",
@@ -1034,7 +950,7 @@ const docTemplate = `{
                 "ErrorSeverityFatal"
             ]
         },
-        "v1.EventCategory": {
+        "internal_modules_events_v1.EventCategory": {
             "type": "string",
             "enum": [
                 "navigation.page_view",
@@ -1181,7 +1097,7 @@ const docTemplate = `{
                 "EventCategoryExperimentSeen"
             ]
         },
-        "v1.EventType": {
+        "internal_modules_events_v1.EventType": {
             "type": "string",
             "enum": [
                 "navigation",
@@ -1204,21 +1120,7 @@ const docTemplate = `{
                 "EventTypeCustom"
             ]
         },
-        "v1.ListResponse": {
-            "type": "object",
-            "properties": {
-                "sites": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/v1.Response"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "v1.MediaType": {
+        "internal_modules_events_v1.MediaType": {
             "type": "string",
             "enum": [
                 "video",
@@ -1231,7 +1133,7 @@ const docTemplate = `{
                 "MediaTypeLive"
             ]
         },
-        "v1.MouseButton": {
+        "internal_modules_events_v1.MouseButton": {
             "type": "string",
             "enum": [
                 "left",
@@ -1244,7 +1146,7 @@ const docTemplate = `{
                 "MouseButtonMiddle"
             ]
         },
-        "v1.PlatformClickIds": {
+        "internal_modules_events_v1.PlatformClickIds": {
             "type": "object",
             "properties": {
                 "ScCid": {
@@ -1294,7 +1196,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.Priority": {
+        "internal_modules_events_v1.Priority": {
             "type": "string",
             "enum": [
                 "low",
@@ -1309,36 +1211,7 @@ const docTemplate = `{
                 "PriorityCritical"
             ]
         },
-        "v1.Response": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "public_key": {
-                    "type": "string"
-                },
-                "tenant_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.ScrollDirection": {
+        "internal_modules_events_v1.ScrollDirection": {
             "type": "string",
             "enum": [
                 "up",
@@ -1349,7 +1222,7 @@ const docTemplate = `{
                 "ScrollDirectionDown"
             ]
         },
-        "v1.TargetElementType": {
+        "internal_modules_events_v1.TargetElementType": {
             "type": "string",
             "enum": [
                 "button",
@@ -1400,7 +1273,7 @@ const docTemplate = `{
                 "TargetElementTypeUnknown"
             ]
         },
-        "v1.TargetProps": {
+        "internal_modules_events_v1.TargetProps": {
             "type": "object",
             "properties": {
                 "affiliation": {
@@ -1410,7 +1283,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "auth_provider": {
-                    "$ref": "#/definitions/v1.AuthProvider"
+                    "$ref": "#/definitions/internal_modules_events_v1.AuthProvider"
                 },
                 "button_id": {
                     "type": "string"
@@ -1459,7 +1332,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "element_type": {
-                    "$ref": "#/definitions/v1.TargetElementType"
+                    "$ref": "#/definitions/internal_modules_events_v1.TargetElementType"
                 },
                 "element_x": {
                     "type": "integer"
@@ -1474,7 +1347,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "error_severity": {
-                    "$ref": "#/definitions/v1.ErrorSeverity"
+                    "$ref": "#/definitions/internal_modules_events_v1.ErrorSeverity"
                 },
                 "error_stack": {
                     "type": "string"
@@ -1512,7 +1385,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v1.CommerceItem"
+                        "$ref": "#/definitions/internal_modules_events_v1.CommerceItem"
                     }
                 },
                 "media_current_time_ms": {
@@ -1543,10 +1416,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "media_type": {
-                    "$ref": "#/definitions/v1.MediaType"
+                    "$ref": "#/definitions/internal_modules_events_v1.MediaType"
                 },
                 "mouse_button": {
-                    "$ref": "#/definitions/v1.MouseButton"
+                    "$ref": "#/definitions/internal_modules_events_v1.MouseButton"
                 },
                 "page_name": {
                     "type": "string"
@@ -1555,13 +1428,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "priority": {
-                    "$ref": "#/definitions/v1.Priority"
+                    "$ref": "#/definitions/internal_modules_events_v1.Priority"
                 },
                 "scroll_depth_px": {
                     "type": "integer"
                 },
                 "scroll_direction": {
-                    "$ref": "#/definitions/v1.ScrollDirection"
+                    "$ref": "#/definitions/internal_modules_events_v1.ScrollDirection"
                 },
                 "scroll_percent": {
                     "type": "number"
@@ -1601,34 +1474,72 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.UpdateConsentRequest": {
+        "internal_modules_sites_v1.CreateRequest": {
             "type": "object",
             "required": [
-                "consent_type",
-                "status"
+                "domain",
+                "name",
+                "tenant_id"
             ],
             "properties": {
-                "consent_type": {
-                    "$ref": "#/definitions/v1.ConsentType"
-                },
-                "status": {
-                    "$ref": "#/definitions/v1.ConsentStatus"
-                }
-            }
-        },
-        "v1.UpdateConsentResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "message": {
+                "domain": {
+                    "description": "Domain of the site (required, must be unique and valid)",
                     "type": "string"
                 },
-                "success": {
-                    "type": "boolean"
+                "name": {
+                    "description": "Name of the site (required, 1-255 characters)",
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "description": "Tenant ID of the site",
+                    "type": "integer"
                 }
             }
         },
-        "v1.UpdateRequest": {
+        "internal_modules_sites_v1.ListResponse": {
+            "type": "object",
+            "properties": {
+                "sites": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_modules_sites_v1.Response"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_modules_sites_v1.Response": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_sites_v1.UpdateRequest": {
             "type": "object",
             "properties": {
                 "domain": {
@@ -1649,7 +1560,85 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.VisitorResponse": {
+        "internal_modules_visitors_v1.CreateVisitorRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint_hash"
+            ],
+            "properties": {
+                "acquisition_campaign": {
+                    "type": "string"
+                },
+                "acquisition_medium": {
+                    "type": "string"
+                },
+                "acquisition_source": {
+                    "type": "string"
+                },
+                "campaign_content": {
+                    "type": "string"
+                },
+                "campaign_id": {
+                    "type": "string"
+                },
+                "campaign_term": {
+                    "type": "string"
+                },
+                "entry_page": {
+                    "type": "string"
+                },
+                "exit_page": {
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "referrer_host": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.PingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "pong"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.VerifyVisitorAPIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_modules_visitors_v1.VerifyVisitorData"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.VerifyVisitorData": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "$ref": "#/definitions/tracking_internal_modules_devices_v1.DeviceResponse"
+                },
+                "is_valid": {
+                    "type": "boolean"
+                },
+                "session": {
+                    "$ref": "#/definitions/tracking_internal_modules_visitor_sessions_v1.SessionResponse"
+                }
+            }
+        },
+        "internal_modules_visitors_v1.VisitorResponse": {
             "type": "object",
             "properties": {
                 "first_seen_at": {
@@ -1667,10 +1656,846 @@ const docTemplate = `{
                 "primary_user_id": {
                     "type": "string"
                 },
-                "session_id": {
+                "session_token": {
                     "type": "string"
                 },
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "tracking_internal_ent.EventCommerceItem": {
+            "type": "object",
+            "properties": {
+                "affiliation": {
+                    "description": "Affiliation holds the value of the \"affiliation\" field.",
+                    "type": "string"
+                },
+                "coupon": {
+                    "description": "Coupon holds the value of the \"coupon\" field.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "Currency holds the value of the \"currency\" field.",
+                    "type": "string"
+                },
+                "discount": {
+                    "description": "Discount holds the value of the \"discount\" field.",
+                    "type": "number"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EventCommerceItemQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.EventCommerceItemEdges"
+                        }
+                    ]
+                },
+                "event_id": {
+                    "description": "EventID holds the value of the \"event_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "index": {
+                    "description": "Index holds the value of the \"index\" field.",
+                    "type": "integer"
+                },
+                "item_brand": {
+                    "description": "ItemBrand holds the value of the \"item_brand\" field.",
+                    "type": "string"
+                },
+                "item_category": {
+                    "description": "ItemCategory holds the value of the \"item_category\" field.",
+                    "type": "string"
+                },
+                "item_category_2": {
+                    "description": "ItemCategory2 holds the value of the \"item_category_2\" field.",
+                    "type": "string"
+                },
+                "item_category_3": {
+                    "description": "ItemCategory3 holds the value of the \"item_category_3\" field.",
+                    "type": "string"
+                },
+                "item_id": {
+                    "description": "ItemID holds the value of the \"item_id\" field.",
+                    "type": "string"
+                },
+                "item_list_id": {
+                    "description": "ItemListID holds the value of the \"item_list_id\" field.",
+                    "type": "string"
+                },
+                "item_list_name": {
+                    "description": "ItemListName holds the value of the \"item_list_name\" field.",
+                    "type": "string"
+                },
+                "item_name": {
+                    "description": "ItemName holds the value of the \"item_name\" field.",
+                    "type": "string"
+                },
+                "item_variant": {
+                    "description": "ItemVariant holds the value of the \"item_variant\" field.",
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Price holds the value of the \"price\" field.",
+                    "type": "number"
+                },
+                "quantity": {
+                    "description": "Quantity holds the value of the \"quantity\" field.",
+                    "type": "integer"
+                }
+            }
+        },
+        "tracking_internal_ent.EventCommerceItemEdges": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "description": "Event holds the value of the event edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_ent.EventCustomProp": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EventCustomPropQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.EventCustomPropEdges"
+                        }
+                    ]
+                },
+                "event_id": {
+                    "description": "EventID holds the value of the \"event_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "Key holds the value of the \"key\" field.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value holds the value of the \"value\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "tracking_internal_ent.EventCustomPropEdges": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "description": "Event holds the value of the event edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_ent.EventTargetProp": {
+            "type": "object",
+            "properties": {
+                "affiliation": {
+                    "description": "Affiliation holds the value of the \"affiliation\" field.",
+                    "type": "string"
+                },
+                "auth_method": {
+                    "description": "AuthMethod holds the value of the \"auth_method\" field.",
+                    "type": "string"
+                },
+                "auth_provider": {
+                    "description": "AuthProvider holds the value of the \"auth_provider\" field.",
+                    "type": "string"
+                },
+                "button_id": {
+                    "description": "ButtonID holds the value of the \"button_id\" field.",
+                    "type": "string"
+                },
+                "button_name": {
+                    "description": "ButtonName holds the value of the \"button_name\" field.",
+                    "type": "string"
+                },
+                "click_x": {
+                    "description": "ClickX holds the value of the \"click_x\" field.",
+                    "type": "integer"
+                },
+                "click_y": {
+                    "description": "ClickY holds the value of the \"click_y\" field.",
+                    "type": "integer"
+                },
+                "component": {
+                    "description": "Component holds the value of the \"component\" field.",
+                    "type": "string"
+                },
+                "component_name": {
+                    "description": "ComponentName holds the value of the \"component_name\" field.",
+                    "type": "string"
+                },
+                "coupon": {
+                    "description": "Coupon holds the value of the \"coupon\" field.",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "Currency holds the value of the \"currency\" field.",
+                    "type": "string"
+                },
+                "duration_ms": {
+                    "description": "DurationMs holds the value of the \"duration_ms\" field.",
+                    "type": "integer"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EventTargetPropQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.EventTargetPropEdges"
+                        }
+                    ]
+                },
+                "element_class": {
+                    "description": "ElementClass holds the value of the \"element_class\" field.",
+                    "type": "string"
+                },
+                "element_id": {
+                    "description": "ElementID holds the value of the \"element_id\" field.",
+                    "type": "string"
+                },
+                "element_name": {
+                    "description": "ElementName holds the value of the \"element_name\" field.",
+                    "type": "string"
+                },
+                "element_selector": {
+                    "description": "ElementSelector holds the value of the \"element_selector\" field.",
+                    "type": "string"
+                },
+                "element_text": {
+                    "description": "ElementText holds the value of the \"element_text\" field.",
+                    "type": "string"
+                },
+                "element_type": {
+                    "description": "ElementType holds the value of the \"element_type\" field.",
+                    "type": "string"
+                },
+                "element_x": {
+                    "description": "ElementX holds the value of the \"element_x\" field.",
+                    "type": "integer"
+                },
+                "element_y": {
+                    "description": "ElementY holds the value of the \"element_y\" field.",
+                    "type": "integer"
+                },
+                "error_code": {
+                    "description": "ErrorCode holds the value of the \"error_code\" field.",
+                    "type": "string"
+                },
+                "error_message": {
+                    "description": "ErrorMessage holds the value of the \"error_message\" field.",
+                    "type": "string"
+                },
+                "error_severity": {
+                    "description": "ErrorSeverity holds the value of the \"error_severity\" field.",
+                    "type": "string"
+                },
+                "error_stack": {
+                    "description": "ErrorStack holds the value of the \"error_stack\" field.",
+                    "type": "string"
+                },
+                "event_id": {
+                    "description": "EventID holds the value of the \"event_id\" field.",
+                    "type": "integer"
+                },
+                "feature": {
+                    "description": "Feature holds the value of the \"feature\" field.",
+                    "type": "string"
+                },
+                "form_completion_pct": {
+                    "description": "FormCompletionPct holds the value of the \"form_completion_pct\" field.",
+                    "type": "number"
+                },
+                "form_field": {
+                    "description": "FormField holds the value of the \"form_field\" field.",
+                    "type": "string"
+                },
+                "form_field_count": {
+                    "description": "FormFieldCount holds the value of the \"form_field_count\" field.",
+                    "type": "integer"
+                },
+                "form_id": {
+                    "description": "FormID holds the value of the \"form_id\" field.",
+                    "type": "string"
+                },
+                "form_name": {
+                    "description": "FormName holds the value of the \"form_name\" field.",
+                    "type": "string"
+                },
+                "form_value_hash": {
+                    "description": "FormValueHash holds the value of the \"form_value_hash\" field.",
+                    "type": "string"
+                },
+                "href": {
+                    "description": "Href holds the value of the \"href\" field.",
+                    "type": "string"
+                },
+                "http_status": {
+                    "description": "HTTPStatus holds the value of the \"http_status\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "is_new_user": {
+                    "description": "IsNewUser holds the value of the \"is_new_user\" field.",
+                    "type": "boolean"
+                },
+                "media_current_time_ms": {
+                    "description": "MediaCurrentTimeMs holds the value of the \"media_current_time_ms\" field.",
+                    "type": "integer"
+                },
+                "media_duration_ms": {
+                    "description": "MediaDurationMs holds the value of the \"media_duration_ms\" field.",
+                    "type": "integer"
+                },
+                "media_fullscreen": {
+                    "description": "MediaFullscreen holds the value of the \"media_fullscreen\" field.",
+                    "type": "boolean"
+                },
+                "media_id": {
+                    "description": "MediaID holds the value of the \"media_id\" field.",
+                    "type": "string"
+                },
+                "media_percent": {
+                    "description": "MediaPercent holds the value of the \"media_percent\" field.",
+                    "type": "number"
+                },
+                "media_provider": {
+                    "description": "MediaProvider holds the value of the \"media_provider\" field.",
+                    "type": "string"
+                },
+                "media_quality": {
+                    "description": "MediaQuality holds the value of the \"media_quality\" field.",
+                    "type": "string"
+                },
+                "media_sound_on": {
+                    "description": "MediaSoundOn holds the value of the \"media_sound_on\" field.",
+                    "type": "boolean"
+                },
+                "media_title": {
+                    "description": "MediaTitle holds the value of the \"media_title\" field.",
+                    "type": "string"
+                },
+                "media_type": {
+                    "description": "MediaType holds the value of the \"media_type\" field.",
+                    "type": "string"
+                },
+                "mouse_button": {
+                    "description": "MouseButton holds the value of the \"mouse_button\" field.",
+                    "type": "string"
+                },
+                "page_name": {
+                    "description": "PageName holds the value of the \"page_name\" field.",
+                    "type": "string"
+                },
+                "payment_type": {
+                    "description": "PaymentType holds the value of the \"payment_type\" field.",
+                    "type": "string"
+                },
+                "priority": {
+                    "description": "Priority holds the value of the \"priority\" field.",
+                    "type": "string"
+                },
+                "scroll_depth_px": {
+                    "description": "ScrollDepthPx holds the value of the \"scroll_depth_px\" field.",
+                    "type": "integer"
+                },
+                "scroll_direction": {
+                    "description": "ScrollDirection holds the value of the \"scroll_direction\" field.",
+                    "type": "string"
+                },
+                "scroll_percent": {
+                    "description": "ScrollPercent holds the value of the \"scroll_percent\" field.",
+                    "type": "number"
+                },
+                "search_results_count": {
+                    "description": "SearchResultsCount holds the value of the \"search_results_count\" field.",
+                    "type": "integer"
+                },
+                "search_term": {
+                    "description": "SearchTerm holds the value of the \"search_term\" field.",
+                    "type": "string"
+                },
+                "share_method": {
+                    "description": "ShareMethod holds the value of the \"share_method\" field.",
+                    "type": "string"
+                },
+                "share_platform": {
+                    "description": "SharePlatform holds the value of the \"share_platform\" field.",
+                    "type": "string"
+                },
+                "shipping": {
+                    "description": "Shipping holds the value of the \"shipping\" field.",
+                    "type": "number"
+                },
+                "shipping_tier": {
+                    "description": "ShippingTier holds the value of the \"shipping_tier\" field.",
+                    "type": "string"
+                },
+                "tax": {
+                    "description": "Tax holds the value of the \"tax\" field.",
+                    "type": "number"
+                },
+                "transaction_id": {
+                    "description": "TransactionID holds the value of the \"transaction_id\" field.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value holds the value of the \"value\" field.",
+                    "type": "number"
+                }
+            }
+        },
+        "tracking_internal_ent.EventTargetPropEdges": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "description": "Event holds the value of the event edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_ent.EventTargetSearchFilter": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EventTargetSearchFilterQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.EventTargetSearchFilterEdges"
+                        }
+                    ]
+                },
+                "event_id": {
+                    "description": "EventID holds the value of the \"event_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "Key holds the value of the \"key\" field.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value holds the value of the \"value\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "tracking_internal_ent.EventTargetSearchFilterEdges": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "description": "Event holds the value of the event edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_ent.PageView": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "referrer": {
+                    "description": "Referrer holds the value of the \"referrer\" field.",
+                    "type": "string"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "URL holds the value of the \"url\" field.",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
+            }
+        },
+        "tracking_internal_ent.VisitorEvent": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "device_id": {
+                    "description": "DeviceID holds the value of the \"device_id\" field.",
+                    "type": "integer"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the VisitorEventQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEventEdges"
+                        }
+                    ]
+                },
+                "event_category": {
+                    "description": "EventCategory holds the value of the \"event_category\" field.",
+                    "type": "string"
+                },
+                "event_name": {
+                    "description": "EventName holds the value of the \"event_name\" field.",
+                    "type": "string"
+                },
+                "event_type": {
+                    "description": "EventType holds the value of the \"event_type\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "occurred_at": {
+                    "description": "OccurredAt holds the value of the \"occurred_at\" field.",
+                    "type": "string"
+                },
+                "page_id": {
+                    "description": "PageID holds the value of the \"page_id\" field.",
+                    "type": "integer"
+                },
+                "schema_version": {
+                    "description": "SchemaVersion holds the value of the \"schema_version\" field.",
+                    "type": "string"
+                },
+                "sdk_name": {
+                    "description": "SdkName holds the value of the \"sdk_name\" field.",
+                    "type": "string"
+                },
+                "sdk_version": {
+                    "description": "SdkVersion holds the value of the \"sdk_version\" field.",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "Sequence holds the value of the \"sequence\" field.",
+                    "type": "integer"
+                },
+                "server_received_at": {
+                    "description": "ServerReceivedAt holds the value of the \"server_received_at\" field.",
+                    "type": "string"
+                },
+                "session_id": {
+                    "description": "SessionID holds the value of the \"session_id\" field.",
+                    "type": "integer"
+                },
+                "uuid": {
+                    "description": "UUID holds the value of the \"uuid\" field.",
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "description": "VisitorID holds the value of the \"visitor_id\" field.",
+                    "type": "integer"
+                }
+            }
+        },
+        "tracking_internal_ent.VisitorEventEdges": {
+            "type": "object",
+            "properties": {
+                "commerce_items": {
+                    "description": "CommerceItems holds the value of the commerce_items edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tracking_internal_ent.EventCommerceItem"
+                    }
+                },
+                "custom_props": {
+                    "description": "CustomProps holds the value of the custom_props edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tracking_internal_ent.EventCustomProp"
+                    }
+                },
+                "platform_clicks": {
+                    "description": "PlatformClicks holds the value of the platform_clicks edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorPlatformClick"
+                        }
+                    ]
+                },
+                "search_filters": {
+                    "description": "SearchFilters holds the value of the search_filters edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tracking_internal_ent.EventTargetSearchFilter"
+                    }
+                },
+                "target_props": {
+                    "description": "TargetProps holds the value of the target_props edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.EventTargetProp"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_ent.VisitorPlatformClick": {
+            "type": "object",
+            "properties": {
+                "dclid": {
+                    "description": "Dclid holds the value of the \"dclid\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the VisitorPlatformClickQuery when eager-loading is set.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorPlatformClickEdges"
+                        }
+                    ]
+                },
+                "epik": {
+                    "description": "Epik holds the value of the \"epik\" field.",
+                    "type": "string"
+                },
+                "event_id": {
+                    "description": "EventID holds the value of the \"event_id\" field.",
+                    "type": "integer"
+                },
+                "fbc": {
+                    "description": "Fbc holds the value of the \"fbc\" field.",
+                    "type": "string"
+                },
+                "fbclid": {
+                    "description": "Fbclid holds the value of the \"fbclid\" field.",
+                    "type": "string"
+                },
+                "fbp": {
+                    "description": "Fbp holds the value of the \"fbp\" field.",
+                    "type": "string"
+                },
+                "gbraid": {
+                    "description": "Gbraid holds the value of the \"gbraid\" field.",
+                    "type": "string"
+                },
+                "gclid": {
+                    "description": "Gclid holds the value of the \"gclid\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "li_fat_id": {
+                    "description": "LiFatID holds the value of the \"li_fat_id\" field.",
+                    "type": "string"
+                },
+                "liveramp_ats_id": {
+                    "description": "LiverampAtsID holds the value of the \"liveramp_ats_id\" field.",
+                    "type": "string"
+                },
+                "msclkid": {
+                    "description": "Msclkid holds the value of the \"msclkid\" field.",
+                    "type": "string"
+                },
+                "sc_cid": {
+                    "description": "ScCid holds the value of the \"sc_cid\" field.",
+                    "type": "string"
+                },
+                "ttclid": {
+                    "description": "Ttclid holds the value of the \"ttclid\" field.",
+                    "type": "string"
+                },
+                "ttp": {
+                    "description": "Ttp holds the value of the \"ttp\" field.",
+                    "type": "string"
+                },
+                "twclid": {
+                    "description": "Twclid holds the value of the \"twclid\" field.",
+                    "type": "string"
+                },
+                "wbraid": {
+                    "description": "Wbraid holds the value of the \"wbraid\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "tracking_internal_ent.VisitorPlatformClickEdges": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "description": "Event holds the value of the event edge.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/tracking_internal_ent.VisitorEvent"
+                        }
+                    ]
+                }
+            }
+        },
+        "tracking_internal_modules_devices_v1.DeviceResponse": {
+            "type": "object",
+            "properties": {
+                "address_ip": {
+                    "type": "string"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "browser_version": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "device_type": {
+                    "type": "string"
+                },
+                "fingerprint_hash": {
+                    "type": "string"
+                },
+                "first_seen_at": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "last_seen_at": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tracking_internal_modules_visitor_sessions_v1.SessionResponse": {
+            "type": "object",
+            "properties": {
+                "acquisition_campaign": {
+                    "type": "string"
+                },
+                "acquisition_medium": {
+                    "type": "string"
+                },
+                "acquisition_source": {
+                    "type": "string"
+                },
+                "campaign_content": {
+                    "type": "string"
+                },
+                "campaign_id": {
+                    "type": "string"
+                },
+                "campaign_term": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "integer"
+                },
+                "ended_at": {
+                    "type": "string"
+                },
+                "entry_page": {
+                    "type": "string"
+                },
+                "exit_page": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_activity_at": {
+                    "type": "string"
+                },
+                "referrer_host": {
+                    "type": "string"
+                },
+                "session_token": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "visitor_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tracking_pkg_httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

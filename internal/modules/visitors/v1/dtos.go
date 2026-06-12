@@ -12,7 +12,6 @@ type CreateVisitorRequest struct {
 	PublicKey string `json:"-"`
 
 	VisitorUUID string `json:"visitor_uuid" swaggerignore:"true"`
-	SessionUUID string `json:"session_uuid" swaggerignore:"true"`
 
 	FingerprintHash string `json:"fingerprint_hash" binding:"required"`
 	DeviceType      string `json:"device_type" swaggerignore:"true"`
@@ -45,7 +44,7 @@ type CreateVisitorRequest struct {
 
 type VisitorResponse struct {
 	UUID            string    `json:"uuid"`
-	SessionID       string    `json:"session_id"`
+	SessionToken    string    `json:"session_token"`
 	PrimaryUserID   *string   `json:"primary_user_id,omitempty"`
 	FirstSeenAt     time.Time `json:"first_seen_at"`
 	LastSeenAt      time.Time `json:"last_seen_at"`
@@ -59,10 +58,14 @@ type FullVisitorSessionDetails struct {
 	Session *ent.VisitorSession `json:"session"`
 }
 
+type PingResponse struct {
+	Message string `json:"message" example:"pong"`
+}
+
 type VerifyVisitorData struct {
-	IsValid bool                                        `json:"is_valid"`
-	Session *visitor_sessionsv1.SessionResponse         `json:"session"`
-	Device  *devicesv1.DeviceResponse                   `json:"device"`
+	IsValid bool                                `json:"is_valid"`
+	Session *visitor_sessionsv1.SessionResponse `json:"session"`
+	Device  *devicesv1.DeviceResponse           `json:"device"`
 }
 
 type VerifyVisitorAPIResponse struct {
@@ -87,7 +90,7 @@ type CreateEventRequest struct {
 
 type EventResponse struct {
 	UUID            string                 `json:"uuid"`
-	SessionUUID     string                 `json:"session_uuid"`
+	SessionToken    string                 `json:"session_token"`
 	VisitorUUID     string                 `json:"visitor_uuid"`
 	DeviceUUID      string                 `json:"device_uuid"`
 	EventName       string                 `json:"event_name"`
@@ -110,14 +113,14 @@ type CreatePageViewRequest struct {
 }
 
 type PageViewResponse struct {
-	UUID        string    `json:"uuid"`
-	SessionUUID string    `json:"session_uuid"`
-	VisitorUUID string    `json:"visitor_uuid"`
-	DeviceUUID  string    `json:"device_uuid"`
-	URL         string    `json:"url"`
-	Title       string    `json:"title,omitempty"`
-	Referrer    string    `json:"referrer,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	UUID         string    `json:"uuid"`
+	SessionToken string    `json:"session_token"`
+	VisitorUUID  string    `json:"visitor_uuid"`
+	DeviceUUID   string    `json:"device_uuid"`
+	URL          string    `json:"url"`
+	Title        string    `json:"title,omitempty"`
+	Referrer     string    `json:"referrer,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type CreateSessionInput struct {

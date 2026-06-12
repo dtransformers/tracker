@@ -169,11 +169,13 @@ func validateNonce(store NonceStore, publicKey, nonce string, requestTimestamp t
 	return store.CheckAndStore(publicKey, nonce, expiry)
 }
 
+const maxBodySize = 1 << 20 // 1 MB
+
 func readRequestBody(c *gin.Context) ([]byte, error) {
 	var bodyBytes []byte
 	if c.Request.Body != nil {
 		var err error
-		bodyBytes, err = io.ReadAll(c.Request.Body)
+		bodyBytes, err = io.ReadAll(io.LimitReader(c.Request.Body, maxBodySize))
 		if err != nil {
 			return nil, err
 		}
@@ -218,7 +220,7 @@ func buildCanonicalRequest(c *gin.Context, timestamp, nonce string, body []byte,
 	return strings.Join(parts, "\n")
 }
 
-func GenerateSignature(method, path, query, timestamp, nonce string, body []byte, secretKey string) string {
+func generateSignature(method, path, query, timestamp, nonce string, body []byte, secretKey string) string {
 	parts := []string{method, path, query, timestamp}
 	if nonce != "" {
 		parts = append(parts, nonce)
