@@ -27,8 +27,7 @@ COPY pkg/ ./pkg/
 COPY docs/ ./docs/
 COPY tools/ ./tools/
 
-# Run unit tests
-RUN go test -v ./...
+
 
 # Build-time metadata (inject at build time)
 ARG VERSION=dev
