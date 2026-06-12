@@ -248,8 +248,10 @@ func Cors(allowedOrigins []string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
+
 		if origin != "" {
-			if allowAll || allowedMap[origin] {
+			isAllowed := allowedMap[origin] || allowAll
+			if isAllowed {
 				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 				c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 			}
