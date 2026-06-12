@@ -36,7 +36,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Param X-Fingerprint header string true "Client Fingerprint"
 // @Param X-Nonce header string true "Request Nonce"
 // @Param request body UpdateConsentRequest true "Consent Request Payload"
-// @Success 200 {object} UpdateConsentResponse
+// @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/consents [post]
@@ -61,12 +61,12 @@ func (h *Handler) UpdateConsent(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.UpdateVisitorConsent(c.Request.Context(), req, site)
+	_, err := h.service.UpdateVisitorConsent(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to update consent", "error", err)
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.Status(http.StatusCreated)
 }
