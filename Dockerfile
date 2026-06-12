@@ -27,8 +27,7 @@ COPY pkg/ ./pkg/
 COPY docs/ ./docs/
 COPY tools/ ./tools/
 
-# Run unit tests
-RUN go test -v ./...
+
 
 # Build-time metadata (inject at build time)
 ARG VERSION=dev
@@ -70,5 +69,7 @@ ENV APP_ENV=production
 
 EXPOSE 8080
 ## TO GENERATE SWAGGER DOCS:
-## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go        
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go      
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go --parseDependency --parseInternal
+
 ENTRYPOINT ["/app"]

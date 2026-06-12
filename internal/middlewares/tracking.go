@@ -54,30 +54,6 @@ func RequestTracking() gin.HandlerFunc {
 }
 
 func extractOriginalIP(c *gin.Context) string {
-	if ip := c.GetHeader("X-Real-IP"); ip != "" {
-		if parsedIP := net.ParseIP(ip); parsedIP != nil {
-			return ip
-		}
-	}
-	if forwarded := c.GetHeader("X-Forwarded-For"); forwarded != "" {
-		ips := strings.Split(forwarded, ",")
-		if len(ips) > 0 {
-			clientIP := strings.TrimSpace(ips[0])
-			if parsedIP := net.ParseIP(clientIP); parsedIP != nil {
-				return clientIP
-			}
-		}
-	}
-	if ip := c.GetHeader("CF-Connecting-IP"); ip != "" {
-		if parsedIP := net.ParseIP(ip); parsedIP != nil {
-			return ip
-		}
-	}
-	if ip := c.GetHeader("True-Client-IP"); ip != "" {
-		if parsedIP := net.ParseIP(ip); parsedIP != nil {
-			return ip
-		}
-	}
 	return c.ClientIP()
 }
 
@@ -249,7 +225,7 @@ func Validation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPatch {
 			contentType := c.GetHeader("Content-Type")
-			if contentType != "application/json" && contentType != "" {
+			if contentType != "application/json" {
 				c.JSON(http.StatusUnsupportedMediaType, gin.H{
 					"error": "Content-Type must be application/json",
 				})
@@ -262,15 +238,27 @@ func Validation() gin.HandlerFunc {
 	}
 }
 
-func Cors() gin.HandlerFunc {
+func Cors(allowedOrigins []string) gin.HandlerFunc {
+	allowedMap := make(map[string]bool)
+	for _, o := range allowedOrigins {
+		allowedMap[o] = true
+	}
+	
+	// Allow any origin if allowedOrigins slice contains "*"
+	allowAll := allowedMap["*"]
+
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		if origin == "" {
-			origin = "*" // Fallback
+		
+		if origin != "" {
+			if allowAll || allowedMap[origin] {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+				c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			} else {
+				// If not allowed, we don't set CORS headers so browser blocks it
+			}
 		}
 
-		c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-API-Key, X-Signature, X-Timestamp, X-Nonce, X-Request-Id, X-Real-IP, X-Forwarded-For, CF-Connecting-IP, True-Client-IP")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 

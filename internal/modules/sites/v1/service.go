@@ -2,7 +2,7 @@ package v1
 
 import (
 	"context"
-	"crypto/sha256"
+	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -99,13 +99,13 @@ func (s *Service) CreateSite(ctx context.Context, req CreateRequest) (*Response,
 		return nil, err
 	}
 
-	pubKey, err := generateKeyFromBaseString(req.Domain, "public", s.pubKeyLength)
+	pubKey, err := generateSecureKey(s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateKeyFromBaseString(req.Domain, "secret", s.secKeyLength)
+	secKey, err := generateSecureKey(s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
@@ -311,13 +311,13 @@ func (s *Service) RegenerateKeys(ctx context.Context, siteUUID string) (*Respons
 		return nil, fmt.Errorf(errInvalidUUIDFormat, err)
 	}
 
-	pubKey, err := generateKeyFromBaseString(siteUUID, "public", s.pubKeyLength)
+	pubKey, err := generateSecureKey(s.pubKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate public key", "error", err)
 		return nil, fmt.Errorf("%w: public key", ErrKeyGeneration)
 	}
 
-	secKey, err := generateKeyFromBaseString(siteUUID, "secret", s.secKeyLength)
+	secKey, err := generateSecureKey(s.secKeyLength)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to generate secret key", "error", err)
 		return nil, fmt.Errorf("%w: secret key", ErrKeyGeneration)
@@ -443,23 +443,17 @@ func normalizeDomain(domain string) string {
 	return normalized
 }
 
-func generateKeyFromBaseString(baseString string, salt string, maxLength int) (string, error) {
-	if baseString == "" {
-		return "", fmt.Errorf("baseString cannot be empty")
+func generateSecureKey(length int) (string, error) {
+	if length <= 0 {
+		return "", fmt.Errorf("length must be greater than 0")
 	}
 
-	if maxLength <= 0 {
-		return "", fmt.Errorf("maxLength must be greater than 0")
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
 	}
 
-	sum := sha256.Sum256([]byte(baseString + salt))
-	hexStr := hex.EncodeToString(sum[:])
-
-	if len(hexStr) > maxLength {
-		hexStr = hexStr[:maxLength]
-	}
-
-	return hexStr, nil
+	return hex.EncodeToString(bytes), nil
 }
 
 func toResponse(site *ent.Site) *Response {

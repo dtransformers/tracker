@@ -60,6 +60,8 @@ type AppConfig struct {
 	IsDev             bool
 	SessionExpiration int
 	VisitorExpiration int
+	AllowedOrigins    []string
+	TrustedProxies    []string
 }
 
 type DBConfig struct {
@@ -97,11 +99,11 @@ func LoadFrom(env EnvProvider, opts LoadOptions) (Config, error) {
 	}
 
 	cfg := Config{
-		App:   loadApp(env, opts),
-		DB:    loadDB(env, opts),
+		App:   loadApp(env),
+		DB:    loadDB(env),
 		Redis: loadRedis(env, opts),
 		TLS:   loadTLS(env, opts),
-		Auth:  loadAuth(env, opts),
+		Auth:  loadAuth(env),
 	}
 
 	if err := Validate(cfg); err != nil {
@@ -156,10 +158,10 @@ func Validate(cfg Config) error {
 	return joinErrors(errs)
 }
 
-func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
-	port, _err := mustValidPort(env, "APP_PORT")
-	if _err != nil {
-		panic(_err)
+func loadApp(env EnvProvider) AppConfig {
+	port, err := mustValidPort(env, "APP_PORT")
+	if err != nil {
+		panic(err)
 	}
 	runMode := mustString(env, "RUN_MODE")
 	if runMode != "development" && runMode != "production" && runMode != "testing" {
@@ -173,10 +175,12 @@ func loadApp(env EnvProvider, opts LoadOptions) AppConfig {
 		IsDev:             isDev,
 		SessionExpiration: intOrDefault(env, "SESSION_EXPIRATION", 2*60*60),
 		VisitorExpiration: intOrDefault(env, "VISITOR_EXPIRATION", 3600*24*365),
+		AllowedOrigins:    parseOrigins(stringOrDefault(env, "ALLOWED_ORIGINS", "", true)),
+		TrustedProxies:    parseOrigins(stringOrDefault(env, "APP_TRUSTED_PROXIES", "", true)),
 	}
 }
 
-func loadDB(env EnvProvider, opts LoadOptions) DBConfig {
+func loadDB(env EnvProvider) DBConfig {
 	return DBConfig{
 		Host:     mustString(env, "DB_HOST"),
 		Port:     mustInt(env, "DB_PORT"),
@@ -204,7 +208,7 @@ func loadTLS(env EnvProvider, opts LoadOptions) TLSConfig {
 	}
 }
 
-func loadAuth(env EnvProvider, opts LoadOptions) AuthConfig {
+func loadAuth(env EnvProvider) AuthConfig {
 	return AuthConfig{
 		RootUsername: mustString(env, "ROOT_USERNAME"),
 		RootPassword: mustString(env, "ROOT_PASSWORD"),
@@ -325,4 +329,19 @@ func joinErrors(errs []error) error {
 		return nil
 	}
 	return errors.Join(errs...)
+}
+
+func parseOrigins(originsStr string) []string {
+	if originsStr == "" {
+		return nil
+	}
+	parts := strings.Split(originsStr, ",")
+	var origins []string
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			origins = append(origins, p)
+		}
+	}
+	return origins
 }
