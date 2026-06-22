@@ -45,9 +45,12 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - APP_HOST=0.0.0.0
     ports:
-      - "3000:3000"
-      - "8080:8080"
+      - "127.0.0.1:8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
