@@ -31,9 +31,9 @@ import (
 	"tracking/internal/modules/consents"
 	"tracking/internal/modules/events"
 	"tracking/internal/modules/health"
+	session "tracking/internal/modules/sessions"
 	"tracking/internal/modules/sites"
 	"tracking/internal/modules/state"
-	"tracking/internal/modules/visitor_sessions"
 	"tracking/internal/modules/visitors"
 	"tracking/internal/server"
 
@@ -136,7 +136,7 @@ func (app *application) registerRoutes(router *gin.Engine) {
 
 	sites.RegisterV1(router, app.db.Client, app.cfg.Auth.RootUsername, app.cfg.Auth.RootPassword)
 
-	sessionSvc := visitor_sessions.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
+	sessionSvc := session.RegisterV1(app.db.Client, slog.Default(), app.cfg.App)
 	consentsModule := consents.RegisterV1(router, app.db.Client, slog.Default())
 	visitorsService := visitors.RegisterV1(router, app.db.Client, sessionSvc, consentsModule.Service(), slog.Default(), app.cfg.App, app.cfg.Auth)
 

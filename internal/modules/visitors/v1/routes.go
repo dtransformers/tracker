@@ -8,9 +8,9 @@ import (
 	"tracking/internal/middlewares"
 	consentsv1 "tracking/internal/modules/consents/v1"
 	devicesv1 "tracking/internal/modules/devices/v1"
+	visitor_sessionsv1 "tracking/internal/modules/sessions/v1"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	"tracking/internal/modules/state"
-	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
 
 	"github.com/gin-gonic/gin"
 )

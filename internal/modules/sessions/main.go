@@ -1,10 +1,10 @@
-package visitor_sessions
+package session
 
 import (
 	"log/slog"
 	"tracking/internal/config"
 	"tracking/internal/ent"
-	v1 "tracking/internal/modules/visitor_sessions/v1"
+	v1 "tracking/internal/modules/sessions/v1"
 )
 
 func RegisterV1(client *ent.Client, logger *slog.Logger, appCfg config.AppConfig) *v1.Service {
