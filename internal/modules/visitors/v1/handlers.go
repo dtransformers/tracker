@@ -43,7 +43,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 // @Param X-Timestamp header string true "Request Timestamp"
 // @Param X-Nonce header string true "Request Nonce"
 // @Param Cookie header string false "Optional session_token and visitor_uuid cookies"
-// @Success 200 {object} VisitorResponse
+// @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/visitors [post]
@@ -75,7 +75,7 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 	}
 	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration)
 
-	c.JSON(http.StatusOK, response)
+	c.Status(http.StatusCreated)
 }
 
 // VerifyVisitor godoc

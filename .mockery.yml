@@ -26,10 +26,10 @@ packages:
       filename: "mock_{{.InterfaceName}}.go"
       pkgname: "mocks"
 
-  tracking/internal/modules/visitor_sessions/v1:
+  tracking/internal/modules/sessions/v1:
     config:
       all: true
-      dir: "internal/modules/visitor_sessions/v1/mocks"
+      dir: "internal/modules/sessions/v1/mocks"
       filename: "mock_{{.InterfaceName}}.go"
       pkgname: "mocks"
 

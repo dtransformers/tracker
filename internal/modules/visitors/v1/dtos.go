@@ -5,7 +5,7 @@ import (
 
 	"tracking/internal/ent"
 	devicesv1 "tracking/internal/modules/devices/v1"
-	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
+	visitor_sessionsv1 "tracking/internal/modules/sessions/v1"
 )
 
 type CreateVisitorRequest struct {

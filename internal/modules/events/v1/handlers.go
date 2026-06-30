@@ -36,7 +36,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Param X-Fingerprint header string true "Client Fingerprint"
 // @Param X-Nonce header string true "Request Nonce"
 // @Param request body CreateEventRequest true "Event Request Payload"
-// @Success 200 {object} ent.VisitorEvent
+// @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/events/custom [post]
@@ -61,14 +61,14 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreateEvent(c.Request.Context(), req, site)
+	_, err := h.service.CreateEvent(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to create event", "error", err)
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.Status(http.StatusCreated)
 }
 
 // @Summary Create page view
@@ -80,7 +80,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 // @Param X-Fingerprint header string true "Client Fingerprint"
 // @Param X-Nonce header string true "Request Nonce"
 // @Param request body CreatePageViewRequest true "Page View Request Payload"
-// @Success 200 {object} ent.PageView
+// @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
 // @Router /api/v1/events/pageviews [post]
@@ -105,12 +105,12 @@ func (h *Handler) CreatePageView(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreatePageView(c.Request.Context(), req, site)
+	_, err := h.service.CreatePageView(c.Request.Context(), req, site)
 	if err != nil {
 		h.logger.Error("failed to create page view", "error", err)
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.Status(http.StatusCreated)
 }

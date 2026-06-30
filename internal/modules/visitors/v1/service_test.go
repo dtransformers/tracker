@@ -15,10 +15,10 @@ import (
 	consentsMocks "tracking/internal/modules/consents/v1/mocks"
 	devicesv1 "tracking/internal/modules/devices/v1"
 	devicesMocks "tracking/internal/modules/devices/v1/mocks"
+	visitor_sessionsv1 "tracking/internal/modules/sessions/v1"
+	visitor_sessionsMocks "tracking/internal/modules/sessions/v1/mocks"
 	sitesv1 "tracking/internal/modules/sites/v1"
 	sitesMocks "tracking/internal/modules/sites/v1/mocks"
-	visitor_sessionsv1 "tracking/internal/modules/visitor_sessions/v1"
-	visitor_sessionsMocks "tracking/internal/modules/visitor_sessions/v1/mocks"
 	visitorsv1 "tracking/internal/modules/visitors/v1"
 	visitorsMocks "tracking/internal/modules/visitors/v1/mocks"
 )

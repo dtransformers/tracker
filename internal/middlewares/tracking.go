@@ -243,19 +243,17 @@ func Cors(allowedOrigins []string) gin.HandlerFunc {
 	for _, o := range allowedOrigins {
 		allowedMap[o] = true
 	}
-	
-	// Allow any origin if allowedOrigins slice contains "*"
+
 	allowAll := allowedMap["*"]
 
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		
+
 		if origin != "" {
-			if allowAll || allowedMap[origin] {
+			isAllowed := allowedMap[origin] || allowAll
+			if isAllowed {
 				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 				c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-			} else {
-				// If not allowed, we don't set CORS headers so browser blocks it
 			}
 		}
 
