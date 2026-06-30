@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"tracking/internal/config"
 	"tracking/internal/ent"
 	"tracking/internal/middlewares"
 	consentsv1 "tracking/internal/modules/consents/v1"
@@ -27,9 +28,10 @@ type Service struct {
 	consentsSvc  *consentsv1.Service
 	logger       *slog.Logger
 	timeout      time.Duration
+	appCfg       config.AppConfig
 }
 
-func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devicesv1.Repository, sessionSvc *visitor_sessionsv1.Service, consentsSvc *consentsv1.Service, logger *slog.Logger) *Service {
+func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devicesv1.Repository, sessionSvc *visitor_sessionsv1.Service, consentsSvc *consentsv1.Service, logger *slog.Logger, appCfg config.AppConfig) *Service {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -41,6 +43,7 @@ func NewService(repo Repository, sitesService *sitesv1.Service, deviceRepo devic
 		consentsSvc:  consentsSvc,
 		logger:       logger,
 		timeout:      constants.DefaultServiceTimeout,
+		appCfg:       appCfg,
 	}
 }
 

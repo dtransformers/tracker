@@ -53,7 +53,7 @@ func (s *Service) tryValidateExistingSession(c *gin.Context, tracking *middlewar
 		return false
 	}
 
-	middlewares.SetTrackingCookies(c, tracking.SessionToken, tracking.VisitorUUID, sessionExp, visitorExp)
+	middlewares.SetTrackingCookies(c, tracking.SessionToken, tracking.VisitorUUID, sessionExp, visitorExp, s.appCfg.CookiesDomain)
 	c.Set(middlewares.SessionDetailsKey, details)
 	c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), middlewares.SessionDetailsKey, details))
 	return true
@@ -91,7 +91,7 @@ func (s *Service) autoResolveNewSession(c *gin.Context, tracking *middlewares.Tr
 	tracking.VisitorUUID = res.UUID
 	tracking.SessionToken = res.SessionToken
 
-	middlewares.SetTrackingCookies(c, res.SessionToken, res.UUID, sessionExp, visitorExp)
+	middlewares.SetTrackingCookies(c, res.SessionToken, res.UUID, sessionExp, visitorExp, s.appCfg.CookiesDomain)
 	c.Set(middlewares.SessionDetailsKey, details)
 	c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), middlewares.SessionDetailsKey, details))
 	return true

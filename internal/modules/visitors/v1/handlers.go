@@ -73,7 +73,7 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 		httputil.RespondError(c, err)
 		return
 	}
-	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration)
+	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration, h.appCfg.CookiesDomain)
 
 	c.Status(http.StatusCreated)
 }
