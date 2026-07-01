@@ -135,6 +135,7 @@ func (s *Service) GetExistingSession(ctx context.Context, VisitorUUID string, Se
 	}
 	response := toVisitorResponse(v)
 	response.SessionToken = session.SessionToken
+	response.DeviceUUID = device.UUID
 	return response, nil
 
 }
@@ -232,6 +233,7 @@ func (s *Service) createNewSessionForVisitor(ctx context.Context, VisitorUUID st
 
 	response := toVisitorResponse(visitor)
 	response.SessionToken = newSession.SessionToken
+	response.DeviceUUID = device.UUID
 	return response, nil
 }
 
@@ -465,6 +467,7 @@ func (s *Service) CreateSession(ctx context.Context, req CreateVisitorRequest, s
 
 	res := toVisitorResponse(v)
 	res.SessionToken = sessionToken
+	res.DeviceUUID = device.UUID
 
 	return res, nil
 }

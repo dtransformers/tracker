@@ -36,6 +36,7 @@ type TrackingInfo struct {
 	Bot            bool              `json:"bot"`
 	VisitorUUID    string            `json:"visitor_uuid,omitempty"`
 	SessionToken   string            `json:"session_token,omitempty"`
+	DeviceUUID     string            `json:"device_uuid,omitempty"`
 	Cookies        map[string]string `json:"cookies,omitempty"`
 	Referer        string            `json:"referer,omitempty"`
 	AcceptLanguage string            `json:"accept_language,omitempty"`

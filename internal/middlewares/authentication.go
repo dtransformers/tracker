@@ -61,7 +61,7 @@ func GetSessionDetails(ctx context.Context) (*SessionDetails, bool) {
 	return nil, false
 }
 
-func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessionExp, visitorExp int, domain string) {
+func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID, deviceUUID string, sessionExp, visitorExp int, domain string) {
 	c.SetCookieData(&http.Cookie{
 		Name:     constants.CookieSessionToken,
 		Value:    sessionToken,
@@ -75,6 +75,16 @@ func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessio
 	c.SetCookieData(&http.Cookie{
 		Name:     constants.CookieVisitorUUID,
 		Value:    visitorUUID,
+		MaxAge:   visitorExp,
+		Domain:   domain,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieDeviceUUID,
+		Value:    deviceUUID,
 		MaxAge:   visitorExp,
 		Domain:   domain,
 		Path:     "/",

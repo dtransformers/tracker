@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 	"tracking/internal/ent"
-	"tracking/internal/ent/device"
 	"tracking/internal/ent/visitor"
 	"tracking/internal/ent/visitorsession"
 )
@@ -240,17 +239,6 @@ func (r *entRepository) VerifySessionOwnership(ctx context.Context, visitorID in
 		return fmt.Errorf("failed to query visitor: %w", err)
 	}
 	if !visitorExists {
-		return &ent.NotFoundError{}
-	}
-
-	deviceExists, err := r.client.Device.
-		Query().
-		Where(device.ID(int(deviceID))).
-		Exist(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to query device: %w", err)
-	}
-	if !deviceExists {
 		return &ent.NotFoundError{}
 	}
 

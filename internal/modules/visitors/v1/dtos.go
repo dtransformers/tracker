@@ -45,6 +45,7 @@ type CreateVisitorRequest struct {
 type VisitorResponse struct {
 	UUID            string    `json:"uuid"`
 	SessionToken    string    `json:"session_token"`
+	DeviceUUID      string    `json:"device_uuid"`
 	PrimaryUserID   *string   `json:"primary_user_id,omitempty"`
 	FirstSeenAt     time.Time `json:"first_seen_at"`
 	LastSeenAt      time.Time `json:"last_seen_at"`
