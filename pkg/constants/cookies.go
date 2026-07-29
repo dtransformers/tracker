@@ -8,4 +8,8 @@ const (
 	// CookieSessionToken is used to track the visitor's current active session.
 	// It helps in grouping interactions that occur within a continuous timeframe.
 	CookieSessionToken = "session_token"
+
+	// CookieDeviceUUID is used to track the visitor's device across multiple sessions.
+	// It helps in recognizing returning users and attributing their activities consistently.
+	CookieDeviceUUID = "device_uuid"
 )

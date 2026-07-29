@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 	"tracking/internal/ent"
-	v1 "tracking/internal/modules/sessions/v1"
+	"tracking/internal/modules/sessions/v1"
 
 	mock "github.com/stretchr/testify/mock"
 )

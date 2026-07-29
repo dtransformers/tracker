@@ -61,12 +61,13 @@ func GetSessionDetails(ctx context.Context) (*SessionDetails, bool) {
 	return nil, false
 }
 
-func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessionExp, visitorExp int) {
+func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID, deviceUUID string, sessionExp, visitorExp int, domain string) {
 	c.SetCookieData(&http.Cookie{
 		Name:     constants.CookieSessionToken,
 		Value:    sessionToken,
 		MaxAge:   sessionExp,
 		Path:     "/",
+		Domain:   domain,
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
@@ -75,6 +76,50 @@ func SetTrackingCookies(c *gin.Context, sessionToken, visitorUUID string, sessio
 		Name:     constants.CookieVisitorUUID,
 		Value:    visitorUUID,
 		MaxAge:   visitorExp,
+		Domain:   domain,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieDeviceUUID,
+		Value:    deviceUUID,
+		MaxAge:   visitorExp,
+		Domain:   domain,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+}
+
+func RemoveTrackingCookies(c *gin.Context, domain string) {
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieSessionToken,
+		Value:    "",
+		MaxAge:   0,
+		Path:     "/",
+		Domain:   domain,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieVisitorUUID,
+		Value:    "",
+		MaxAge:   0,
+		Domain:   domain,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	c.SetCookieData(&http.Cookie{
+		Name:     constants.CookieDeviceUUID,
+		Value:    "",
+		MaxAge:   0,
+		Domain:   domain,
 		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,

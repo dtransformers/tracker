@@ -53,7 +53,14 @@ func (s *Service) tryValidateExistingSession(c *gin.Context, tracking *middlewar
 		return false
 	}
 
-	middlewares.SetTrackingCookies(c, tracking.SessionToken, tracking.VisitorUUID, sessionExp, visitorExp)
+	// Asynchronously slide the database session expiration window (KeepAlive) to avoid blocking the request path
+	go func(token string) {
+		bgCtx, cancel := context.WithTimeout(context.Background(), s.timeout)
+		defer cancel()
+		_ = s.sessionSvc.KeepAliveSession(bgCtx, token)
+	}(tracking.SessionToken)
+
+	middlewares.SetTrackingCookies(c, tracking.SessionToken, tracking.VisitorUUID, tracking.DeviceUUID, sessionExp, visitorExp, s.appCfg.CookiesDomain)
 	c.Set(middlewares.SessionDetailsKey, details)
 	c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), middlewares.SessionDetailsKey, details))
 	return true
@@ -90,8 +97,9 @@ func (s *Service) autoResolveNewSession(c *gin.Context, tracking *middlewares.Tr
 
 	tracking.VisitorUUID = res.UUID
 	tracking.SessionToken = res.SessionToken
+	tracking.DeviceUUID = res.DeviceUUID
 
-	middlewares.SetTrackingCookies(c, res.SessionToken, res.UUID, sessionExp, visitorExp)
+	middlewares.SetTrackingCookies(c, res.SessionToken, res.UUID, res.DeviceUUID, sessionExp, visitorExp, s.appCfg.CookiesDomain)
 	c.Set(middlewares.SessionDetailsKey, details)
 	c.Request = c.Request.WithContext(context.WithValue(c.Request.Context(), middlewares.SessionDetailsKey, details))
 	return true

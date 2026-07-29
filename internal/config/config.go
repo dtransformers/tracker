@@ -62,6 +62,7 @@ type AppConfig struct {
 	VisitorExpiration int
 	AllowedOrigins    []string
 	TrustedProxies    []string
+	CookiesDomain     string
 }
 
 type DBConfig struct {
@@ -177,6 +178,7 @@ func loadApp(env EnvProvider) AppConfig {
 		VisitorExpiration: intOrDefault(env, "VISITOR_EXPIRATION", 3600*24*365),
 		AllowedOrigins:    parseOrigins(stringOrDefault(env, "ALLOWED_ORIGINS", "", true)),
 		TrustedProxies:    parseOrigins(stringOrDefault(env, "APP_TRUSTED_PROXIES", "", true)),
+		CookiesDomain:     stringOrDefault(env, "COOKIES_DOMAIN", "osoul.local", true),
 	}
 }
 

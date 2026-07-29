@@ -111,11 +111,14 @@ func (s *Service) GetBySessionTokenRaw(ctx context.Context, token string) (*ent.
 
 	if sess.EndedAt != nil && time.Now().UTC().After(*sess.EndedAt) {
 		isActive := false
-		sess, err = s.repo.Update(ctx, sess.UUID, UpdateSessionInput{IsActive: &isActive})
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to update expired session status", "error", err)
-			return nil, err
-		}
+		go func(uuid string) {
+			bgCtx, cancel := context.WithTimeout(context.Background(), s.timeout)
+			defer cancel()
+			_, err := s.repo.Update(bgCtx, uuid, UpdateSessionInput{IsActive: &isActive})
+			if err != nil {
+				s.logger.Warn("failed to update expired session status asynchronously", "error", err)
+			}
+		}(sess.UUID)
 		return nil, nil
 	}
 

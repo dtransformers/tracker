@@ -58,22 +58,25 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 
 	siteObj, exists := c.Get("site")
 	if !exists {
+		middlewares.RemoveTrackingCookies(c, h.appCfg.CookiesDomain)
 		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "Unauthorized"))
 		return
 	}
 
 	site, ok := siteObj.(*ent.Site)
 	if !ok || site == nil || !site.IsActive || site.IsDeleted {
+		middlewares.RemoveTrackingCookies(c, h.appCfg.CookiesDomain)
 		httputil.RespondError(c, custom_errors.NewUnauthorizedError(constants.Version, "Unauthorized"))
 		return
 	}
 	response, err := h.service.CreateSession(c.Request.Context(), req, site)
 	if err != nil {
+		middlewares.RemoveTrackingCookies(c, h.appCfg.CookiesDomain)
 		h.logger.Error("failed to create visitor session", "error", err)
 		httputil.RespondError(c, err)
 		return
 	}
-	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration)
+	middlewares.SetTrackingCookies(c, response.SessionToken, response.UUID, response.DeviceUUID, h.appCfg.SessionExpiration, h.appCfg.VisitorExpiration, h.appCfg.CookiesDomain)
 
 	c.Status(http.StatusCreated)
 }

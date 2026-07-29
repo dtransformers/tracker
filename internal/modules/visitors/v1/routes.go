@@ -30,7 +30,7 @@ func NewModule(client *ent.Client, sitesService *sitesv1.Service, sessionSvc *vi
 	}
 	repo := NewRepository(client)
 	deviceRepo := devicesv1.NewRepository(client)
-	svc := NewService(repo, sitesService, deviceRepo, sessionSvc, consentsSvc, logger)
+	svc := NewService(repo, sitesService, deviceRepo, sessionSvc, consentsSvc, logger, appCfg)
 	handler := NewHandler(svc, logger, appCfg)
 
 	return &Module{
