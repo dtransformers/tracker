@@ -42,7 +42,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 409 {object} httputil.ErrorResponse "Domain already exists"
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites [post]
+// @Router /events/api/v1/sites [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateRequest
 
@@ -70,7 +70,7 @@ func (h *Handler) Create(c *gin.Context) {
 // @Security BasicAuth
 // @Success 200 {object} ListResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites [get]
+// @Router /events/api/v1/sites [get]
 func (h *Handler) List(c *gin.Context) {
 	var tenantID *int64
 	if tidStr := c.Query("tenant_id"); tidStr != "" {
@@ -103,7 +103,7 @@ func (h *Handler) List(c *gin.Context) {
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 404 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites/{uuid} [get]
+// @Router /events/api/v1/sites/{uuid} [get]
 func (h *Handler) Get(c *gin.Context) {
 	uuid := c.Param("uuid")
 
@@ -130,7 +130,7 @@ func (h *Handler) Get(c *gin.Context) {
 // @Failure 404 {object} httputil.ErrorResponse
 // @Failure 409 {object} httputil.ErrorResponse "Domain already in use"
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites/{uuid} [patch]
+// @Router /events/api/v1/sites/{uuid} [patch]
 func (h *Handler) Update(c *gin.Context) {
 	uuid := c.Param("uuid")
 
@@ -160,7 +160,7 @@ func (h *Handler) Update(c *gin.Context) {
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 404 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites/{uuid} [delete]
+// @Router /events/api/v1/sites/{uuid} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	uuid := c.Param("uuid")
 
@@ -183,7 +183,7 @@ func (h *Handler) Delete(c *gin.Context) {
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 404 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/sites/{uuid}/regenerate-keys [post]
+// @Router /events/api/v1/sites/{uuid}/regenerate-keys [post]
 func (h *Handler) RegenerateKeys(c *gin.Context) {
 	uuid := c.Param("uuid")
 

@@ -2,35 +2,35 @@ basePath: /
 definitions:
   internal_modules_consents_v1.ConsentStatus:
     enum:
-    - granted
-    - denied
-    - pending
+      - granted
+      - denied
+      - pending
     type: string
     x-enum-varnames:
-    - ConsentStatusGranted
-    - ConsentStatusDenied
-    - ConsentStatusPending
+      - ConsentStatusGranted
+      - ConsentStatusDenied
+      - ConsentStatusPending
   internal_modules_consents_v1.ConsentType:
     enum:
-    - tracking
-    - marketing
-    - functional
-    - none
+      - tracking
+      - marketing
+      - functional
+      - none
     type: string
     x-enum-varnames:
-    - ConsentTypeTracking
-    - ConsentTypeMarketing
-    - ConsentTypeFunctional
-    - ConsentTypeNone
+      - ConsentTypeTracking
+      - ConsentTypeMarketing
+      - ConsentTypeFunctional
+      - ConsentTypeNone
   internal_modules_consents_v1.UpdateConsentRequest:
     properties:
       consent_type:
-        $ref: '#/definitions/internal_modules_consents_v1.ConsentType'
+        $ref: "#/definitions/internal_modules_consents_v1.ConsentType"
       status:
-        $ref: '#/definitions/internal_modules_consents_v1.ConsentStatus'
+        $ref: "#/definitions/internal_modules_consents_v1.ConsentStatus"
     required:
-    - consent_type
-    - status
+      - consent_type
+      - status
     type: object
   internal_modules_consents_v1.UpdateConsentResponse:
     properties:
@@ -42,22 +42,22 @@ definitions:
     type: object
   internal_modules_events_v1.AuthProvider:
     enum:
-    - email
-    - google
-    - facebook
-    - apple
-    - twitter
-    - github
-    - sso
+      - email
+      - google
+      - facebook
+      - apple
+      - twitter
+      - github
+      - sso
     type: string
     x-enum-varnames:
-    - AuthProviderEmail
-    - AuthProviderGoogle
-    - AuthProviderFacebook
-    - AuthProviderApple
-    - AuthProviderTwitter
-    - AuthProviderGithub
-    - AuthProviderSSO
+      - AuthProviderEmail
+      - AuthProviderGoogle
+      - AuthProviderFacebook
+      - AuthProviderApple
+      - AuthProviderTwitter
+      - AuthProviderGithub
+      - AuthProviderSSO
   internal_modules_events_v1.CommerceItem:
     properties:
       affiliation:
@@ -96,9 +96,9 @@ definitions:
   internal_modules_events_v1.CreateEventRequest:
     properties:
       category:
-        $ref: '#/definitions/internal_modules_events_v1.EventCategory'
+        $ref: "#/definitions/internal_modules_events_v1.EventCategory"
       click_ids:
-        $ref: '#/definitions/internal_modules_events_v1.PlatformClickIds'
+        $ref: "#/definitions/internal_modules_events_v1.PlatformClickIds"
       event_id:
         type: string
       name:
@@ -118,14 +118,14 @@ definitions:
       server_received_at:
         type: string
       target:
-        $ref: '#/definitions/internal_modules_events_v1.TargetProps'
+        $ref: "#/definitions/internal_modules_events_v1.TargetProps"
       type:
-        $ref: '#/definitions/internal_modules_events_v1.EventType'
+        $ref: "#/definitions/internal_modules_events_v1.EventType"
     required:
-    - category
-    - name
-    - occurred_at
-    - type
+      - category
+      - name
+      - occurred_at
+      - type
     type: object
   internal_modules_events_v1.CreatePageViewRequest:
     properties:
@@ -140,204 +140,204 @@ definitions:
       url:
         type: string
     required:
-    - url
+      - url
     type: object
   internal_modules_events_v1.ErrorSeverity:
     enum:
-    - info
-    - warning
-    - error
-    - fatal
+      - info
+      - warning
+      - error
+      - fatal
     type: string
     x-enum-varnames:
-    - ErrorSeverityInfo
-    - ErrorSeverityWarning
-    - ErrorSeverityError
-    - ErrorSeverityFatal
+      - ErrorSeverityInfo
+      - ErrorSeverityWarning
+      - ErrorSeverityError
+      - ErrorSeverityFatal
   internal_modules_events_v1.EventCategory:
     enum:
-    - navigation.page_view
-    - navigation.page_leave
-    - navigation.page_redirect
-    - navigation.history_change
-    - interaction.click
-    - interaction.right_click
-    - interaction.double_click
-    - interaction.hover
-    - interaction.scroll
-    - interaction.keyboard
-    - interaction.touch
-    - interaction.drag
-    - interaction.focus
-    - interaction.blur
-    - interaction.copy
-    - interaction.paste
-    - interaction.form_start
-    - interaction.form_submit
-    - interaction.form_abandon
-    - interaction.form_error
-    - interaction.input_change
-    - engagement.read
-    - engagement.content_view
-    - engagement.content_share
-    - engagement.content_save
-    - engagement.download
-    - engagement.search
-    - engagement.video_watch
-    - engagement.video_play
-    - engagement.video_pause
-    - engagement.video_seek
-    - engagement.video_complete
-    - engagement.video_buffer
-    - engagement.video_quality
-    - engagement.video_progress
-    - authentication.login
-    - authentication.logout
-    - authentication.signup
-    - authentication.password_reset
-    - authentication.token_refresh
-    - authentication.mfa_challenge
-    - communication.message_sent
-    - communication.contact_form
-    - communication.chat_open
-    - communication.chat_close
-    - communication.notification_click
-    - communication.notification_dismiss
-    - communication.subscribe
-    - communication.unsubscribe
-    - communication.lead_submit
-    - commerce.view_item
-    - commerce.view_item_list
-    - commerce.select_item
-    - commerce.add_to_cart
-    - commerce.remove_from_cart
-    - commerce.view_cart
-    - commerce.begin_checkout
-    - commerce.add_payment_info
-    - commerce.add_shipping_info
-    - commerce.purchase
-    - commerce.refund
-    - commerce.add_to_wishlist
-    - commerce.promo_view
-    - commerce.promo_click
-    - system.error
-    - system.warning
-    - system.performance
-    - system.consent_update
-    - system.app_crash
-    - system.experiment_seen
+      - navigation.page_view
+      - navigation.page_leave
+      - navigation.page_redirect
+      - navigation.history_change
+      - interaction.click
+      - interaction.right_click
+      - interaction.double_click
+      - interaction.hover
+      - interaction.scroll
+      - interaction.keyboard
+      - interaction.touch
+      - interaction.drag
+      - interaction.focus
+      - interaction.blur
+      - interaction.copy
+      - interaction.paste
+      - interaction.form_start
+      - interaction.form_submit
+      - interaction.form_abandon
+      - interaction.form_error
+      - interaction.input_change
+      - engagement.read
+      - engagement.content_view
+      - engagement.content_share
+      - engagement.content_save
+      - engagement.download
+      - engagement.search
+      - engagement.video_watch
+      - engagement.video_play
+      - engagement.video_pause
+      - engagement.video_seek
+      - engagement.video_complete
+      - engagement.video_buffer
+      - engagement.video_quality
+      - engagement.video_progress
+      - authentication.login
+      - authentication.logout
+      - authentication.signup
+      - authentication.password_reset
+      - authentication.token_refresh
+      - authentication.mfa_challenge
+      - communication.message_sent
+      - communication.contact_form
+      - communication.chat_open
+      - communication.chat_close
+      - communication.notification_click
+      - communication.notification_dismiss
+      - communication.subscribe
+      - communication.unsubscribe
+      - communication.lead_submit
+      - commerce.view_item
+      - commerce.view_item_list
+      - commerce.select_item
+      - commerce.add_to_cart
+      - commerce.remove_from_cart
+      - commerce.view_cart
+      - commerce.begin_checkout
+      - commerce.add_payment_info
+      - commerce.add_shipping_info
+      - commerce.purchase
+      - commerce.refund
+      - commerce.add_to_wishlist
+      - commerce.promo_view
+      - commerce.promo_click
+      - system.error
+      - system.warning
+      - system.performance
+      - system.consent_update
+      - system.app_crash
+      - system.experiment_seen
     type: string
     x-enum-varnames:
-    - EventCategoryPageView
-    - EventCategoryPageLeave
-    - EventCategoryPageRedirect
-    - EventCategoryHistoryChange
-    - EventCategoryClick
-    - EventCategoryRightClick
-    - EventCategoryDoubleClick
-    - EventCategoryHover
-    - EventCategoryScroll
-    - EventCategoryKeyboard
-    - EventCategoryTouch
-    - EventCategoryDrag
-    - EventCategoryFocus
-    - EventCategoryBlur
-    - EventCategoryCopy
-    - EventCategoryPaste
-    - EventCategoryFormStart
-    - EventCategoryFormSubmit
-    - EventCategoryFormAbandon
-    - EventCategoryFormError
-    - EventCategoryInputChange
-    - EventCategoryRead
-    - EventCategoryContentView
-    - EventCategoryContentShare
-    - EventCategoryContentSave
-    - EventCategoryDownload
-    - EventCategorySearch
-    - EventCategoryVideoWatch
-    - EventCategoryVideoPlay
-    - EventCategoryVideoPause
-    - EventCategoryVideoSeek
-    - EventCategoryVideoComplete
-    - EventCategoryVideoBuffer
-    - EventCategoryVideoQuality
-    - EventCategoryVideoProgress
-    - EventCategoryLogin
-    - EventCategoryLogout
-    - EventCategorySignup
-    - EventCategoryPasswordReset
-    - EventCategoryTokenRefresh
-    - EventCategoryMFAChallenge
-    - EventCategoryMessageSent
-    - EventCategoryContactForm
-    - EventCategoryChatOpen
-    - EventCategoryChatClose
-    - EventCategoryNotificationClick
-    - EventCategoryNotificationDismiss
-    - EventCategorySubscribe
-    - EventCategoryUnsubscribe
-    - EventCategoryLeadSubmit
-    - EventCategoryViewItem
-    - EventCategoryViewItemList
-    - EventCategorySelectItem
-    - EventCategoryAddToCart
-    - EventCategoryRemoveFromCart
-    - EventCategoryViewCart
-    - EventCategoryBeginCheckout
-    - EventCategoryAddPaymentInfo
-    - EventCategoryAddShippingInfo
-    - EventCategoryPurchase
-    - EventCategoryRefund
-    - EventCategoryAddToWishlist
-    - EventCategoryPromoView
-    - EventCategoryPromoClick
-    - EventCategoryError
-    - EventCategoryWarning
-    - EventCategoryPerformance
-    - EventCategoryConsentUpdate
-    - EventCategoryAppCrash
-    - EventCategoryExperimentSeen
+      - EventCategoryPageView
+      - EventCategoryPageLeave
+      - EventCategoryPageRedirect
+      - EventCategoryHistoryChange
+      - EventCategoryClick
+      - EventCategoryRightClick
+      - EventCategoryDoubleClick
+      - EventCategoryHover
+      - EventCategoryScroll
+      - EventCategoryKeyboard
+      - EventCategoryTouch
+      - EventCategoryDrag
+      - EventCategoryFocus
+      - EventCategoryBlur
+      - EventCategoryCopy
+      - EventCategoryPaste
+      - EventCategoryFormStart
+      - EventCategoryFormSubmit
+      - EventCategoryFormAbandon
+      - EventCategoryFormError
+      - EventCategoryInputChange
+      - EventCategoryRead
+      - EventCategoryContentView
+      - EventCategoryContentShare
+      - EventCategoryContentSave
+      - EventCategoryDownload
+      - EventCategorySearch
+      - EventCategoryVideoWatch
+      - EventCategoryVideoPlay
+      - EventCategoryVideoPause
+      - EventCategoryVideoSeek
+      - EventCategoryVideoComplete
+      - EventCategoryVideoBuffer
+      - EventCategoryVideoQuality
+      - EventCategoryVideoProgress
+      - EventCategoryLogin
+      - EventCategoryLogout
+      - EventCategorySignup
+      - EventCategoryPasswordReset
+      - EventCategoryTokenRefresh
+      - EventCategoryMFAChallenge
+      - EventCategoryMessageSent
+      - EventCategoryContactForm
+      - EventCategoryChatOpen
+      - EventCategoryChatClose
+      - EventCategoryNotificationClick
+      - EventCategoryNotificationDismiss
+      - EventCategorySubscribe
+      - EventCategoryUnsubscribe
+      - EventCategoryLeadSubmit
+      - EventCategoryViewItem
+      - EventCategoryViewItemList
+      - EventCategorySelectItem
+      - EventCategoryAddToCart
+      - EventCategoryRemoveFromCart
+      - EventCategoryViewCart
+      - EventCategoryBeginCheckout
+      - EventCategoryAddPaymentInfo
+      - EventCategoryAddShippingInfo
+      - EventCategoryPurchase
+      - EventCategoryRefund
+      - EventCategoryAddToWishlist
+      - EventCategoryPromoView
+      - EventCategoryPromoClick
+      - EventCategoryError
+      - EventCategoryWarning
+      - EventCategoryPerformance
+      - EventCategoryConsentUpdate
+      - EventCategoryAppCrash
+      - EventCategoryExperimentSeen
   internal_modules_events_v1.EventType:
     enum:
-    - navigation
-    - interaction
-    - engagement
-    - authentication
-    - communication
-    - commerce
-    - system
-    - custom
+      - navigation
+      - interaction
+      - engagement
+      - authentication
+      - communication
+      - commerce
+      - system
+      - custom
     type: string
     x-enum-varnames:
-    - EventTypeNavigation
-    - EventTypeInteraction
-    - EventTypeEngagement
-    - EventTypeAuthentication
-    - EventTypeCommunication
-    - EventTypeCommerce
-    - EventTypeSystem
-    - EventTypeCustom
+      - EventTypeNavigation
+      - EventTypeInteraction
+      - EventTypeEngagement
+      - EventTypeAuthentication
+      - EventTypeCommunication
+      - EventTypeCommerce
+      - EventTypeSystem
+      - EventTypeCustom
   internal_modules_events_v1.MediaType:
     enum:
-    - video
-    - audio
-    - live
+      - video
+      - audio
+      - live
     type: string
     x-enum-varnames:
-    - MediaTypeVideo
-    - MediaTypeAudio
-    - MediaTypeLive
+      - MediaTypeVideo
+      - MediaTypeAudio
+      - MediaTypeLive
   internal_modules_events_v1.MouseButton:
     enum:
-    - left
-    - right
-    - middle
+      - left
+      - right
+      - middle
     type: string
     x-enum-varnames:
-    - MouseButtonLeft
-    - MouseButtonRight
-    - MouseButtonMiddle
+      - MouseButtonLeft
+      - MouseButtonRight
+      - MouseButtonMiddle
   internal_modules_events_v1.PlatformClickIds:
     properties:
       ScCid:
@@ -373,72 +373,72 @@ definitions:
     type: object
   internal_modules_events_v1.Priority:
     enum:
-    - low
-    - medium
-    - high
-    - critical
+      - low
+      - medium
+      - high
+      - critical
     type: string
     x-enum-varnames:
-    - PriorityLow
-    - PriorityMedium
-    - PriorityHigh
-    - PriorityCritical
+      - PriorityLow
+      - PriorityMedium
+      - PriorityHigh
+      - PriorityCritical
   internal_modules_events_v1.ScrollDirection:
     enum:
-    - up
-    - down
+      - up
+      - down
     type: string
     x-enum-varnames:
-    - ScrollDirectionUp
-    - ScrollDirectionDown
+      - ScrollDirectionUp
+      - ScrollDirectionDown
   internal_modules_events_v1.TargetElementType:
     enum:
-    - button
-    - link
-    - image
-    - video
-    - form
-    - input
-    - select
-    - checkbox
-    - radio
-    - textarea
-    - banner
-    - modal
-    - nav_item
-    - product_card
-    - carousel
-    - tab
-    - accordion
-    - search_bar
-    - notification
-    - toast
-    - dropdown
-    - unknown
+      - button
+      - link
+      - image
+      - video
+      - form
+      - input
+      - select
+      - checkbox
+      - radio
+      - textarea
+      - banner
+      - modal
+      - nav_item
+      - product_card
+      - carousel
+      - tab
+      - accordion
+      - search_bar
+      - notification
+      - toast
+      - dropdown
+      - unknown
     type: string
     x-enum-varnames:
-    - TargetElementTypeButton
-    - TargetElementTypeLink
-    - TargetElementTypeImage
-    - TargetElementTypeVideo
-    - TargetElementTypeForm
-    - TargetElementTypeInput
-    - TargetElementTypeSelect
-    - TargetElementTypeCheckbox
-    - TargetElementTypeRadio
-    - TargetElementTypeTextarea
-    - TargetElementTypeBanner
-    - TargetElementTypeModal
-    - TargetElementTypeNavItem
-    - TargetElementTypeProductCard
-    - TargetElementTypeCarousel
-    - TargetElementTypeTab
-    - TargetElementTypeAccordion
-    - TargetElementTypeSearchBar
-    - TargetElementTypeNotification
-    - TargetElementTypeToast
-    - TargetElementTypeDropdown
-    - TargetElementTypeUnknown
+      - TargetElementTypeButton
+      - TargetElementTypeLink
+      - TargetElementTypeImage
+      - TargetElementTypeVideo
+      - TargetElementTypeForm
+      - TargetElementTypeInput
+      - TargetElementTypeSelect
+      - TargetElementTypeCheckbox
+      - TargetElementTypeRadio
+      - TargetElementTypeTextarea
+      - TargetElementTypeBanner
+      - TargetElementTypeModal
+      - TargetElementTypeNavItem
+      - TargetElementTypeProductCard
+      - TargetElementTypeCarousel
+      - TargetElementTypeTab
+      - TargetElementTypeAccordion
+      - TargetElementTypeSearchBar
+      - TargetElementTypeNotification
+      - TargetElementTypeToast
+      - TargetElementTypeDropdown
+      - TargetElementTypeUnknown
   internal_modules_events_v1.TargetProps:
     properties:
       affiliation:
@@ -446,7 +446,7 @@ definitions:
       auth_method:
         type: string
       auth_provider:
-        $ref: '#/definitions/internal_modules_events_v1.AuthProvider'
+        $ref: "#/definitions/internal_modules_events_v1.AuthProvider"
       button_id:
         type: string
       button_name:
@@ -479,7 +479,7 @@ definitions:
       element_text:
         type: string
       element_type:
-        $ref: '#/definitions/internal_modules_events_v1.TargetElementType'
+        $ref: "#/definitions/internal_modules_events_v1.TargetElementType"
       element_x:
         type: integer
       element_y:
@@ -489,7 +489,7 @@ definitions:
       error_message:
         type: string
       error_severity:
-        $ref: '#/definitions/internal_modules_events_v1.ErrorSeverity'
+        $ref: "#/definitions/internal_modules_events_v1.ErrorSeverity"
       error_stack:
         type: string
       feature:
@@ -514,7 +514,7 @@ definitions:
         type: boolean
       items:
         items:
-          $ref: '#/definitions/internal_modules_events_v1.CommerceItem'
+          $ref: "#/definitions/internal_modules_events_v1.CommerceItem"
         type: array
       media_current_time_ms:
         type: integer
@@ -535,19 +535,19 @@ definitions:
       media_title:
         type: string
       media_type:
-        $ref: '#/definitions/internal_modules_events_v1.MediaType'
+        $ref: "#/definitions/internal_modules_events_v1.MediaType"
       mouse_button:
-        $ref: '#/definitions/internal_modules_events_v1.MouseButton'
+        $ref: "#/definitions/internal_modules_events_v1.MouseButton"
       page_name:
         type: string
       payment_type:
         type: string
       priority:
-        $ref: '#/definitions/internal_modules_events_v1.Priority'
+        $ref: "#/definitions/internal_modules_events_v1.Priority"
       scroll_depth_px:
         type: integer
       scroll_direction:
-        $ref: '#/definitions/internal_modules_events_v1.ScrollDirection'
+        $ref: "#/definitions/internal_modules_events_v1.ScrollDirection"
       scroll_percent:
         type: number
       search_filters:
@@ -585,15 +585,15 @@ definitions:
         description: Tenant ID of the site
         type: integer
     required:
-    - domain
-    - name
-    - tenant_id
+      - domain
+      - name
+      - tenant_id
     type: object
   internal_modules_sites_v1.ListResponse:
     properties:
       sites:
         items:
-          $ref: '#/definitions/internal_modules_sites_v1.Response'
+          $ref: "#/definitions/internal_modules_sites_v1.Response"
         type: array
       total:
         type: integer
@@ -655,7 +655,7 @@ definitions:
       referrer_host:
         type: string
     required:
-    - fingerprint_hash
+      - fingerprint_hash
     type: object
   internal_modules_visitors_v1.PingResponse:
     properties:
@@ -666,7 +666,7 @@ definitions:
   internal_modules_visitors_v1.VerifyVisitorAPIResponse:
     properties:
       data:
-        $ref: '#/definitions/internal_modules_visitors_v1.VerifyVisitorData'
+        $ref: "#/definitions/internal_modules_visitors_v1.VerifyVisitorData"
       error:
         type: string
       success:
@@ -677,11 +677,11 @@ definitions:
   internal_modules_visitors_v1.VerifyVisitorData:
     properties:
       device:
-        $ref: '#/definitions/tracking_internal_modules_devices_v1.DeviceResponse'
+        $ref: "#/definitions/tracking_internal_modules_devices_v1.DeviceResponse"
       is_valid:
         type: boolean
       session:
-        $ref: '#/definitions/tracking_internal_modules_visitor_sessions_v1.SessionResponse'
+        $ref: "#/definitions/tracking_internal_modules_visitor_sessions_v1.SessionResponse"
     type: object
   internal_modules_visitors_v1.VisitorResponse:
     properties:
@@ -716,7 +716,7 @@ definitions:
         type: number
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.EventCommerceItemEdges'
+          - $ref: "#/definitions/tracking_internal_ent.EventCommerceItemEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the EventCommerceItemQuery when eager-loading is set.
@@ -767,14 +767,14 @@ definitions:
     properties:
       event:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         description: Event holds the value of the event edge.
     type: object
   tracking_internal_ent.EventCustomProp:
     properties:
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.EventCustomPropEdges'
+          - $ref: "#/definitions/tracking_internal_ent.EventCustomPropEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the EventCustomPropQuery when eager-loading is set.
@@ -795,7 +795,7 @@ definitions:
     properties:
       event:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         description: Event holds the value of the event edge.
     type: object
   tracking_internal_ent.EventTargetProp:
@@ -838,7 +838,7 @@ definitions:
         type: integer
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.EventTargetPropEdges'
+          - $ref: "#/definitions/tracking_internal_ent.EventTargetPropEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the EventTargetPropQuery when eager-loading is set.
@@ -885,7 +885,8 @@ definitions:
         description: Feature holds the value of the "feature" field.
         type: string
       form_completion_pct:
-        description: FormCompletionPct holds the value of the "form_completion_pct"
+        description:
+          FormCompletionPct holds the value of the "form_completion_pct"
           field.
         type: number
       form_field:
@@ -916,7 +917,8 @@ definitions:
         description: IsNewUser holds the value of the "is_new_user" field.
         type: boolean
       media_current_time_ms:
-        description: MediaCurrentTimeMs holds the value of the "media_current_time_ms"
+        description:
+          MediaCurrentTimeMs holds the value of the "media_current_time_ms"
           field.
         type: integer
       media_duration_ms:
@@ -968,7 +970,8 @@ definitions:
         description: ScrollPercent holds the value of the "scroll_percent" field.
         type: number
       search_results_count:
-        description: SearchResultsCount holds the value of the "search_results_count"
+        description:
+          SearchResultsCount holds the value of the "search_results_count"
           field.
         type: integer
       search_term:
@@ -1000,14 +1003,14 @@ definitions:
     properties:
       event:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         description: Event holds the value of the event edge.
     type: object
   tracking_internal_ent.EventTargetSearchFilter:
     properties:
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.EventTargetSearchFilterEdges'
+          - $ref: "#/definitions/tracking_internal_ent.EventTargetSearchFilterEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the EventTargetSearchFilterQuery when eager-loading is set.
@@ -1028,7 +1031,7 @@ definitions:
     properties:
       event:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         description: Event holds the value of the event edge.
     type: object
   tracking_internal_ent.PageView:
@@ -1071,7 +1074,7 @@ definitions:
         type: integer
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEventEdges'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEventEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the VisitorEventQuery when eager-loading is set.
@@ -1106,7 +1109,8 @@ definitions:
         description: Sequence holds the value of the "sequence" field.
         type: integer
       server_received_at:
-        description: ServerReceivedAt holds the value of the "server_received_at"
+        description:
+          ServerReceivedAt holds the value of the "server_received_at"
           field.
         type: string
       session_id:
@@ -1124,25 +1128,25 @@ definitions:
       commerce_items:
         description: CommerceItems holds the value of the commerce_items edge.
         items:
-          $ref: '#/definitions/tracking_internal_ent.EventCommerceItem'
+          $ref: "#/definitions/tracking_internal_ent.EventCommerceItem"
         type: array
       custom_props:
         description: CustomProps holds the value of the custom_props edge.
         items:
-          $ref: '#/definitions/tracking_internal_ent.EventCustomProp'
+          $ref: "#/definitions/tracking_internal_ent.EventCustomProp"
         type: array
       platform_clicks:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorPlatformClick'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorPlatformClick"
         description: PlatformClicks holds the value of the platform_clicks edge.
       search_filters:
         description: SearchFilters holds the value of the search_filters edge.
         items:
-          $ref: '#/definitions/tracking_internal_ent.EventTargetSearchFilter'
+          $ref: "#/definitions/tracking_internal_ent.EventTargetSearchFilter"
         type: array
       target_props:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.EventTargetProp'
+          - $ref: "#/definitions/tracking_internal_ent.EventTargetProp"
         description: TargetProps holds the value of the target_props edge.
     type: object
   tracking_internal_ent.VisitorPlatformClick:
@@ -1152,7 +1156,7 @@ definitions:
         type: string
       edges:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorPlatformClickEdges'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorPlatformClickEdges"
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the VisitorPlatformClickQuery when eager-loading is set.
@@ -1209,7 +1213,7 @@ definitions:
     properties:
       event:
         allOf:
-        - $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+          - $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         description: Event holds the value of the event edge.
     type: object
   tracking_internal_modules_devices_v1.DeviceResponse:
@@ -1309,474 +1313,477 @@ info:
   title: Tracking API
   version: "1.0"
 paths:
-  /api/v1/consents:
+  /events/api/v1/consents:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Updates the consent status for a specific site and visitor
       parameters:
-      - description: Site API Key
-        in: header
-        name: X-Api-Key
-        required: true
-        type: string
-      - description: Client Fingerprint
-        in: header
-        name: X-Fingerprint
-        required: true
-        type: string
-      - description: Request Nonce
-        in: header
-        name: X-Nonce
-        required: true
-        type: string
-      - description: Consent Request Payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_consents_v1.UpdateConsentRequest'
+        - description: Site API Key
+          in: header
+          name: X-Api-Key
+          required: true
+          type: string
+        - description: Client Fingerprint
+          in: header
+          name: X-Fingerprint
+          required: true
+          type: string
+        - description: Request Nonce
+          in: header
+          name: X-Nonce
+          required: true
+          type: string
+        - description: Consent Request Payload
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_consents_v1.UpdateConsentRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_consents_v1.UpdateConsentResponse'
+            $ref: "#/definitions/internal_modules_consents_v1.UpdateConsentResponse"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Update visitor consent
       tags:
-      - Consents
-  /api/v1/events/custom:
+        - Consents
+  /events/api/v1/events/custom:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Records a custom event for a visitor
       parameters:
-      - description: Site API Key
-        in: header
-        name: X-Api-Key
-        required: true
-        type: string
-      - description: Client Fingerprint
-        in: header
-        name: X-Fingerprint
-        required: true
-        type: string
-      - description: Request Nonce
-        in: header
-        name: X-Nonce
-        required: true
-        type: string
-      - description: Event Request Payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_events_v1.CreateEventRequest'
+        - description: Site API Key
+          in: header
+          name: X-Api-Key
+          required: true
+          type: string
+        - description: Client Fingerprint
+          in: header
+          name: X-Fingerprint
+          required: true
+          type: string
+        - description: Request Nonce
+          in: header
+          name: X-Nonce
+          required: true
+          type: string
+        - description: Event Request Payload
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_events_v1.CreateEventRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/tracking_internal_ent.VisitorEvent'
+            $ref: "#/definitions/tracking_internal_ent.VisitorEvent"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Create custom event
       tags:
-      - Events
-  /api/v1/events/pageviews:
+        - Events
+  /events/api/v1/events/pageviews:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Records a page view for a visitor
       parameters:
-      - description: Site API Key
-        in: header
-        name: X-Api-Key
-        required: true
-        type: string
-      - description: Client Fingerprint
-        in: header
-        name: X-Fingerprint
-        required: true
-        type: string
-      - description: Request Nonce
-        in: header
-        name: X-Nonce
-        required: true
-        type: string
-      - description: Page View Request Payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_events_v1.CreatePageViewRequest'
+        - description: Site API Key
+          in: header
+          name: X-Api-Key
+          required: true
+          type: string
+        - description: Client Fingerprint
+          in: header
+          name: X-Fingerprint
+          required: true
+          type: string
+        - description: Request Nonce
+          in: header
+          name: X-Nonce
+          required: true
+          type: string
+        - description: Page View Request Payload
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_events_v1.CreatePageViewRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/tracking_internal_ent.PageView'
+            $ref: "#/definitions/tracking_internal_ent.PageView"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Create page view
       tags:
-      - Events
-  /api/v1/sites:
+        - Events
+  /events/api/v1/sites:
     get:
       description: Get a list of all sites
       parameters:
-      - description: Filter by Tenant ID
-        format: int64
-        in: query
-        name: tenant_id
-        type: integer
+        - description: Filter by Tenant ID
+          format: int64
+          in: query
+          name: tenant_id
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.ListResponse'
+            $ref: "#/definitions/internal_modules_sites_v1.ListResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: List all sites
       tags:
-      - sites
+        - sites
     post:
       consumes:
-      - application/json
-      description: Create a new site with auto-generated security keys and assigned
+        - application/json
+      description:
+        Create a new site with auto-generated security keys and assigned
         tenant ID
       parameters:
-      - description: Site creation request
-        in: body
-        name: site
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_sites_v1.CreateRequest'
+        - description: Site creation request
+          in: body
+          name: site
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_sites_v1.CreateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: "#/definitions/internal_modules_sites_v1.Response"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "409":
           description: Domain already exists
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: Create a new site
       tags:
-      - sites
-  /api/v1/sites/{uuid}:
+        - sites
+  /events/api/v1/sites/{uuid}:
     delete:
       description: Permanently delete a site
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: Delete a site
       tags:
-      - sites
+        - sites
     get:
       description: Get detailed information about a specific site
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: "#/definitions/internal_modules_sites_v1.Response"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: Get a site by UUID
       tags:
-      - sites
+        - sites
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Update site information
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
-      - description: Site update request
-        in: body
-        name: site
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_sites_v1.UpdateRequest'
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
+        - description: Site update request
+          in: body
+          name: site
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_sites_v1.UpdateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: "#/definitions/internal_modules_sites_v1.Response"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "409":
           description: Domain already in use
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: Update a site
       tags:
-      - sites
-  /api/v1/sites/{uuid}/regenerate-keys:
+        - sites
+  /events/api/v1/sites/{uuid}/regenerate-keys:
     post:
       description: Generate new public and secret keys for a site
       parameters:
-      - description: Site UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
+        - description: Site UUID
+          in: path
+          name: uuid
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_sites_v1.Response'
+            $ref: "#/definitions/internal_modules_sites_v1.Response"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       security:
-      - BasicAuth: []
+        - BasicAuth: []
       summary: Regenerate site security keys
       tags:
-      - sites
-  /api/v1/visitors:
+        - sites
+  /events/api/v1/visitors:
     post:
       consumes:
-      - application/json
-      description: Create a visitor on a site. Creates a new visitor if not exists,
+        - application/json
+      description:
+        Create a visitor on a site. Creates a new visitor if not exists,
         or updates last seen time.
       parameters:
-      - description: Track visitor request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_modules_visitors_v1.CreateVisitorRequest'
-      - description: Public API Key
-        in: header
-        name: X-API-Key
-        required: true
-        type: string
-      - description: HMAC Signature
-        in: header
-        name: X-Signature
-        required: true
-        type: string
-      - description: Request Timestamp
-        in: header
-        name: X-Timestamp
-        required: true
-        type: string
-      - description: Request Nonce
-        in: header
-        name: X-Nonce
-        required: true
-        type: string
-      - description: Optional session_token and visitor_uuid cookies
-        in: header
-        name: Cookie
-        type: string
+        - description: Track visitor request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/internal_modules_visitors_v1.CreateVisitorRequest"
+        - description: Public API Key
+          in: header
+          name: X-API-Key
+          required: true
+          type: string
+        - description: HMAC Signature
+          in: header
+          name: X-Signature
+          required: true
+          type: string
+        - description: Request Timestamp
+          in: header
+          name: X-Timestamp
+          required: true
+          type: string
+        - description: Request Nonce
+          in: header
+          name: X-Nonce
+          required: true
+          type: string
+        - description: Optional session_token and visitor_uuid cookies
+          in: header
+          name: Cookie
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.VisitorResponse'
+            $ref: "#/definitions/internal_modules_visitors_v1.VisitorResponse"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Create a visitor
       tags:
-      - visitors
-  /api/v1/visitors/{visitor_uuid}/verify/{session_token}:
+        - visitors
+  /events/api/v1/visitors/{visitor_uuid}/verify/{session_token}:
     get:
       consumes:
-      - application/json
-      description: Verify that the visitor uuid and session_token are valid and return
+        - application/json
+      description:
+        Verify that the visitor uuid and session_token are valid and return
         session status. Always returns 200 with is_valid flag unless params are invalid
         or an internal error occurs.
       parameters:
-      - description: Visitor UUID
-        in: path
-        name: visitor_uuid
-        required: true
-        type: string
-      - description: Session Token
-        in: path
-        name: session_token
-        required: true
-        type: string
+        - description: Visitor UUID
+          in: path
+          name: visitor_uuid
+          required: true
+          type: string
+        - description: Session Token
+          in: path
+          name: session_token
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.VerifyVisitorAPIResponse'
+            $ref: "#/definitions/internal_modules_visitors_v1.VerifyVisitorAPIResponse"
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Verify a visitor
       tags:
-      - visitors
-  /api/v1/visitors/ping:
+        - visitors
+  /events/api/v1/visitors/ping:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Keep the visitor session alive
       parameters:
-      - description: Site API Key
-        in: header
-        name: X-Api-Key
-        required: true
-        type: string
-      - description: Client Fingerprint
-        in: header
-        name: X-Fingerprint
-        required: true
-        type: string
-      - description: Request Nonce
-        in: header
-        name: X-Nonce
-        required: true
-        type: string
-      - description: Optional session_token and visitor_uuid cookies
-        in: header
-        name: Cookie
-        type: string
+        - description: Site API Key
+          in: header
+          name: X-Api-Key
+          required: true
+          type: string
+        - description: Client Fingerprint
+          in: header
+          name: X-Fingerprint
+          required: true
+          type: string
+        - description: Request Nonce
+          in: header
+          name: X-Nonce
+          required: true
+          type: string
+        - description: Optional session_token and visitor_uuid cookies
+          in: header
+          name: Cookie
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_modules_visitors_v1.PingResponse'
+            $ref: "#/definitions/internal_modules_visitors_v1.PingResponse"
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/tracking_pkg_httputil.ErrorResponse'
+            $ref: "#/definitions/tracking_pkg_httputil.ErrorResponse"
       summary: Ping session
       tags:
-      - visitors
+        - visitors
 securityDefinitions:
   BasicAuth:
     type: basic

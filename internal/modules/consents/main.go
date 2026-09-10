@@ -14,13 +14,13 @@ func RegisterV1(router *gin.Engine, client *ent.Client, logger *slog.Logger) *v1
 	if logger == nil {
 		logger = slog.Default()
 	}
-	v1Group := router.Group("/api/v1")
+	v1Group := router.Group("/events/api/v1")
 
 	sitesRepo := sitesv1.NewRepository(client)
 	sitesService := sitesv1.NewService(sitesRepo, logger)
 
 	module := v1.NewModule(client, sitesService, logger)
 	module.Register(v1Group)
-	fmt.Printf("Consents module endpoints under /api/v1/consents Are Ready To use \n")
+	fmt.Printf("Consents module endpoints under /events/api/v1/consents Are Ready To use \n")
 	return module
 }

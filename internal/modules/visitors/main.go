@@ -17,13 +17,13 @@ func RegisterV1(router *gin.Engine, client *ent.Client, sessionSvc *visitor_sess
 	if logger == nil {
 		logger = slog.Default()
 	}
-	v1Group := router.Group("/api/v1")
+	v1Group := router.Group("/events/api/v1")
 
 	sitesRepo := sitesv1.NewRepository(client)
 	sitesService := sitesv1.NewService(sitesRepo, logger)
 
 	module := v1.NewModule(client, sitesService, sessionSvc, consentsSvc, logger, appCfg, authCfg)
 	module.Register(v1Group)
-	fmt.Printf("Visitors module endpoints under /api/v1/visitor Are Ready To use \n")
+	fmt.Printf("Visitors module endpoints under /events/api/v1/visitor Are Ready To use \n")
 	return module.Service()
 }
