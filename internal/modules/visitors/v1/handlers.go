@@ -46,7 +46,7 @@ func NewHandler(service *Service, logger *slog.Logger, appCfg config.AppConfig) 
 // @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/visitors [post]
+// @Router /events/api/v1/visitors [post]
 func (h *Handler) CreateVisitor(c *gin.Context) {
 	var req CreateVisitorRequest
 
@@ -92,7 +92,7 @@ func (h *Handler) CreateVisitor(c *gin.Context) {
 // @Success 200 {object} VerifyVisitorAPIResponse
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/visitors/{visitor_uuid}/verify/{session_token} [get]
+// @Router /events/api/v1/visitors/{visitor_uuid}/verify/{session_token} [get]
 func (h *Handler) VerifyVisitor(c *gin.Context) {
 	visitorUUID := c.Param("visitor_uuid")
 	sessionToken := c.Param("session_token")
@@ -130,7 +130,7 @@ func (h *Handler) VerifyVisitor(c *gin.Context) {
 // @Success 200 {object} PingResponse
 // @Failure 401 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/visitors/ping [post]
+// @Router /events/api/v1/visitors/ping [post]
 func (h *Handler) Ping(c *gin.Context) {
 	tracking, exists := middlewares.GetTrackingInfo(c.Request.Context())
 	if !exists || tracking == nil {

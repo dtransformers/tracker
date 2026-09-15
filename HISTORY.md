@@ -6,7 +6,7 @@
 - **Implemented Changes**:
   - Enhanced visitor repository to support `CreateEvent` and `CreatePageView`.
   - Added `CreateEvent` and `CreatePageView` in the visitor service layer, supported by a shared `resolveSession` helper that automatically handles "find-or-create" logic for visitors, devices, and sessions.
-  - Registered `POST /api/v1/visitors/events` and `POST /api/v1/visitors/pageviews` routes.
+  - Registered `POST /events/api/v1/visitors/events` and `POST /events/api/v1/visitors/pageviews` routes.
   - Implemented `CreateEvent` and `CreatePageView` in the visitor handler layer.
   - Added unit tests for the service layer in `service_test.go` and regenerated mock files using Mockery.
 - **Reasoning / Design Decisions**:

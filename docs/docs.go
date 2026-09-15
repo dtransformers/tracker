@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/consents": {
+        "/events/api/v1/consents": {
             "post": {
                 "description": "Updates the consent status for a specific site and visitor",
                 "consumes": [
@@ -91,7 +91,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/events/custom": {
+        "/events/api/v1/events/custom": {
             "post": {
                 "description": "Records a custom event for a visitor",
                 "consumes": [
@@ -158,7 +158,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/events/pageviews": {
+        "/events/api/v1/events/pageviews": {
             "post": {
                 "description": "Records a page view for a visitor",
                 "consumes": [
@@ -225,7 +225,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/sites": {
+        "/events/api/v1/sites": {
             "get": {
                 "security": [
                     {
@@ -320,7 +320,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/sites/{uuid}": {
+        "/events/api/v1/sites/{uuid}": {
             "get": {
                 "security": [
                     {
@@ -484,7 +484,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/sites/{uuid}/regenerate-keys": {
+        "/events/api/v1/sites/{uuid}/regenerate-keys": {
             "post": {
                 "security": [
                     {
@@ -536,7 +536,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/visitors": {
+        "/events/api/v1/visitors": {
             "post": {
                 "description": "Create a visitor on a site. Creates a new visitor if not exists, or updates last seen time.",
                 "consumes": [
@@ -616,7 +616,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/visitors/ping": {
+        "/events/api/v1/visitors/ping": {
             "post": {
                 "description": "Keep the visitor session alive",
                 "consumes": [
@@ -680,7 +680,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/visitors/{visitor_uuid}/verify/{session_token}": {
+        "/events/api/v1/visitors/{visitor_uuid}/verify/{session_token}": {
             "get": {
                 "description": "Verify that the visitor uuid and session_token are valid and return session status. Always returns 200 with is_valid flag unless params are invalid or an internal error occurs.",
                 "consumes": [

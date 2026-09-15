@@ -46,15 +46,10 @@ RUN go build -trimpath -ldflags "\
 ############################
 # 2. Runtime stage
 ############################
-FROM scratch
+FROM gcr.io/distroless/static-debian12:nonroot
 
-# Copy CA certificates and user/group from builder
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-
-# Use the non-root user
-USER appuser:appuser
+# distroless/static:nonroot already includes CA certs and runs as nonroot (uid 65532)
+# No need to copy /etc/passwd or manually set USER
 
 # Copy binary
 COPY --from=builder /out/app /app
@@ -69,7 +64,7 @@ ENV APP_ENV=production
 
 EXPOSE 8080
 ## TO GENERATE SWAGGER DOCS:
-## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go      
-## go run github.com/swaggo/swag/cmd/swag init -g cmd/api/main.go --parseDependency --parseInternal
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/events/api/main.go      
+## go run github.com/swaggo/swag/cmd/swag init -g cmd/events/api/main.go --parseDependency --parseInternal
 
 ENTRYPOINT ["/app"]

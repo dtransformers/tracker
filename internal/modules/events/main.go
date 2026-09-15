@@ -14,7 +14,7 @@ func RegisterV1(router *gin.Engine, client *ent.Client, sessionMiddleware gin.Ha
 	if logger == nil {
 		logger = slog.Default()
 	}
-	v1Group := router.Group("/api/v1")
+	v1Group := router.Group("/events/api/v1")
 
 	sitesRepo := sitesv1.NewRepository(client)
 	sitesService := sitesv1.NewService(sitesRepo, logger)
@@ -22,6 +22,6 @@ func RegisterV1(router *gin.Engine, client *ent.Client, sessionMiddleware gin.Ha
 	module := v1.NewModule(client, sitesService, logger)
 	module.SetSessionMiddleware(sessionMiddleware)
 	module.Register(v1Group)
-	fmt.Printf("Events module endpoints under /api/v1/events Are Ready To use \n")
+	fmt.Printf("Events module endpoints under /events/api/v1/events Are Ready To use \n")
 	return module.Service()
 }

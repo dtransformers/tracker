@@ -39,7 +39,7 @@ func NewHandler(service *Service, logger *slog.Logger) *Handler {
 // @Success 201 "Created"
 // @Failure 400 {object} httputil.ErrorResponse
 // @Failure 500 {object} httputil.ErrorResponse
-// @Router /api/v1/consents [post]
+// @Router /events/api/v1/consents [post]
 func (h *Handler) UpdateConsent(c *gin.Context) {
 	var req UpdateConsentRequest
 
