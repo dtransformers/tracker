@@ -12,9 +12,11 @@ RUN apk add --no-cache git ca-certificates tzdata && \
     adduser -D -g '' appuser
 
 # Enable reproducible builds & module caching
+# TARGETARCH is set by BuildKit (amd64, arm64, ...) so the binary matches the runtime image
+ARG TARGETARCH
 ENV CGO_ENABLED=0 \
     GOOS=linux \
-    GOARCH=amd64
+    GOARCH=${TARGETARCH}
 
 # Cache dependencies first (better layer caching)
 COPY go.mod go.sum ./
